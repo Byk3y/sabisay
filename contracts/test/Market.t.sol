@@ -4,65 +4,332 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 import "../src/MarketFactory.sol";
 import "../src/Market.sol";
+import "../src/libraries/CPMMMath.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+// Mock USDC token for testing
+contract MockUSDC is ERC20 {
+    constructor() ERC20("USD Coin", "USDC") {
+        _mint(msg.sender, 1000000 * 10**6); // 1M USDC
+    }
+    
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
+    }
+}
 
 contract MarketTest is Test {
-    MarketFactory factory;
-    Market market;
+    MarketFactory public factory;
+    Market public market;
+    MockUSDC public usdc;
     
-    address usdc = address(0x1234);
-    address admin = address(0x1);
-    address resolver = address(0x2);
-    address pauser = address(0x3);
-    address user = address(0x4);
+    address public admin = address(0x1);
+    address public resolver = address(0x2);
+    address public pauser = address(0x3);
+    address public user1 = address(0x4);
+    address public user2 = address(0x5);
+    
+    uint256 constant MIN_STAKE = 1e6; // $1 USDC
+    uint16 constant FEE_BPS = 200; // 2%
+    uint64 constant END_TIME = 1735689600; // Future timestamp
     
     function setUp() public {
+        // Deploy mock USDC
+        usdc = new MockUSDC();
+        
         // Deploy factory
-        factory = new MarketFactory(usdc, admin, resolver, pauser);
+        vm.prank(admin);
+        factory = new MarketFactory(address(usdc));
         
-        // Create a test market
+        // Create market
+        vm.prank(admin);
         address marketAddr = factory.createMarket(
-            "Will Nigeria win the next AFCON?",
-            block.timestamp + 7 days,
-            10000e6, // $10,000 initial liquidity
-            "QmTest123"
+            address(usdc),
+            FEE_BPS,
+            END_TIME,
+            "QmTestRulesCid"
         );
-        
         market = Market(marketAddr);
+        
+        // Setup user balances
+        usdc.mint(user1, 1000 * 10**6); // 1000 USDC
+        usdc.mint(user2, 1000 * 10**6); // 1000 USDC
+        
+        // Approve factory to spend USDC
+        vm.prank(user1);
+        usdc.approve(address(market), type(uint256).max);
+        vm.prank(user2);
+        usdc.approve(address(market), type(uint256).max);
     }
     
     function testMarketCreation() public {
-        assertTrue(factory.isMarket(address(market)));
-        assertEq(market.creator(), admin);
-        assertEq(market.resolver(), resolver);
+        assertEq(market.factory(), address(factory));
+        assertEq(market.stable(), address(usdc));
+        assertEq(market.feeBps(), FEE_BPS);
+        assertEq(market.endTimeUTC(), END_TIME);
+        assertEq(uint8(market.state()), uint8(Market.State.Open));
+        assertEq(uint8(market.outcome()), uint8(Market.Outcome.None));
     }
     
-    function testTrade() public {
-        // Mock USDC transfer
-        vm.mockCall(usdc, abi.encodeWithSelector(IERC20.transferFrom.selector), abi.encode(true));
-        vm.mockCall(usdc, abi.encodeWithSelector(IERC20.transfer.selector), abi.encode(true));
+    function testBuyYes() public {
+        uint256 amountIn = 100 * 10**6; // 100 USDC
+        uint256 minSharesOut = 0;
         
-        // Trade Yes
-        market.trade(1, 100e6, 0); // $100 for Yes
+        vm.prank(user1);
+        market.buyYes(amountIn, minSharesOut);
         
-        assertEq(market.balanceOf(user, 1), 0); // Will be calculated by CPMM
+        // Check user balance
+        (uint256 yesBal, uint256 noBal) = market.getUserBalances(user1);
+        assertGt(yesBal, 0);
+        assertEq(noBal, 0);
+        
+        // Check reserves
+        assertGt(market.reserveYes(), 0);
+        assertGt(market.reserveNo(), 0);
+        
+        // Check fees
+        assertGt(market.feesAccrued(), 0);
     }
     
-    function testCannotTradeAfterEndTime() public {
-        vm.warp(block.timestamp + 8 days);
+    function testBuyNo() public {
+        uint256 amountIn = 100 * 10**6; // 100 USDC
+        uint256 minSharesOut = 0;
         
-        vm.mockCall(usdc, abi.encodeWithSelector(IERC20.transferFrom.selector), abi.encode(true));
+        vm.prank(user1);
+        market.buyNo(amountIn, minSharesOut);
         
+        // Check user balance
+        (uint256 yesBal, uint256 noBal) = market.getUserBalances(user1);
+        assertEq(yesBal, 0);
+        assertGt(noBal, 0);
+        
+        // Check reserves
+        assertGt(market.reserveYes(), 0);
+        assertGt(market.reserveNo(), 0);
+    }
+    
+    function testSellYes() public {
+        // First buy Yes shares
+        uint256 amountIn = 100 * 10**6; // 100 USDC
+        vm.prank(user1);
+        market.buyYes(amountIn, 0);
+        
+        (uint256 yesBalBefore, ) = market.getUserBalances(user1);
+        assertGt(yesBalBefore, 0);
+        
+        // Then sell half
+        uint256 sharesToSell = yesBalBefore / 2;
+        uint256 minAmountOut = 0;
+        
+        vm.prank(user1);
+        market.sellYes(sharesToSell, minAmountOut);
+        
+        // Check user balance
+        (uint256 yesBalAfter, uint256 noBal) = market.getUserBalances(user1);
+        assertEq(yesBalAfter, yesBalBefore - sharesToSell);
+        assertEq(noBal, 0);
+    }
+    
+    function testSellNo() public {
+        // First buy No shares
+        uint256 amountIn = 100 * 10**6; // 100 USDC
+        vm.prank(user1);
+        market.buyNo(amountIn, 0);
+        
+        (, uint256 noBalBefore) = market.getUserBalances(user1);
+        assertGt(noBalBefore, 0);
+        
+        // Then sell half
+        uint256 sharesToSell = noBalBefore / 2;
+        uint256 minAmountOut = 0;
+        
+        vm.prank(user1);
+        market.sellNo(sharesToSell, minAmountOut);
+        
+        // Check user balance
+        (uint256 yesBal, uint256 noBalAfter) = market.getUserBalances(user1);
+        assertEq(yesBal, 0);
+        assertEq(noBalAfter, noBalBefore - sharesToSell);
+    }
+    
+    function testSlippageProtection() public {
+        uint256 amountIn = 100 * 10**6; // 100 USDC
+        uint256 minSharesOut = 1000 * 10**6; // Unrealistic high minimum
+        
+        vm.prank(user1);
+        vm.expectRevert("Slippage too high");
+        market.buyYes(amountIn, minSharesOut);
+    }
+    
+    function testMinimumStake() public {
+        uint256 amountIn = 0.5 * 10**6; // 0.5 USDC (below minimum)
+        
+        vm.prank(user1);
+        vm.expectRevert("Amount too small");
+        market.buyYes(amountIn, 0);
+    }
+    
+    function testCannotTradeAfterClose() public {
+        // Fast forward past end time
+        vm.warp(END_TIME + 1);
+        
+        uint256 amountIn = 100 * 10**6;
+        
+        vm.prank(user1);
         vm.expectRevert("Market closed");
-        market.trade(1, 100e6, 0);
+        market.buyYes(amountIn, 0);
     }
     
-    function testResolution() public {
-        vm.warp(block.timestamp + 7 days);
+    function testCloseMarket() public {
+        // Fast forward past end time
+        vm.warp(END_TIME + 1);
         
-        // Post preliminary result
-        market.postPreliminaryResult(true, "QmResolution123");
+        // Anyone can close
+        market.close();
         
-        assertEq(uint256(market.state()), uint256(Market.MarketState.PendingResolution));
-        assertTrue(market.outcome());
+        assertEq(uint8(market.state()), uint8(Market.State.PendingResolution));
+    }
+    
+    function testPostPreliminary() public {
+        // Close market first
+        vm.warp(END_TIME + 1);
+        market.close();
+        
+        // Resolver posts preliminary result
+        vm.prank(resolver);
+        market.postPreliminary(1, "QmEvidenceCid");
+        
+        assertEq(uint8(market.state()), uint8(Market.State.DisputeWindow));
+        assertEq(uint8(market.outcome()), uint8(Market.Outcome.Yes));
+        assertEq(market.evidenceCid(), "QmEvidenceCid");
+    }
+    
+    function testFinalize() public {
+        // Go through full lifecycle
+        vm.warp(END_TIME + 1);
+        market.close();
+        
+        vm.prank(resolver);
+        market.postPreliminary(1, "QmEvidenceCid");
+        
+        // Fast forward past dispute window
+        vm.warp(block.timestamp + 49 hours);
+        
+        vm.prank(resolver);
+        market.finalize(1);
+        
+        assertEq(uint8(market.state()), uint8(Market.State.Resolved));
+        assertEq(uint8(market.outcome()), uint8(Market.Outcome.Yes));
+    }
+    
+    function testMarkInvalid() public {
+        // Go through lifecycle to dispute window
+        vm.warp(END_TIME + 1);
+        market.close();
+        
+        vm.prank(resolver);
+        market.postPreliminary(1, "QmEvidenceCid");
+        
+        // Mark as invalid
+        vm.prank(resolver);
+        market.markInvalid();
+        
+        assertEq(uint8(market.state()), uint8(Market.State.Invalid));
+    }
+    
+    function testRedeemWinningShares() public {
+        // Buy Yes shares
+        uint256 amountIn = 100 * 10**6;
+        vm.prank(user1);
+        market.buyYes(amountIn, 0);
+        
+        (uint256 yesBalBefore, ) = market.getUserBalances(user1);
+        
+        // Resolve market with Yes winning
+        vm.warp(END_TIME + 1);
+        market.close();
+        
+        vm.prank(resolver);
+        market.postPreliminary(1, "QmEvidenceCid");
+        
+        vm.warp(block.timestamp + 49 hours);
+        vm.prank(resolver);
+        market.finalize(1);
+        
+        // Redeem
+        uint256 balanceBefore = usdc.balanceOf(user1);
+        vm.prank(user1);
+        market.redeem();
+        uint256 balanceAfter = usdc.balanceOf(user1);
+        
+        // Should receive more than original stake due to fees
+        assertGt(balanceAfter, balanceBefore);
+        
+        // Shares should be zeroed
+        (uint256 yesBalAfter, uint256 noBal) = market.getUserBalances(user1);
+        assertEq(yesBalAfter, 0);
+        assertEq(noBal, 0);
+    }
+    
+    function testPauseBlocksTrading() public {
+        // Pause market
+        vm.prank(pauser);
+        market.pause();
+        
+        uint256 amountIn = 100 * 10**6;
+        
+        vm.prank(user1);
+        vm.expectRevert("Paused");
+        market.buyYes(amountIn, 0);
+    }
+    
+    function testFeeAccounting() public {
+        uint256 amountIn = 100 * 10**6;
+        uint256 expectedFee = (amountIn * FEE_BPS) / 10000;
+        
+        vm.prank(user1);
+        market.buyYes(amountIn, 0);
+        
+        assertEq(market.feesAccrued(), expectedFee);
+    }
+    
+    function testWithdrawFees() public {
+        // Generate some fees
+        vm.prank(user1);
+        market.buyYes(100 * 10**6, 0);
+        
+        uint256 feesBefore = market.feesAccrued();
+        assertGt(feesBefore, 0);
+        
+        // Resolve market
+        vm.warp(END_TIME + 1);
+        market.close();
+        vm.prank(resolver);
+        market.postPreliminary(1, "QmEvidenceCid");
+        vm.warp(block.timestamp + 49 hours);
+        vm.prank(resolver);
+        market.finalize(1);
+        
+        // Withdraw fees
+        uint256 factoryBalanceBefore = usdc.balanceOf(address(factory));
+        vm.prank(address(factory));
+        market.withdrawFees(address(factory));
+        uint256 factoryBalanceAfter = usdc.balanceOf(address(factory));
+        
+        assertEq(factoryBalanceAfter - factoryBalanceBefore, feesBefore);
+        assertEq(market.feesAccrued(), 0);
+    }
+    
+    function testGetOdds() public {
+        // Initial odds should be 50/50
+        uint256 odds = market.getOdds();
+        assertEq(odds, 5000); // 50% in basis points
+        
+        // Buy Yes shares to skew odds
+        vm.prank(user1);
+        market.buyYes(100 * 10**6, 0);
+        
+        uint256 oddsAfter = market.getOdds();
+        assertLt(oddsAfter, 5000); // Yes should be more likely now
     }
 }

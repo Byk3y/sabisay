@@ -1,130 +1,104 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "./Market.sol";
 
 /**
  * @title MarketFactory
  * @dev Factory contract for creating prediction markets
- * @notice This contract deploys individual market contracts and manages roles
+ * @notice Deploys individual market contracts and manages roles
  */
 contract MarketFactory is AccessControl, ReentrancyGuard, Pausable {
+    // Roles
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant RESOLVER_ROLE = keccak256("RESOLVER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     // State variables
     address public immutable usdcToken;
-    uint256 public constant TRADE_FEE_BPS = 200; // 2%
-    uint256 public constant SETTLEMENT_FEE_BPS = 100; // 1% (feature flagged)
-    uint256 public constant MIN_STAKE = 1e6; // $1 USDC (6 decimals)
-    
-    // Market registry
+    uint256 public marketCount;
+    mapping(uint256 => address) public markets;
     mapping(address => bool) public isMarket;
-    address[] public markets;
-    
+
     // Events
     event MarketCreated(
+        uint256 indexed marketId,
         address indexed market,
-        address indexed creator,
-        string question,
         uint256 endTime,
-        uint256 initialLiquidity
+        uint256 feeBps,
+        string rulesCid
     );
-    
-    event FeesWithdrawn(address indexed to, uint256 amount);
-    event TreasuryUpdated(address indexed newTreasury);
 
-    constructor(
-        address _usdcToken,
-        address _admin,
-        address _resolver,
-        address _pauser
-    ) {
+    constructor(address _usdcToken) {
         usdcToken = _usdcToken;
         
         // Set up roles
-        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-        _grantRole(ADMIN_ROLE, _admin);
-        _grantRole(RESOLVER_ROLE, _resolver);
-        _grantRole(PAUSER_ROLE, _pauser);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, msg.sender);
+        _grantRole(RESOLVER_ROLE, msg.sender);
+        _grantRole(PAUSER_ROLE, msg.sender);
     }
 
     /**
      * @dev Create a new prediction market
-     * @param question The market question
-     * @param endTime Unix timestamp when market closes
-     * @param initialLiquidity Initial liquidity to seed the market
-     * @param rulesCid IPFS CID containing market rules and metadata
+     * @param stable USDC token address
+     * @param feeBps Trade fee in basis points (default 200 = 2%)
+     * @param endTimeUTC Market end time (UTC timestamp)
+     * @param rulesCid IPFS CID for market rules
+     * @return market Address of the created market
      */
     function createMarket(
-        string memory question,
-        uint256 endTime,
-        uint256 initialLiquidity,
+        address stable,
+        uint16 feeBps,
+        uint64 endTimeUTC,
         string memory rulesCid
-    ) external onlyRole(ADMIN_ROLE) whenNotPaused returns (address) {
-        require(endTime > block.timestamp, "End time must be in future");
-        require(initialLiquidity >= MIN_STAKE, "Insufficient initial liquidity");
+    ) external onlyRole(ADMIN_ROLE) returns (address market) {
+        require(stable == usdcToken, "Invalid stable token");
+        require(feeBps <= 1000, "Fee too high"); // Max 10%
+        require(endTimeUTC > block.timestamp, "Invalid end time");
         
-        // Deploy new market contract
-        Market market = new Market(
+        marketCount++;
+        
+        market = address(new Market(
             address(this),
-            usdcToken,
-            endTime,
-            msg.sender, // creator
-            getRoleMember(RESOLVER_ROLE, 0), // resolver
+            stable,
+            feeBps,
+            endTimeUTC,
             rulesCid
-        );
+        ));
         
-        // Register market
-        address marketAddress = address(market);
-        isMarket[marketAddress] = true;
-        markets.push(marketAddress);
+        markets[marketCount] = market;
+        isMarket[market] = true;
         
-        // Transfer initial liquidity to market
-        IERC20(usdcToken).transferFrom(msg.sender, marketAddress, initialLiquidity);
-        
-        emit MarketCreated(marketAddress, msg.sender, question, endTime, initialLiquidity);
-        
-        return marketAddress;
+        emit MarketCreated(marketCount, market, endTimeUTC, feeBps, rulesCid);
     }
 
     /**
      * @dev Get all markets
+     * @return Array of market addresses
      */
     function getAllMarkets() external view returns (address[] memory) {
-        return markets;
+        address[] memory allMarkets = new address[](marketCount);
+        for (uint256 i = 1; i <= marketCount; i++) {
+            allMarkets[i - 1] = markets[i];
+        }
+        return allMarkets;
     }
 
     /**
-     * @dev Get market count
+     * @dev Pause all markets (emergency only)
      */
-    function getMarketCount() external view returns (uint256) {
-        return markets.length;
-    }
-
-    /**
-     * @dev Pause all market operations
-     */
-    function pause() external onlyRole(PAUSER_ROLE) {
+    function pauseAllMarkets() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
     /**
-     * @dev Unpause all market operations
+     * @dev Unpause all markets
      */
-    function unpause() external onlyRole(PAUSER_ROLE) {
+    function unpauseAllMarkets() external onlyRole(PAUSER_ROLE) {
         _unpause();
-    }
-
-    /**
-     * @dev Emergency function to pause a specific market
-     */
-    function pauseMarket(address market) external onlyRole(PAUSER_ROLE) {
-        require(isMarket[market], "Invalid market");
-        Market(market).pause();
     }
 }
