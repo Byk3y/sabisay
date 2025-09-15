@@ -47,6 +47,7 @@ contract Market is AccessControl, ReentrancyGuard, Pausable, ERC1155 {
     
     // Constants
     uint256 public constant TRADE_FEE_BPS = 200; // 2%
+    uint256 public constant SETTLEMENT_FEE_BPS = 0; // 0% (can be enabled later)
     uint256 public constant MIN_STAKE = 1e6; // $1 USDC
     
     // Token IDs
@@ -280,6 +281,11 @@ contract Market is AccessControl, ReentrancyGuard, Pausable, ERC1155 {
             _burn(msg.sender, NO_TOKEN_ID, noShares);
             if (yesShares > 0) _burn(msg.sender, YES_TOKEN_ID, yesShares);
         }
+        
+        // Apply settlement fee (currently 0%)
+        uint256 settlementFee = (amount * SETTLEMENT_FEE_BPS) / 10000;
+        feesAccrued += settlementFee;
+        amount -= settlementFee;
         
         IERC20(usdcToken).transfer(msg.sender, amount);
         
