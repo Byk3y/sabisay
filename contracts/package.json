@@ -1,0 +1,17 @@
+{
+  "name": "@sabisay/contracts",
+  "version": "0.1.0",
+  "description": "SabiSay smart contracts",
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "test:gas": "forge test --gas-report",
+    "test:coverage": "forge coverage",
+    "deploy:amoy": "forge script script/Deploy.s.sol --rpc-url $AMOY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify",
+    "deploy:polygon": "forge script script/Deploy.s.sol --rpc-url $POLYGON_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify",
+    "clean": "forge clean"
+  },
+  "devDependencies": {
+    "forge-std": "^1.1.2"
+  }
+}

@@ -1,0 +1,140 @@
+# 🛡️ SabiSay Cursor Rules
+
+These rules guide **all code generation, refactoring, and review**.  
+**Security comes first**, followed by **clean, maintainable code**.
+
+---
+
+## 0) Golden Principles
+- **MUST** prioritize security in all design and code.
+- **MUST** prefer clarity and maintainability over cleverness or micro-optimizations.
+- **MUST** keep modules small, self-explanatory, and tested.
+- **NEVER** commit secrets, private keys, or sensitive info.
+
+---
+
+## 1) Repo & Ownership
+- **MUST** follow the monorepo structure:  
+  `/apps/web`, `/packages/sdk`, `/contracts`, `/docs`.
+- **MUST** separate UI, SDK, and contracts cleanly.
+- **MUST** avoid "god files" — max 200 lines for components, 600 lines for contracts.
+
+---
+
+## 2) Secrets & Config
+- **MUST** use `.env` for secrets; `.env.example` for placeholders.
+- **MUST** validate envs on startup (zod schema).
+- **NEVER** hardcode addresses or keys in components.
+- **MUST** load addresses/fees from a single config (`lib/config.ts`, `sdk/addresses.ts`).
+
+---
+
+## 3) Smart Contracts
+- **MUST** use OpenZeppelin (`AccessControl`, `ReentrancyGuard`, `Pausable`, `ERC1155`).
+- **MUST** enforce close time, min stake ($1), and slippage.
+- **MUST** implement state machine:  
+  `Open → PendingResolution → DisputeWindow → Resolved | Invalid`.
+- **MUST** store resolution evidence CIDs on-chain; emit events.
+- **MUST** use multisig (2-of-3) for `RESOLVER` and `PAUSER`.
+- **NEVER** allow trades after close time.
+- **NEVER** allow reentrancy or unchecked external calls.
+- **NEVER** rely on upgradeable proxies in MVP; versioned deployments only.
+
+---
+
+## 4) SDK (TypeScript, viem/wagmi)
+- **MUST** expose typed hooks: `useMarkets`, `useTrade`, `useCashout`, `useResolve`.
+- **MUST** enforce slippage + deadline checks on every trade.
+- **MUST** reject mismatched chainId.
+- **NEVER** bypass input validation.
+- **MUST** document all exports with JSDoc.
+
+---
+
+## 5) Frontend (Next.js)
+- **MUST** be mobile-first, responsive, and accessible.
+- **MUST** use familiar betting copy:  
+  - "Back Yes" / "Back No"  
+  - "Cashout Now"  
+  - "Potential Payout"  
+  - "Closes [UTC time]"  
+- **MUST** block trades post-close (UI + contract).
+- **NEVER** show "Buy/Sell" in UI — always "Back" and "Cashout".
+- **MUST** split components by concern: presentational vs logic (hooks).
+- **MUST** keep components ≤ 200 lines.
+
+---
+
+## 6) Admin App
+- **MUST** be wallet-gated; only multisig can resolve/pause.
+- **MUST** require resolution evidence (source URL + IPFS CID + note).
+- **MUST** display state timeline + dispute countdown.
+- **MUST** include a prominent **Pause Market** button (double confirm).
+- **NEVER** allow single-user resolution without multisig.
+
+---
+
+## 7) Data & Off-Chain
+- **MUST** store market metadata and resolution evidence on IPFS.
+- **MUST** ensure on-chain storage references (CIDs).
+- **NEVER** store personal info (PII).
+- **MUST** allow UI to work with direct chain reads (no indexer dependency).
+
+---
+
+## 8) Observability & Alerts
+- **MUST** integrate error tracking (Sentry) with no PII.
+- **MUST** add telemetry for trade, cashout, resolve, pause events.
+- **MUST** run a bot watching for:  
+  - Large slippage trades  
+  - Reserve anomalies  
+  - State changes (pause/resolve)
+
+---
+
+## 9) Clean Code & Maintainability
+- **MUST** prefer clarity over line count reduction.
+- **MUST** comment complex logic (CPMM math, fee calc).
+- **MUST** keep functions ≤ 40 lines.
+- **MUST** keep hooks/utils ≤ 150 lines; contracts ≤ 600 lines; components ≤ 200 lines.
+- **NEVER** duplicate logic across UI and SDK — SDK is the only chain gateway.
+- **MUST** remove dead code, unused imports, and console.logs in PRs.
+- **MUST** keep PRs ≤ 300 lines diff (soft cap); >600 lines requires split.
+
+---
+
+## 10) Linting, Types, Tests
+- **MUST** use strict TypeScript (`strict: true`, no `any`).
+- **MUST** enforce ESLint + Prettier; CI must have 0 warnings.
+- **MUST** enforce solhint + prettier-plugin-solidity in contracts.
+- **MUST** write unit tests for all public functions.
+- **MUST** fuzz-test contract invariants (fees, reserves).
+- **MUST** achieve ≥ 90% contract coverage, ≥ 85% SDK coverage.
+
+---
+
+## 11) Accessibility & Performance
+- **MUST** support keyboard nav + focus states.
+- **MUST** meet WCAG AA for contrast.
+- **MUST** code-split routes; lazy-load admin dashboard.
+- **MUST** avoid large JSON in state; cache IPFS responses.
+
+---
+
+## 12) Legal & Compliance (UI)
+- **MUST** restrict geos (block US + restricted countries).
+- **MUST** show "18+ only. Crypto-only. Not for US persons." in ToS.
+- **MUST** display invalidation policy ("Unclear → Invalid → Refunds").
+- **MUST** always show resolution/dispute rules in market page.
+
+---
+
+## 13) "Never do" (absolute bans)
+- **NEVER** store or request user seed phrases/private keys.
+- **NEVER** allow trades post close time.
+- **NEVER** bypass fee/slippage/deadline checks.
+- **NEVER** deploy unaudited math or novel AMM logic.
+- **NEVER** create overgrown files (>600 lines contracts, >200 lines components).
+- **NEVER** merge PRs with warnings, failing tests, or uncovered features.
+
+---
