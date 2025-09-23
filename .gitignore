@@ -15,6 +15,18 @@ out/
 .env.test.local
 .env.production.local
 
+# Env files (never commit secrets)
+.env
+*.env
+**/.env
+**/.env.*
+.env.*.local
+apps/web/.env.local
+apps/**/.env*
+packages/sdk/.env
+packages/**/.env*
+contracts/.env
+
 # Logs
 *.log
 npm-debug.log*

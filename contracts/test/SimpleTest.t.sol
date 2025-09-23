@@ -23,7 +23,7 @@ contract SimpleTest is Test {
         MockUSDC usdc = new MockUSDC();
         
         // Deploy factory
-        MarketFactory factory = new MarketFactory(address(usdc));
+        MarketFactory factory = new MarketFactory(address(usdc), address(this));
         
         // Check that factory was created
         assertEq(factory.usdcToken(), address(usdc));

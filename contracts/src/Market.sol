@@ -5,7 +5,17 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./libraries/CPMMMath.sol";
+
+/**
+ * @title IMarketFactory
+ * @dev Interface for MarketFactory treasury getter
+ */
+interface IMarketFactory {
+    function treasury() external view returns (address);
+}
 
 /**
  * @title Market
@@ -13,6 +23,7 @@ import "./libraries/CPMMMath.sol";
  * @notice Implements constant product market maker for Yes/No outcomes
  */
 contract Market is AccessControl, ReentrancyGuard, Pausable {
+    using SafeERC20 for IERC20;
     // Roles
     bytes32 public constant RESOLVER_ROLE = keccak256("RESOLVER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -36,15 +47,27 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
     // State variables
     address public immutable factory;
     address public immutable stable; // USDC
+    
+    // Reserve guard constant
+    uint256 public constant MIN_RESERVE = 100 * 10**6; // 100 USDC minimum reserve
     uint16 public immutable feeBps; // Trade fee in basis points
     uint64 public immutable endTimeUTC;
+    uint8 public immutable STABLE_DECIMALS;
+    uint256 public immutable minStake;
     string public rulesCid;
-    
+
     State public state;
     Outcome public outcome;
     string public evidenceCid;
     uint256 public resolutionTime;
     uint256 public disputeEndTime;
+    uint256 public preliminaryTimestamp;
+
+    // Constants
+    uint256 public constant DISPUTE_WINDOW = 48 hours;
+
+    // Liquidity seeding guard
+    bool public liquiditySeeded;
     
     // CPMM reserves
     uint256 public reserveYes;
@@ -54,9 +77,6 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
     // Internal accounting for shares (MVP - no ERC1155)
     mapping(address => uint256) public yesBal;
     mapping(address => uint256) public noBal;
-    
-    // Constants
-    uint256 public constant MIN_STAKE = 1e6; // $1 USDC (6 decimals)
     
     // Events
     event Traded(
@@ -80,7 +100,9 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
     event Finalized(uint8 outcome);
     event Invalid();
     event Redeemed(address indexed user, uint256 amount);
+    event RedeemedInvalid(address indexed user, uint256 amount);
     event FeesWithdrawn(address indexed to, uint256 amount);
+    event LiquiditySeeded(uint256 yesAmount, uint256 noAmount);
 
     constructor(
         address _factory,
@@ -95,11 +117,15 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
         endTimeUTC = _endTimeUTC;
         rulesCid = _rulesCid;
         state = State.Open;
-        
-        // Initialize with minimal liquidity for CPMM to work
-        reserveYes = 1000 * 10**6; // 1000 USDC
-        reserveNo = 1000 * 10**6;  // 1000 USDC
-        
+
+        // Read decimals and compute minimum stake ($1)
+        uint8 _decimals = IERC20Metadata(_stable).decimals();
+        STABLE_DECIMALS = _decimals;
+        minStake = 1 * 10**_decimals; // $1 in stable token decimals
+
+        // Liquidity will be seeded separately via seedLiquidity()
+        // reserveYes and reserveNo start at 0
+
         // Set up roles - factory gets admin role
         _grantRole(DEFAULT_ADMIN_ROLE, _factory);
         _grantRole(PAUSER_ROLE, _factory);
@@ -126,6 +152,34 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
         _;
     }
 
+    modifier onlySeeded() {
+        require(liquiditySeeded, "Not seeded");
+        _;
+    }
+
+    /**
+     * @dev Seed initial liquidity (one-time, factory only)
+     * @param yesAmount Initial USDC amount for Yes reserve
+     * @param noAmount Initial USDC amount for No reserve
+     */
+    function seedLiquidity(uint256 yesAmount, uint256 noAmount)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        nonReentrant
+    {
+        require(!liquiditySeeded, "Already seeded");
+        require(yesAmount > 0 && noAmount > 0, "Invalid amounts");
+
+        liquiditySeeded = true;
+        reserveYes = yesAmount;
+        reserveNo = noAmount;
+
+        // Transfer USDC from factory to this market
+        IERC20(stable).safeTransferFrom(msg.sender, address(this), yesAmount + noAmount);
+
+        emit LiquiditySeeded(yesAmount, noAmount);
+    }
+
     /**
      * @dev Buy Yes shares with USDC
      * @param amountIn USDC amount to trade
@@ -134,25 +188,28 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
     function buyYes(
         uint256 amountIn,
         uint256 minSharesOut
-    ) external onlyOpen onlyBeforeClose whenNotPaused nonReentrant {
-        require(amountIn >= MIN_STAKE, "Amount too small");
+    ) external onlyOpen onlyBeforeClose whenNotPaused onlySeeded nonReentrant {
+        require(amountIn >= minStake, "Amount too small");
         
-        // Transfer USDC from user
-        IERC20(stable).transferFrom(msg.sender, address(this), amountIn);
-        
-        // Calculate trade using CPMM
+        // Apply fee first
+        (uint256 amountAfterFee, uint256 fee) = CPMMMath.applyFee(amountIn, feeBps);
+
+        // Calculate trade using CPMM with amount after fee
         (uint256 sharesOut, uint256 price) = CPMMMath.quoteBuy(
             reserveYes,
             reserveNo,
-            amountIn
+            amountAfterFee
         );
-        
+
         require(sharesOut >= minSharesOut, "Slippage too high");
-        
-        // Apply fee
-        (uint256 amountAfterFee, uint256 fee) = CPMMMath.applyFee(amountIn, feeBps);
+        require(sharesOut <= reserveNo, "Insufficient reserve");
+        require(reserveNo >= sharesOut + MIN_RESERVE, "Insufficient reserve");
+
+        // Transfer USDC from user
+        IERC20(stable).safeTransferFrom(msg.sender, address(this), amountIn);
+
         feesAccrued += fee;
-        
+
         // Update reserves
         reserveYes += amountAfterFee;
         reserveNo -= sharesOut;
@@ -171,25 +228,28 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
     function buyNo(
         uint256 amountIn,
         uint256 minSharesOut
-    ) external onlyOpen onlyBeforeClose whenNotPaused nonReentrant {
-        require(amountIn >= MIN_STAKE, "Amount too small");
+    ) external onlyOpen onlyBeforeClose whenNotPaused onlySeeded nonReentrant {
+        require(amountIn >= minStake, "Amount too small");
         
-        // Transfer USDC from user
-        IERC20(stable).transferFrom(msg.sender, address(this), amountIn);
-        
-        // Calculate trade using CPMM
+        // Apply fee first
+        (uint256 amountAfterFee, uint256 fee) = CPMMMath.applyFee(amountIn, feeBps);
+
+        // Calculate trade using CPMM with amount after fee
         (uint256 sharesOut, uint256 price) = CPMMMath.quoteBuy(
             reserveNo,
             reserveYes,
-            amountIn
+            amountAfterFee
         );
-        
+
         require(sharesOut >= minSharesOut, "Slippage too high");
-        
-        // Apply fee
-        (uint256 amountAfterFee, uint256 fee) = CPMMMath.applyFee(amountIn, feeBps);
+        require(sharesOut <= reserveYes, "Insufficient reserve");
+        require(reserveYes >= sharesOut + MIN_RESERVE, "Insufficient reserve");
+
+        // Transfer USDC from user
+        IERC20(stable).safeTransferFrom(msg.sender, address(this), amountIn);
+
         feesAccrued += fee;
-        
+
         // Update reserves
         reserveNo += amountAfterFee;
         reserveYes -= sharesOut;
@@ -208,7 +268,7 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
     function sellYes(
         uint256 sharesIn,
         uint256 minAmountOut
-    ) external onlyOpen onlyBeforeClose whenNotPaused nonReentrant {
+    ) external onlyOpen onlyBeforeClose whenNotPaused onlySeeded nonReentrant {
         require(yesBal[msg.sender] >= sharesIn, "Insufficient shares");
         
         // Calculate trade using CPMM
@@ -217,22 +277,24 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
             reserveYes,
             sharesIn
         );
-        
+
+        require(amountOut <= reserveYes, "Insufficient reserve");
         require(amountOut >= minAmountOut, "Slippage too high");
-        
+
         // Apply fee
         (uint256 amountAfterFee, uint256 fee) = CPMMMath.applyFee(amountOut, feeBps);
+        require(reserveYes >= amountAfterFee + MIN_RESERVE, "Insufficient reserve");
         feesAccrued += fee;
-        
+
+        // Update user balance first
+        yesBal[msg.sender] -= sharesIn;
+
         // Update reserves
         reserveNo += sharesIn;
-        reserveYes -= amountAfterFee;
-        
-        // Update user balance
-        yesBal[msg.sender] -= sharesIn;
-        
+        reserveYes -= amountOut;
+
         // Transfer USDC to user
-        IERC20(stable).transfer(msg.sender, amountAfterFee);
+        IERC20(stable).safeTransfer(msg.sender, amountAfterFee);
         
         emit CashedOut(msg.sender, 1, sharesIn, amountAfterFee, fee);
     }
@@ -245,7 +307,7 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
     function sellNo(
         uint256 sharesIn,
         uint256 minAmountOut
-    ) external onlyOpen onlyBeforeClose whenNotPaused nonReentrant {
+    ) external onlyOpen onlyBeforeClose whenNotPaused onlySeeded nonReentrant {
         require(noBal[msg.sender] >= sharesIn, "Insufficient shares");
         
         // Calculate trade using CPMM
@@ -254,22 +316,24 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
             reserveNo,
             sharesIn
         );
-        
+
+        require(amountOut <= reserveNo, "Insufficient reserve");
         require(amountOut >= minAmountOut, "Slippage too high");
-        
+
         // Apply fee
         (uint256 amountAfterFee, uint256 fee) = CPMMMath.applyFee(amountOut, feeBps);
+        require(reserveNo >= amountAfterFee + MIN_RESERVE, "Insufficient reserve");
         feesAccrued += fee;
-        
+
+        // Update user balance first
+        noBal[msg.sender] -= sharesIn;
+
         // Update reserves
         reserveYes += sharesIn;
-        reserveNo -= amountAfterFee;
-        
-        // Update user balance
-        noBal[msg.sender] -= sharesIn;
-        
+        reserveNo -= amountOut;
+
         // Transfer USDC to user
-        IERC20(stable).transfer(msg.sender, amountAfterFee);
+        IERC20(stable).safeTransfer(msg.sender, amountAfterFee);
         
         emit CashedOut(msg.sender, 2, sharesIn, amountAfterFee, fee);
     }
@@ -300,7 +364,7 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
         state = State.DisputeWindow;
         outcome = _outcome == 1 ? Outcome.Yes : Outcome.No;
         evidenceCid = _evidenceCid;
-        resolutionTime = block.timestamp;
+        preliminaryTimestamp = block.timestamp;
         disputeEndTime = block.timestamp + 48 hours; // 48h dispute window
         
         emit PreliminaryPosted(_outcome, _evidenceCid);
@@ -311,11 +375,8 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
      * @param _outcome Final outcome (1 = Yes, 2 = No)
      */
     function finalize(uint8 _outcome) external onlyResolver {
-        require(
-            state == State.PendingResolution || state == State.DisputeWindow,
-            "Invalid state"
-        );
-        require(block.timestamp >= disputeEndTime, "Dispute period not ended");
+        require(state == State.DisputeWindow, "Not in dispute window");
+        require(block.timestamp >= preliminaryTimestamp + DISPUTE_WINDOW, "Dispute window not elapsed");
         require(_outcome == 1 || _outcome == 2, "Invalid outcome");
         
         state = State.Resolved;
@@ -338,50 +399,60 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
     }
 
     /**
-     * @dev Redeem winning shares for USDC
+     * @dev Redeem shares for USDC (resolved or invalid markets)
      */
     function redeem() external nonReentrant {
-        require(state == State.Resolved, "Market not resolved");
-        
+        require(state == State.Resolved || state == State.Invalid, "Market not finalized");
+
         uint256 yesShares = yesBal[msg.sender];
         uint256 noShares = noBal[msg.sender];
-        
+
         uint256 totalShares = yesShares + noShares;
         require(totalShares > 0, "No shares to redeem");
-        
+
         uint256 amount;
-        
-        if (outcome == Outcome.Yes) {
-            // Yes won - redeem Yes shares
-            amount = (yesShares * (reserveYes + reserveNo)) / totalShares;
+
+        if (state == State.Invalid) {
+            // Invalid market: each share redeems at 0.5 USDC
+            amount = totalShares / 2;
             yesBal[msg.sender] = 0;
-            if (noShares > 0) noBal[msg.sender] = 0;
-        } else if (outcome == Outcome.No) {
-            // No won - redeem No shares
-            amount = (noShares * (reserveYes + reserveNo)) / totalShares;
             noBal[msg.sender] = 0;
-            if (yesShares > 0) yesBal[msg.sender] = 0;
-        }
-        
-        if (amount > 0) {
-            IERC20(stable).transfer(msg.sender, amount);
+            emit RedeemedInvalid(msg.sender, amount);
+        } else {
+            // Resolved market: only winning shares redeem at $1 per share
+            if (outcome == Outcome.Yes) {
+                amount = yesShares;
+                yesBal[msg.sender] = 0;
+                if (noShares > 0) noBal[msg.sender] = 0;
+            } else if (outcome == Outcome.No) {
+                amount = noShares;
+                noBal[msg.sender] = 0;
+                if (yesShares > 0) yesBal[msg.sender] = 0;
+            }
             emit Redeemed(msg.sender, amount);
+        }
+
+        if (amount > 0) {
+            IERC20(stable).safeTransfer(msg.sender, amount);
         }
     }
 
     /**
-     * @dev Withdraw accrued fees (factory only)
-     * @param to Address to receive fees
+     * @dev Withdraw accrued fees to factory's treasury
      */
-    function withdrawFees(address to) external {
+    function withdrawFees() external {
         require(msg.sender == factory, "Only factory");
         require(state == State.Resolved || state == State.Invalid, "Market not finalized");
-        
+
         uint256 amount = feesAccrued;
+        if (amount == 0) return;
+
         feesAccrued = 0;
-        
-        IERC20(stable).transfer(to, amount);
-        emit FeesWithdrawn(to, amount);
+
+        // Get treasury from factory and transfer fees
+        address treasury = IMarketFactory(factory).treasury();
+        IERC20(stable).safeTransfer(treasury, amount);
+        emit FeesWithdrawn(treasury, amount);
     }
 
     /**
@@ -403,6 +474,56 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
      */
     function getOdds() external view returns (uint256) {
         return CPMMMath.getOdds(reserveYes, reserveNo);
+    }
+
+    /**
+     * @dev Quote buying Yes shares with USDC (view only)
+     * @param amountIn USDC amount to trade
+     * @return sharesOut Amount of Yes shares received
+     * @return price Price per share (in USDC, 18 decimals)
+     */
+    function quoteBuyYes(uint256 amountIn) external view returns (uint256 sharesOut, uint256 price) {
+        if (!liquiditySeeded || amountIn == 0) return (0, 0);
+        (uint256 amountAfterFee,) = CPMMMath.applyFee(amountIn, feeBps);
+        return CPMMMath.quoteBuy(reserveYes, reserveNo, amountAfterFee);
+    }
+
+    /**
+     * @dev Quote buying No shares with USDC (view only)
+     * @param amountIn USDC amount to trade
+     * @return sharesOut Amount of No shares received
+     * @return price Price per share (in USDC, 18 decimals)
+     */
+    function quoteBuyNo(uint256 amountIn) external view returns (uint256 sharesOut, uint256 price) {
+        if (!liquiditySeeded || amountIn == 0) return (0, 0);
+        (uint256 amountAfterFee,) = CPMMMath.applyFee(amountIn, feeBps);
+        return CPMMMath.quoteBuy(reserveNo, reserveYes, amountAfterFee);
+    }
+
+    /**
+     * @dev Quote selling Yes shares for USDC (view only)
+     * @param sharesIn Number of Yes shares to sell
+     * @return amountOut USDC amount received (after fees)
+     * @return price Price per share (in USDC, 18 decimals)
+     */
+    function quoteSellYes(uint256 sharesIn) external view returns (uint256 amountOut, uint256 price) {
+        if (!liquiditySeeded || sharesIn == 0) return (0, 0);
+        (uint256 grossAmount, uint256 priceRaw) = CPMMMath.quoteSell(reserveNo, reserveYes, sharesIn);
+        (uint256 amountAfterFee,) = CPMMMath.applyFee(grossAmount, feeBps);
+        return (amountAfterFee, priceRaw);
+    }
+
+    /**
+     * @dev Quote selling No shares for USDC (view only)
+     * @param sharesIn Number of No shares to sell
+     * @return amountOut USDC amount received (after fees)
+     * @return price Price per share (in USDC, 18 decimals)
+     */
+    function quoteSellNo(uint256 sharesIn) external view returns (uint256 amountOut, uint256 price) {
+        if (!liquiditySeeded || sharesIn == 0) return (0, 0);
+        (uint256 grossAmount, uint256 priceRaw) = CPMMMath.quoteSell(reserveYes, reserveNo, sharesIn);
+        (uint256 amountAfterFee,) = CPMMMath.applyFee(grossAmount, feeBps);
+        return (amountAfterFee, priceRaw);
     }
 
     /**

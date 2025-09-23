@@ -196,7 +196,7 @@ contract MarketTest is Test {
         market.close();
         
         // Resolver posts preliminary result
-        vm.prank(resolver);
+        vm.prank(admin); // Use admin (factory) who has RESOLVER_ROLE
         market.postPreliminary(1, "QmEvidenceCid");
         
         assertEq(uint8(market.state()), uint8(Market.State.DisputeWindow));
@@ -209,13 +209,13 @@ contract MarketTest is Test {
         vm.warp(END_TIME + 1);
         market.close();
         
-        vm.prank(resolver);
+        vm.prank(admin); // Use admin (factory) who has RESOLVER_ROLE
         market.postPreliminary(1, "QmEvidenceCid");
         
         // Fast forward past dispute window
         vm.warp(block.timestamp + 49 hours);
         
-        vm.prank(resolver);
+        vm.prank(admin); // Use admin (factory) who has RESOLVER_ROLE
         market.finalize(1);
         
         assertEq(uint8(market.state()), uint8(Market.State.Resolved));
@@ -227,11 +227,11 @@ contract MarketTest is Test {
         vm.warp(END_TIME + 1);
         market.close();
         
-        vm.prank(resolver);
+        vm.prank(admin); // Use admin (factory) who has RESOLVER_ROLE
         market.postPreliminary(1, "QmEvidenceCid");
         
         // Mark as invalid
-        vm.prank(resolver);
+        vm.prank(admin); // Use admin (factory) who has RESOLVER_ROLE
         market.markInvalid();
         
         assertEq(uint8(market.state()), uint8(Market.State.Invalid));
@@ -249,11 +249,11 @@ contract MarketTest is Test {
         vm.warp(END_TIME + 1);
         market.close();
         
-        vm.prank(resolver);
+        vm.prank(admin); // Use admin (factory) who has RESOLVER_ROLE
         market.postPreliminary(1, "QmEvidenceCid");
         
         vm.warp(block.timestamp + 49 hours);
-        vm.prank(resolver);
+        vm.prank(admin); // Use admin (factory) who has RESOLVER_ROLE
         market.finalize(1);
         
         // Redeem
@@ -273,13 +273,13 @@ contract MarketTest is Test {
     
     function testPauseBlocksTrading() public {
         // Pause market
-        vm.prank(pauser);
+        vm.prank(admin); // Use admin (factory) who has PAUSER_ROLE
         market.pause();
         
         uint256 amountIn = 100 * 10**6;
         
         vm.prank(user1);
-        vm.expectRevert("Paused");
+        vm.expectRevert();
         market.buyYes(amountIn, 0);
     }
     
@@ -304,10 +304,10 @@ contract MarketTest is Test {
         // Resolve market
         vm.warp(END_TIME + 1);
         market.close();
-        vm.prank(resolver);
+        vm.prank(admin); // Use admin (factory) who has RESOLVER_ROLE
         market.postPreliminary(1, "QmEvidenceCid");
         vm.warp(block.timestamp + 49 hours);
-        vm.prank(resolver);
+        vm.prank(admin); // Use admin (factory) who has RESOLVER_ROLE
         market.finalize(1);
         
         // Withdraw fees

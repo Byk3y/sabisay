@@ -68,12 +68,15 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
+      react-icons:
+        specifier: ^5.5.0
+        version: 5.5.0(react@18.3.1)
       tailwind-merge:
         specifier: ^2.0.0
         version: 2.6.0
       tailwindcss-animate:
         specifier: ^1.0.7
-        version: 1.0.7(tailwindcss@3.4.17)
+        version: 1.0.7(tailwindcss@3.3.6)
       viem:
         specifier: ^2.0.0
         version: 2.37.6(typescript@5.9.2)(zod@3.22.4)
@@ -94,7 +97,7 @@ importers:
         specifier: ^18.2.0
         version: 18.3.7(@types/react@18.3.24)
       autoprefixer:
-        specifier: ^10.4.16
+        specifier: ^10.4.21
         version: 10.4.21(postcss@8.5.6)
       eslint:
         specifier: ^8.0.0
@@ -103,11 +106,11 @@ importers:
         specifier: 14.0.4
         version: 14.0.4(eslint@8.57.1)(typescript@5.9.2)
       postcss:
-        specifier: ^8.4.31
+        specifier: ^8.5.6
         version: 8.5.6
       tailwindcss:
-        specifier: ^3.3.5
-        version: 3.4.17
+        specifier: 3.3.6
+        version: 3.3.6
       typescript:
         specifier: ^5.0.0
         version: 5.9.2
@@ -4881,6 +4884,10 @@ packages:
       type-check: 0.4.0
     dev: true
 
+  /lilconfig@2.1.0:
+    resolution: {integrity: sha512-utWOt/GHzuUxnLKxB6dk81RoOeoNeHgbrXiuGk4yyF5qlRz+iIVWu56E2fqGHFrXz0QNUhLB/8nKqvRH66JKGQ==}
+    engines: {node: '>=10'}
+
   /lilconfig@3.1.3:
     resolution: {integrity: sha512-/vlFKAoH5Cgt3Ie+JLhRbwOsCQePABiU3tJ1egGvyQ+33R/vcwM2Zl2QR/LzjsBeItPt3oSVXapn+m4nQDvpzw==}
     engines: {node: '>=14'}
@@ -5608,6 +5615,14 @@ packages:
       scheduler: 0.23.2
     dev: false
 
+  /react-icons@5.5.0(react@18.3.1):
+    resolution: {integrity: sha512-MEFcXdkP3dLo8uumGI5xN3lDFNsRtrjbOEKDLD7yv76v4wpnEq2Lt2qeHaQOr34I/wPN3s3+N08WkQ+CW37Xiw==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      react: 18.3.1
+    dev: false
+
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
     dev: true
@@ -6194,16 +6209,16 @@ packages:
     resolution: {integrity: sha512-P+Vu1qXfzediirmHOC3xKGAYeZtPcV9g76X+xg2FD4tYgR71ewMA35Y3sCz3zhiN/dwefRpJX0yBcgwi1fXNQA==}
     dev: false
 
-  /tailwindcss-animate@1.0.7(tailwindcss@3.4.17):
+  /tailwindcss-animate@1.0.7(tailwindcss@3.3.6):
     resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
     dependencies:
-      tailwindcss: 3.4.17
+      tailwindcss: 3.3.6
     dev: false
 
-  /tailwindcss@3.4.17:
-    resolution: {integrity: sha512-w33E2aCvSDP0tW9RZuNXadXlkHXqFzSkQew/aIa2i/Sj8fThxwovwlXHSPXTbAHwEIhBFXAedUhP2tueAKP8Og==}
+  /tailwindcss@3.3.6:
+    resolution: {integrity: sha512-AKjF7qbbLvLaPieoKeTjG1+FyNZT6KaJMJPFeQyLfIp7l82ggH1fbHJSsYIvnbTFQOlkh+gBYpyby5GT1LIdLw==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
@@ -6216,7 +6231,7 @@ packages:
       glob-parent: 6.0.2
       is-glob: 4.0.3
       jiti: 1.21.7
-      lilconfig: 3.1.3
+      lilconfig: 2.1.0
       micromatch: 4.0.8
       normalize-path: 3.0.0
       object-hash: 3.0.0

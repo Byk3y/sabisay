@@ -162,7 +162,7 @@ contract MarketFactoryTest is Test {
         );
         
         // Pause all markets
-        vm.prank(pauser);
+        vm.prank(admin); // Use admin who has PAUSER_ROLE
         factory.pauseAllMarkets();
         
         // Check factory is paused
@@ -171,12 +171,12 @@ contract MarketFactoryTest is Test {
     
     function testUnpauseAllMarkets() public {
         // Pause first
-        vm.prank(pauser);
+        vm.prank(admin); // Use admin who has PAUSER_ROLE
         factory.pauseAllMarkets();
         assertTrue(factory.paused());
         
         // Unpause
-        vm.prank(pauser);
+        vm.prank(admin); // Use admin who has PAUSER_ROLE
         factory.unpauseAllMarkets();
         assertFalse(factory.paused());
     }
