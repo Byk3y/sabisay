@@ -53,6 +53,7 @@ export default function MarketDetailsPage() {
   const [activeTab, setActiveTab] = useState("All");
   const [activeCategory, setActiveCategory] = useState<Category>("Trending");
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [selectedOutcome, setSelectedOutcome] = useState<"yes" | "no" | null>(null);
 
   useEffect(() => {
     console.log('Market:', market?.title || 'Not found', 'Tab:', activeTab);
@@ -169,8 +170,8 @@ export default function MarketDetailsPage() {
                   <button className="px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-md font-medium transition-colors shadow-sm border-b-2 border-gray-900 dark:border-white text-sm">Buy</button>
                   <button className="px-3 py-1.5 text-gray-600 dark:text-gray-400 font-medium transition-colors text-sm">Sell</button>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <span>Market</span>
+                <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
+                  <span className="font-semibold">Market</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -180,13 +181,35 @@ export default function MarketDetailsPage() {
               {/* Outcome Selection */}
               <div className="mb-6">
                 <div className="grid grid-cols-2 gap-2">
-                  <button className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">Yes </span>
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">88¢</span>
+                  <button
+                    onClick={() => setSelectedOutcome("yes")}
+                    className={`px-3 py-2 border rounded-lg text-center transition-colors ${
+                      selectedOutcome === "yes"
+                        ? "bg-green-500 border-green-500 hover:bg-green-600"
+                        : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <span className={`text-sm font-semibold ${
+                      selectedOutcome === "yes" ? "text-white" : "text-gray-900 dark:text-white"
+                    }`}>Yes </span>
+                    <span className={`text-lg font-bold ${
+                      selectedOutcome === "yes" ? "text-white" : "text-gray-900 dark:text-white"
+                    }`}>88¢</span>
                   </button>
-                  <button className="px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-center hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
-                    <span className="text-sm font-semibold text-red-700 dark:text-red-400">No </span>
-                    <span className="text-lg font-bold text-red-700 dark:text-red-400">12.2¢</span>
+                  <button
+                    onClick={() => setSelectedOutcome("no")}
+                    className={`px-3 py-2 border rounded-lg text-center transition-colors ${
+                      selectedOutcome === "no"
+                        ? "bg-red-500 border-red-500 hover:bg-red-600"
+                        : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <span className={`text-sm font-semibold ${
+                      selectedOutcome === "no" ? "text-white" : "text-gray-900 dark:text-white"
+                    }`}>No </span>
+                    <span className={`text-lg font-bold ${
+                      selectedOutcome === "no" ? "text-white" : "text-gray-900 dark:text-white"
+                    }`}>12.2¢</span>
                   </button>
                 </div>
               </div>
@@ -197,81 +220,91 @@ export default function MarketDetailsPage() {
                   <div className="relative text-right overflow-hidden whitespace-nowrap h-16 flex items-center justify-between">
                     <label className="text-base font-bold text-gray-900 dark:text-gray-100 flex-shrink-0">Amount</label>
                     <div className="flex items-center justify-end relative min-w-0" style={{ flex: '1 1 0%' }}>
-                      {/* Display formatted value when not focused */}
-                      {tradeAmount && !isInputFocused && (
-                        <div
-                          className="text-gray-900 dark:text-white font-bold whitespace-nowrap pointer-events-none"
-                          style={{
-                            fontSize: tradeAmount.length <= 3 ? '3rem' :
-                                     tradeAmount.length <= 5 ? '2.5rem' :
-                                     tradeAmount.length <= 7 ? '2rem' :
-                                     tradeAmount.length <= 9 ? '1.75rem' : '1.5rem'
-                          }}
-                        >
-                          ${parseFloat(tradeAmount).toLocaleString()}
-                        </div>
-                      )}
-
-                      {/* Display dollar sign and raw value when focused */}
-                      {tradeAmount && isInputFocused && (
-                        <div className="flex items-center justify-end">
-                          <span className="text-gray-900 dark:text-white font-bold" style={{
-                            fontSize: tradeAmount.length <= 3 ? '3rem' :
-                                     tradeAmount.length <= 5 ? '2.5rem' :
-                                     tradeAmount.length <= 7 ? '2rem' :
-                                     tradeAmount.length <= 9 ? '1.75rem' : '1.5rem'
-                          }}>$</span>
-                          <span className="text-gray-900 dark:text-white font-bold" style={{
-                            fontSize: tradeAmount.length <= 3 ? '3rem' :
-                                     tradeAmount.length <= 5 ? '2.5rem' :
-                                     tradeAmount.length <= 7 ? '2rem' :
-                                     tradeAmount.length <= 9 ? '1.75rem' : '1.5rem'
-                          }}>
-                            {parseFloat(tradeAmount).toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Input field for editing */}
+                      {/* Single input field with proper formatting */}
                       <input
                         type="text"
-                        value={tradeAmount || ''}
+                        value={tradeAmount ? `$${parseFloat(tradeAmount).toLocaleString()}` : ''}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\./g, '$1');
-                          const numbers = value.replace(/\./g, '');
+                          // Extract raw number from formatted input
+                          const rawValue = e.target.value.replace(/[$,]/g, '');
+                          const cleanValue = rawValue.replace(/[^0-9.]/g, '').replace(/(\..*?)\./g, '$1');
+                          const numbers = cleanValue.replace(/\./g, '');
                           if (numbers.length <= 9) {
-                            setTradeAmount(value);
+                            setTradeAmount(cleanValue);
                           }
                         }}
-                        onFocus={() => setIsInputFocused(true)}
-                        onBlur={() => setIsInputFocused(false)}
+                        onFocus={() => {
+                          setIsInputFocused(true);
+                          // Show raw value for editing
+                          const input = document.activeElement as HTMLInputElement;
+                          if (input && tradeAmount) {
+                            input.value = tradeAmount;
+                          }
+                        }}
+                        onBlur={() => {
+                          setIsInputFocused(false);
+                          // Show formatted value
+                          const input = document.activeElement as HTMLInputElement;
+                          if (input && tradeAmount) {
+                            input.value = `$${parseFloat(tradeAmount).toLocaleString()}`;
+                          }
+                        }}
                         placeholder="$0"
-                        className={`bg-transparent border-none outline-none font-bold text-right text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 ${
-                          isInputFocused && tradeAmount ? 'absolute inset-0 text-transparent caret-gray-900 dark:caret-white' : 'w-full'
-                        }`}
+                        className="w-full bg-transparent border-none outline-none font-bold text-right text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                         style={{
                           fontSize: tradeAmount && tradeAmount.length <= 3 ? '3rem' :
                                    tradeAmount && tradeAmount.length <= 5 ? '2.5rem' :
                                    tradeAmount && tradeAmount.length <= 7 ? '2rem' :
                                    tradeAmount && tradeAmount.length <= 9 ? '1.75rem' :
-                                   tradeAmount ? '1.5rem' : '3rem',
-                          caretColor: isInputFocused && tradeAmount ? 'black' : 'auto'
+                                   tradeAmount ? '1.5rem' : '3rem'
                         }}
                       />
                     </div>
                   </div>
                 </div>
                 <div className="flex gap-1.5 justify-end my-3">
-                  <button className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => {
+                      const currentAmount = parseFloat(tradeAmount) || 0;
+                      const newAmount = currentAmount + 1;
+                      if (newAmount.toString().replace(/\./g, '').length <= 9) {
+                        setTradeAmount(newAmount.toString());
+                      }
+                    }}
+                    className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
+                  >
                     +$1
                   </button>
-                  <button className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => {
+                      const currentAmount = parseFloat(tradeAmount) || 0;
+                      const newAmount = currentAmount + 20;
+                      if (newAmount.toString().replace(/\./g, '').length <= 9) {
+                        setTradeAmount(newAmount.toString());
+                      }
+                    }}
+                    className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
+                  >
                     +$20
                   </button>
-                  <button className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => {
+                      const currentAmount = parseFloat(tradeAmount) || 0;
+                      const newAmount = currentAmount + 100;
+                      if (newAmount.toString().replace(/\./g, '').length <= 9) {
+                        setTradeAmount(newAmount.toString());
+                      }
+                    }}
+                    className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
+                  >
                     +$100
                   </button>
-                  <button className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => {
+                      setTradeAmount("999999999");
+                    }}
+                    className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
+                  >
                     Max
                   </button>
                 </div>
