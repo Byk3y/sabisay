@@ -8,8 +8,8 @@ interface WalletBrandIconProps {
 
 export function WalletBrandIcon({ name, className }: WalletBrandIconProps) {
   // Handle different file naming conventions for each wallet
-  let filename = name;
-  let extension = "svg";
+  let filename: string = name;
+  let extension: string = "svg";
   
   if (name === "phantom") {
     extension = "png";

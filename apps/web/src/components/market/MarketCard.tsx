@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Market } from "@/lib/mock";
 import { formatPool } from "@/lib/mock";
 
@@ -15,26 +16,27 @@ export function MarketCard({
   onNoClick
 }: MarketCardProps) {
   return (
-    <article className="rounded-xl border border-gray-300 dark:border-gray-600/20 bg-white dark:bg-gray-800/50 backdrop-blur-sm shadow-md hover:shadow-lg dark:hover:bg-gray-800/70 transition-all duration-200 ring-1 ring-gray-100 dark:ring-gray-700/50">
-      <div className="p-4">
-        {/* Image and title on the same line */}
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-[38px] h-[38px] shrink-0 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden">
-            {market.imageUrl && (
-              <img 
-                src={market.imageUrl} 
-                alt="Market" 
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            )}
+    <Link href={`/market/${market.id}`}>
+      <article className="rounded-xl border border-gray-300 dark:border-gray-600/20 bg-white dark:bg-gray-800/50 backdrop-blur-sm shadow-md hover:shadow-lg dark:hover:bg-gray-800/70 transition-all duration-200 ring-1 ring-gray-100 dark:ring-gray-700/50 cursor-pointer">
+        <div className="p-4">
+          {/* Image and title on the same line */}
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-[38px] h-[38px] shrink-0 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden">
+              {market.imageUrl && (
+                <img 
+                  src={market.imageUrl} 
+                  alt="Market" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
+            </div>
+            <h3 className="text-[15px] font-semibold leading-5 line-clamp-2 flex-1 text-gray-900 dark:text-white">
+              {market.question}
+            </h3>
           </div>
-          <h3 className="text-[15px] font-semibold leading-5 line-clamp-2 flex-1 text-gray-900 dark:text-white">
-            {market.question}
-          </h3>
-        </div>
 
         {/* Outcomes */}
         {market.outcomes.map((outcome, index) => (
@@ -69,5 +71,6 @@ export function MarketCard({
         </div>
       </div>
     </article>
+    </Link>
   );
 }
