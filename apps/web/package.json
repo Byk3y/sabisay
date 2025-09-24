@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:local": "cross-env NEXT_PUBLIC_CHAIN_ID=31337 NEXT_PUBLIC_RPC_URL=http://127.0.0.1:8545 next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -35,6 +36,7 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "autoprefixer": "^10.4.21",
+    "cross-env": "^10.0.0",
     "eslint": "^8.0.0",
     "eslint-config-next": "14.0.4",
     "postcss": "^8.5.6",

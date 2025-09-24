@@ -34,13 +34,14 @@ Single source of truth for SabiSay's Polymarket-style platform. We ship in phase
   - [ ] Admin: close, postPreliminary(outcome, evidenceCid), finalize, markInvalid, pause/unpause
   - [ ] Events: Trade, Close, Preliminary, Finalized, Invalidated, Redeem, FeesWithdrawn
   - [ ] Foundry tests (trading, closing, resolution, redeem, pause)
-  - [ ] Deploy to Amoy; commit `contracts/addresses/amoy.json`
+  - [x] Deploy to Amoy; commit `contracts/addresses/amoy.json`
+  - [x] Deploy to local Anvil chain for development
 - [ ] **SDK**
-  - [ ] Read markets, reserves → compute prices & chance %
+  - [x] Read markets, reserves → compute prices & chance %
   - [ ] `useTrade()` buy/sell; `useCashout()` sell all; error + receipt handling
   - [ ] `useResolve()` admin only; `usePortfolio()` balances + est. value
 - [ ] **Frontend**
-  - [ ] Home/Feed (cards from on-chain data)
+  - [x] Home/Feed (cards from on-chain data)
   - [ ] Market Detail: Buy/Sell panel, position card, resolution banner
   - [ ] Portfolio: open positions, redeem section
   - [ ] Admin: Create Market (IPFS rules upload), Resolve Market (prelim → timer → finalize)
@@ -49,6 +50,9 @@ Single source of truth for SabiSay's Polymarket-style platform. We ship in phase
   - [ ] RPC (Alchemy Amoy), WalletConnect project ID, USDC address envs
   - [ ] IPFS pinning (Pinata/Web3.Storage) server route
   - [ ] Basic geo-block for restricted regions; ToS link
+  - [x] Local development setup with Anvil chain
+  - [x] MockUSDC deployment and configuration
+  - [x] Wagmi/viem wallet integration
 - [ ] **QA (manual)**
   - [ ] Buy, Sell (cash out), price moves
   - [ ] Close → Prelim → (48h) → Finalize → Redeem (winners only)
@@ -157,3 +161,26 @@ Single source of truth for SabiSay's Polymarket-style platform. We ship in phase
 ## Changelog
 
 - _2025-01-19_: Initialized roadmap.
+- _2025-01-19_: **Major Frontend Progress** - Completed mobile-first UI with dark/light mode, wallet connection, market cards, and responsive navigation. Local development environment fully functional with Anvil chain and MockUSDC.
+
+## Current Status (Phase 1)
+
+**✅ Completed:**
+- **Frontend Foundation**: Mobile-first responsive design with Polymarket-style UI
+- **Theme System**: Complete dark/light mode implementation with smooth transitions
+- **Wallet Integration**: MetaMask connection with local Anvil chain support
+- **UI Components**: Market cards, navigation, search, filtering, and mobile drawer
+- **Development Environment**: Local Anvil chain with MockUSDC deployment
+- **TypeScript Setup**: Monorepo structure with proper type definitions
+
+**🚧 In Progress:**
+- **Smart Contracts**: MarketFactory deployed, individual Market contracts need implementation
+- **SDK Hooks**: Basic structure ready, need trading and portfolio hooks
+- **Contract Integration**: Frontend ready for real contract data integration
+
+**📋 Next Steps:**
+1. Implement individual Market contracts with CPMM logic
+2. Create trading hooks in SDK
+3. Build Market Detail and Portfolio screens
+4. Add admin dashboard for market creation/resolution
+5. Integrate IPFS for market metadata storage

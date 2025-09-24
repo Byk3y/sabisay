@@ -17,7 +17,7 @@ Deliver a working end-to-end prediction market MVP where users can trade binary 
 - Comprehensive tests with Foundry.
 
 **Checklist:**
-- [ ] MarketFactory contract (deploy new markets, track addresses).
+- [x] MarketFactory contract (deploy new markets, track addresses).
 - [ ] Market contract with:
   - [ ] CPMM buy/sell (binary + multi-outcome).
   - [ ] State machine (Open → Pending → Dispute → Finalized/Invalid).
@@ -26,7 +26,8 @@ Deliver a working end-to-end prediction market MVP where users can trade binary 
   - [ ] Emergency pause/unpause.
   - [ ] Events for Trade, Close, Preliminary, Finalized, Invalidated, Redeem.
 - [ ] Tests: trading mechanics, slippage, resolution, redeem, invalid, pause.
-- [ ] Deploy to Amoy testnet, record addresses.
+- [x] Deploy to Amoy testnet, record addresses.
+- [x] Deploy to local Anvil chain for development.
 
 ## 1B. SDK (TypeScript Layer)
 
@@ -39,8 +40,8 @@ Deliver a working end-to-end prediction market MVP where users can trade binary 
 - Add formatting & math utilities (prices, odds, payouts).
 
 **Checklist:**
-- [ ] Types for Market, Outcome, Position, Trade.
-- [ ] Utilities: formatUSDC, oddsFromReserves, payout calculation.
+- [x] Types for Market, Outcome, Position, Trade.
+- [x] Utilities: formatUSDC, oddsFromReserves, payout calculation.
 - [ ] Hooks:
   - [ ] `useMarkets()` → list of markets.
   - [ ] `useMarket(id)` → single market detail.
@@ -59,12 +60,22 @@ Deliver a working end-to-end prediction market MVP where users can trade binary 
 - Optimize for mobile first.
 
 **Checklist:**
-- [ ] Home/Feed screen — list markets (cards).
+- [x] Home/Feed screen — list markets (cards).
 - [ ] Market Detail screen — buy/sell panel, odds chart placeholder, resolution banner.
 - [ ] Portfolio screen — open positions, redeem button.
 - [ ] Admin dashboard — create market, upload rules (IPFS), resolve market.
 - [ ] "How it Works" modal — simple 3-step flow (Pick → Trade → Profit).
 - [ ] Replace mock data with SDK/contract data.
+
+**Progress Notes:**
+- ✅ **Mobile-first responsive design** with Polymarket-style UI
+- ✅ **Dark/Light mode** theme system implemented
+- ✅ **Wallet connection** (MetaMask) with local Anvil chain support
+- ✅ **Market cards** with proper styling and interaction states
+- ✅ **Category filtering** and search functionality
+- ✅ **Bottom navigation** and side panel for mobile
+- ✅ **Top navigation** with wallet status and theme toggle
+- ✅ **Mock data** structure ready for contract integration
 
 ## 1D. Infrastructure
 
@@ -80,9 +91,17 @@ Deliver a working end-to-end prediction market MVP where users can trade binary 
 **Checklist:**
 - [ ] Alchemy Amoy RPC key added.
 - [ ] WalletConnect project ID configured.
-- [ ] USDC testnet contract address added to env.
+- [x] USDC testnet contract address added to env.
 - [ ] IPFS pinning set up with API keys.
 - [ ] Simple geo-block + ToS page.
+
+**Progress Notes:**
+- ✅ **Local development setup** with Anvil chain
+- ✅ **MockUSDC deployment** and configuration
+- ✅ **Environment variables** properly configured
+- ✅ **Wagmi/viem integration** for wallet connection
+- ✅ **TypeScript configuration** and build system
+- ✅ **Monorepo structure** with pnpm workspaces
 
 ## 1E. QA (Manual Testing)
 

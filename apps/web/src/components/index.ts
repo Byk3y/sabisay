@@ -5,3 +5,6 @@ export { BottomNav } from "./nav/BottomNav";
 
 // Market components
 export { MarketCard } from "./market/MarketCard";
+
+// Auth components
+export { SignUpModal } from "./auth/SignUpModal";

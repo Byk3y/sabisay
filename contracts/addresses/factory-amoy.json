@@ -1,0 +1,19 @@
+{
+  "contractName": "MarketFactory",
+  "address": "0xab0acd955be5296335a793d0911aa705885aec82",
+  "chainId": 80002,
+  "network": "polygon-amoy",
+  "deployedAt": "2025-01-25T00:00:00.000Z",
+  "constructorArgs": {
+    "usdcAddress": "0x41E94Eb019C7B122EF22F638D49015e6E54B7B6c",
+    "treasuryAddress": "0x742d35Cc6634C0532925a3b8D0C0E3c0c5b7a8A0"
+  },
+  "gasUsed": "5731640",
+  "gasPrice": "27.500000126 gwei",
+  "estimatedCost": "0.15762010072218664 POL",
+  "deployer": "0x9386edbec76a2c540b965ce498fe7106ed15d848",
+  "transactionHash": null,
+  "status": "simulated",
+  "note": "Deployment simulated successfully but not broadcast due to insufficient funds"
+}
+
