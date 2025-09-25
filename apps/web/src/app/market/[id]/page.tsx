@@ -106,40 +106,16 @@ export default function MarketDetailsPage() {
         <div className="relative">
           {/* Left Column - Market Details */}
           <div className="max-w-4xl space-y-6">
-            {/* Market Header */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900 rounded-2xl flex items-center justify-center">
-                  <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
-                    <span className="text-white text-2xl font-bold">🗽</span>
-                  </div>
+            {/* Market Header - Match Polymarket layout */}
+            <div className="mb-8">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                  <span className="text-gray-500 dark:text-gray-400 text-2xl font-bold">📊</span>
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                     {market.title}
                   </h1>
-                  <div className="flex flex-wrap items-center gap-6 text-sm">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        ${market.volume.toLocaleString()} Vol.
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {market.endDate.toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                  </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
@@ -153,6 +129,126 @@ export default function MarketDetailsPage() {
                     </svg>
                   </button>
                 </div>
+              </div>
+
+              {/* Volume and Date under the icon */}
+              <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  <span>${market.volume.toLocaleString()} Vol.</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>
+                    {market.endDate.toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Chart Section */}
+            <div className="mb-6">
+              {/* Chart Legend */}
+              <div className="flex items-center gap-6 mb-4 text-sm">
+                {market?.outcomes?.map((outcome, index) => {
+                  const colors = ['bg-orange-500', 'bg-blue-500', 'bg-yellow-500', 'bg-gray-500'];
+                  return (
+                    <div key={index} className="flex items-center gap-2">
+                      <div className={`w-3 h-3 ${colors[index]} rounded-full`}></div>
+                      <span className="text-gray-900 dark:text-white font-medium">
+                        {outcome.name} {outcome.probability}%
+                      </span>
+                    </div>
+                  );
+                }) || (
+                  // Fallback legend if market data is not available
+                  <>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                      <span className="text-gray-900 dark:text-white font-medium">Loading...</span>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Chart Area */}
+              <div className="relative h-60 bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden">
+                {/* Chart placeholder with grid lines */}
+                <div className="absolute inset-0 flex flex-col justify-between p-4">
+                  {/* Chart content area with Y-axis labels on right */}
+                  <div className="flex justify-between items-center h-full">
+                    {/* Chart content area */}
+                    <div className="flex-1 h-full relative mr-6">
+                      {/* Grid lines */}
+                      <div className="absolute inset-0 flex flex-col justify-between">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <div key={i} className="border-t border-gray-200 dark:border-gray-700"></div>
+                        ))}
+                      </div>
+
+                      {/* Mock chart lines */}
+                      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 749 240">
+                        {/* Peter Obi line (orange) - trending upward */}
+                        <path
+                          d="M0,220 L100,210 L200,190 L300,170 L400,140 L500,120 L600,100 L700,90 L749,85"
+                          stroke="#f97316"
+                          strokeWidth="2"
+                          fill="none"
+                        />
+                        {/* Bola Tinubu line (blue) - stable to declining */}
+                        <path
+                          d="M0,200 L100,195 L200,190 L300,185 L400,180 L500,175 L600,170 L700,165 L749,160"
+                          stroke="#3b82f6"
+                          strokeWidth="2"
+                          fill="none"
+                        />
+                        {/* Others line (yellow) - low and stable */}
+                        <path
+                          d="M0,230 L100,228 L200,226 L300,224 L400,222 L500,220 L600,218 L700,216 L749,214"
+                          stroke="#eab308"
+                          strokeWidth="2"
+                          fill="none"
+                        />
+                      </svg>
+                    </div>
+
+                    {/* Y-axis labels on right */}
+                    <div className="flex flex-col justify-between text-xs text-gray-500 dark:text-gray-400 h-full py-2">
+                      <span>80%</span>
+                      <span>60%</span>
+                      <span>40%</span>
+                      <span>20%</span>
+                      <span>0%</span>
+                    </div>
+                  </div>
+
+                  {/* X-axis labels */}
+                  <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2 mr-6">
+                    <span>May</span>
+                    <span>Jun</span>
+                    <span>Jul</span>
+                    <span>Aug</span>
+                    <span>Sep</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Time period buttons */}
+              <div className="flex items-center gap-2 mt-4">
+                <button className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600">1H</button>
+                <button className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600">6H</button>
+                <button className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600">1D</button>
+                <button className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600">1W</button>
+                <button className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600">1M</button>
+                <button className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded">ALL</button>
               </div>
             </div>
           </div>
