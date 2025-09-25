@@ -111,7 +111,7 @@ export default function HomePage() {
       <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
 
       {/* Desktop Search Bar */}
-        <div className="hidden md:block mx-auto max-w-7xl px-3 md:px-4 py-2">
+        <div className="hidden md:block mx-auto max-w-7xl px-0 py-2">
               <div className="flex items-center gap-2">
                               <div className="flex items-center gap-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 px-3 py-2 w-96 shadow-sm">
                                 <Search className="size-4 text-gray-500 dark:text-gray-400" />
@@ -138,7 +138,7 @@ export default function HomePage() {
 
       {/* Desktop Filter Pills */}
       {showFilterPills && (
-        <div className="hidden md:block mx-auto max-w-7xl px-3 md:px-4 py-1">
+        <div className="hidden md:block mx-auto max-w-7xl px-0 py-1">
           <div className="flex items-center gap-2 relative">
                         <button
                           onMouseDown={(e) => {
@@ -299,7 +299,7 @@ export default function HomePage() {
       )}
 
       {/* Market Cards */}
-      <main className="mx-auto max-w-7xl px-3 md:px-4 py-1 md:py-4 pb-20 lg:pb-6">
+      <main className="mx-auto max-w-7xl px-0 py-1 md:py-4 pb-20 lg:pb-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredMarkets.length === 0 ? (
           <div className="col-span-full text-center py-8">

@@ -14,7 +14,7 @@ export function CategoryTabs({ activeCategory, onCategoryChange }: CategoryTabsP
 
   return (
     <div className="sticky top-14 z-30 bg-white dark:bg-[#0b1220] border-b border-gray-200 dark:border-gray-700">
-      <div className="mx-auto max-w-7xl px-3 md:px-4 overflow-x-auto no-scrollbar">
+      <div className="mx-auto max-w-7xl px-0 overflow-x-auto no-scrollbar">
         <ul className="flex gap-2 py-3 text-sm">
           {categories.map((category) => (
             <li key={category} className="shrink-0">

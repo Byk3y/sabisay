@@ -53,7 +53,14 @@ export default function MarketDetailsPage() {
   const [activeTab, setActiveTab] = useState("All");
   const [activeCategory, setActiveCategory] = useState<Category>("Trending");
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const [selectedOutcome, setSelectedOutcome] = useState<"yes" | "no" | null>(null);
+  const [tradeType, setTradeType] = useState<"buy" | "sell">("buy");
+  const [selectedCandidate, setSelectedCandidate] = useState(0); // Index of the candidate being traded
+  const [orderType, setOrderType] = useState<"market" | "limit">("market");
+  const [limitPrice, setLimitPrice] = useState("");
+  const [shares, setShares] = useState("");
+  const [expirationEnabled, setExpirationEnabled] = useState(false);
+  const [expirationDropdownOpen, setExpirationDropdownOpen] = useState(false);
+  const [selectedExpiration, setSelectedExpiration] = useState("End of day");
 
   useEffect(() => {
     console.log('Market:', market?.title || 'Not found', 'Tab:', activeTab);
@@ -95,7 +102,7 @@ export default function MarketDetailsPage() {
       <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-3 md:px-4 py-6">
+      <div className="max-w-7xl mx-auto px-0 py-6">
         <div className="relative">
           {/* Left Column - Market Details */}
           <div className="max-w-4xl space-y-6">
@@ -157,65 +164,91 @@ export default function MarketDetailsPage() {
               {/* Profile Section */}
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-lg font-bold text-white">ZM</span>
+                  <span className="text-lg font-bold text-white">
+                    {market.outcomes[0]?.name?.split(' ').map(n => n[0]).join('').substring(0, 2) || "PO"}
+                  </span>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Zohran Mamdani</h3>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    {market.outcomes[0]?.name || "Peter Obi"}
+                  </h3>
                 </div>
               </div>
 
               {/* Buy/Sell Tabs and Market Dropdown */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-                  <button className="px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-md font-medium transition-colors shadow-sm border-b-2 border-gray-900 dark:border-white text-sm">Buy</button>
-                  <button className="px-3 py-1.5 text-gray-600 dark:text-gray-400 font-medium transition-colors text-sm">Sell</button>
+                  <button
+                    onClick={() => setTradeType("buy")}
+                    className={`px-3 py-1.5 rounded-md font-medium transition-colors text-sm ${
+                      tradeType === "buy"
+                        ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm border-b-2 border-gray-900 dark:border-white"
+                        : "text-gray-600 dark:text-gray-400"
+                    }`}
+                  >
+                    Buy
+                  </button>
+                  <button
+                    onClick={() => setTradeType("sell")}
+                    className={`px-3 py-1.5 rounded-md font-medium transition-colors text-sm ${
+                      tradeType === "sell"
+                        ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm border-b-2 border-gray-900 dark:border-white"
+                        : "text-gray-600 dark:text-gray-400"
+                    }`}
+                  >
+                    Sell
+                  </button>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
-                  <span className="font-semibold">Market</span>
+                <button
+                  onClick={() => setOrderType(orderType === "market" ? "limit" : "market")}
+                  className="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 px-2 py-1 rounded transition-colors"
+                >
+                  <span className="font-semibold">{orderType === "market" ? "Market" : "Limit"}</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                </div>
+                </button>
               </div>
 
-              {/* Outcome Selection */}
+              {/* Yes/No Selection */}
               <div className="mb-6">
                 <div className="grid grid-cols-2 gap-2">
                   <button
-                    onClick={() => setSelectedOutcome("yes")}
+                    onClick={() => setSelectedCandidate(0)}
                     className={`px-3 py-2 border rounded-lg text-center transition-colors ${
-                      selectedOutcome === "yes"
+                      selectedCandidate === 0
                         ? "bg-green-500 border-green-500 hover:bg-green-600"
                         : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                   >
-                    <span className={`text-sm font-semibold ${
-                      selectedOutcome === "yes" ? "text-white" : "text-gray-900 dark:text-white"
-                    }`}>Yes </span>
+                    <span className={`text-base font-semibold ${
+                      selectedCandidate === 0 ? "text-white" : "text-gray-900 dark:text-white"
+                    } mr-2`}>Yes</span>
                     <span className={`text-lg font-bold ${
-                      selectedOutcome === "yes" ? "text-white" : "text-gray-900 dark:text-white"
-                    }`}>88¢</span>
+                      selectedCandidate === 0 ? "text-white" : "text-gray-900 dark:text-white"
+                    }`}>{market.outcomes[0]?.probability || 88}¢</span>
                   </button>
                   <button
-                    onClick={() => setSelectedOutcome("no")}
+                    onClick={() => setSelectedCandidate(1)}
                     className={`px-3 py-2 border rounded-lg text-center transition-colors ${
-                      selectedOutcome === "no"
-                        ? "bg-red-500 border-red-500 hover:bg-red-600"
+                      selectedCandidate === 1
+                        ? "bg-green-500 border-green-500 hover:bg-green-600"
                         : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                   >
-                    <span className={`text-sm font-semibold ${
-                      selectedOutcome === "no" ? "text-white" : "text-gray-900 dark:text-white"
-                    }`}>No </span>
+                    <span className={`text-base font-semibold ${
+                      selectedCandidate === 1 ? "text-white" : "text-gray-900 dark:text-white"
+                    } mr-2`}>No</span>
                     <span className={`text-lg font-bold ${
-                      selectedOutcome === "no" ? "text-white" : "text-gray-900 dark:text-white"
-                    }`}>12.2¢</span>
+                      selectedCandidate === 1 ? "text-white" : "text-gray-900 dark:text-white"
+                    }`}>{market.outcomes[1]?.probability || 12.2}¢</span>
                   </button>
                 </div>
               </div>
 
-              {/* Amount Input */}
-              <div className="mb-3">
+              {orderType === "market" ? (
+                /* Market Order - Amount Input */
+                <div className="mb-3">
                 <div className="mb-1">
                   <div className="relative text-right overflow-hidden whitespace-nowrap h-16 flex items-center justify-between">
                     <label className="text-base font-bold text-gray-900 dark:text-gray-100 flex-shrink-0">Amount</label>
@@ -309,6 +342,214 @@ export default function MarketDetailsPage() {
                   </button>
                 </div>
               </div>
+              ) : (
+                /* Limit Order Interface */
+                <div className="space-y-4">
+                  {/* Limit Price */}
+                  <div className="flex items-center justify-between">
+                    <label className="text-base font-semibold text-gray-900 dark:text-gray-100">Limit Price</label>
+                    <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 w-40 h-10 overflow-hidden">
+                      <button
+                        onClick={() => {
+                          const currentValue = limitPrice || (selectedCandidate === 0 ? (market.outcomes[0]?.probability || 45) : (market.outcomes[1]?.probability || 38));
+                          const current = parseFloat(currentValue.toString()) || 0;
+                          setLimitPrice(Math.max(0.1, current - 0.1).toFixed(1));
+                        }}
+                        className="px-2 py-1 text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 text-base font-semibold flex-shrink-0"
+                      >
+                        —
+                      </button>
+                      <input
+                        type="text"
+                        value={limitPrice || (selectedCandidate === 0 ? (market.outcomes[0]?.probability || 45) : (market.outcomes[1]?.probability || 38))}
+                        onChange={(e) => setLimitPrice(e.target.value)}
+                        placeholder={selectedCandidate === 0 ? (market.outcomes[0]?.probability?.toString() || "45") : (market.outcomes[1]?.probability?.toString() || "38")}
+                        className="flex-1 min-w-0 px-0 py-1 text-center bg-transparent border-none outline-none text-gray-900 dark:text-white font-bold text-lg"
+                      />
+                      <button
+                        onClick={() => {
+                          const currentValue = limitPrice || (selectedCandidate === 0 ? (market.outcomes[0]?.probability || 45) : (market.outcomes[1]?.probability || 38));
+                          const current = parseFloat(currentValue.toString()) || 0;
+                          setLimitPrice((current + 0.1).toFixed(1));
+                        }}
+                        className="px-2 py-1 text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 text-base font-semibold flex-shrink-0"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Shares */}
+                  <div className="flex items-start justify-between">
+                    <label className="text-base font-semibold text-gray-900 dark:text-gray-100 mt-2">Shares</label>
+                    <div className="flex flex-col items-end space-y-2">
+                      <input
+                        type="text"
+                        value={shares}
+                        onChange={(e) => setShares(e.target.value)}
+                        placeholder="0"
+                        className="w-40 h-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-center text-gray-900 dark:text-white font-semibold text-base outline-none focus:border-blue-500"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            const current = parseFloat(shares) || 0;
+                            setShares(Math.max(0, current - 10).toString());
+                          }}
+                          className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          -10
+                        </button>
+                        <button
+                          onClick={() => {
+                            const current = parseFloat(shares) || 0;
+                            setShares((current + 10).toString());
+                          }}
+                          className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          +10
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Set Expiration */}
+                  <div>
+                    <div className="flex items-center justify-between py-3">
+                      <span className="text-base font-semibold text-gray-900 dark:text-gray-100">Set Expiration</span>
+                      <button
+                        onClick={() => setExpirationEnabled(!expirationEnabled)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          expirationEnabled
+                            ? 'bg-blue-600'
+                            : 'bg-gray-200 dark:bg-gray-700'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            expirationEnabled ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Expiration Dropdown - shows when enabled */}
+                    {expirationEnabled && (
+                      <div className="mt-2 relative">
+                        <button
+                          onClick={() => setExpirationDropdownOpen(!expirationDropdownOpen)}
+                          className="w-full flex items-center justify-between border-2 border-gray-900 dark:border-white rounded-lg bg-white dark:bg-gray-800 px-4 py-3"
+                        >
+                          <span className="text-base font-medium text-gray-900 dark:text-white">{selectedExpiration}</span>
+                          <svg className={`w-5 h-5 text-gray-900 dark:text-white transition-transform ${expirationDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+
+                        {/* Dropdown Options */}
+                        {expirationDropdownOpen && (
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10">
+                            <div className="py-2">
+                              <button
+                                onClick={() => {
+                                  setSelectedExpiration("End of day");
+                                  setExpirationDropdownOpen(false);
+                                }}
+                                className="w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              >
+                                <span className="text-base font-medium text-gray-900 dark:text-white">End of day</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedExpiration("45 Minutes");
+                                  setExpirationDropdownOpen(false);
+                                }}
+                                className="w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              >
+                                <span className="text-base font-medium text-gray-900 dark:text-white">45 Minutes</span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Total and To Win */}
+                  <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">Total</span>
+                      <span className="text-lg font-bold text-blue-600">
+                        ${(() => {
+                          const price = parseFloat(limitPrice) || 0;
+                          const shareCount = parseFloat(shares) || 0;
+                          const total = (price * shareCount) / 100;
+                          return total.toFixed(2);
+                        })()}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">To Win</span>
+                        <span>💵</span>
+                      </div>
+                      <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                        ${(() => {
+                          const shareCount = parseFloat(shares) || 0;
+                          const winAmount = shareCount - ((parseFloat(limitPrice) || 0) * shareCount / 100);
+                          return Math.max(0, winAmount).toFixed(2);
+                        })()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* To Win Section - shows when amount is entered */}
+              {tradeAmount && (
+                <div className="mb-4 pt-4 border-t border-gray-200 dark:border-gray-700 animate-in slide-in-from-top-2 duration-300">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100 text-base font-semibold mb-1">
+                        <span>To win</span>
+                        <span>💰</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300 font-medium">
+                        <span>Avg. Price {market.outcomes[selectedCandidate]?.probability || 88}¢</span>
+                        <div className="w-3 h-3 rounded-full border border-gray-400 flex items-center justify-center">
+                          <span className="text-[8px]">?</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right min-w-[140px] flex justify-end">
+                      <div
+                        className="font-bold text-green-600 dark:text-green-400 h-12 flex items-center justify-end"
+                        style={{
+                          fontSize: (() => {
+                            const amount = parseFloat(tradeAmount);
+                            const price = (market.outcomes[selectedCandidate]?.probability || 88) / 100;
+                            const potentialWin = amount / price;
+                            const winString = potentialWin.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            const length = winString.length;
+
+                            return length <= 6 ? '2.75rem' :
+                                   length <= 8 ? '2.25rem' :
+                                   length <= 10 ? '1.875rem' :
+                                   length <= 12 ? '1.625rem' : '1.375rem';
+                          })()
+                        }}
+                      >
+                        ${(() => {
+                          const amount = parseFloat(tradeAmount);
+                          const price = (market.outcomes[selectedCandidate]?.probability || 88) / 100;
+                          const potentialWin = amount / price;
+                          return potentialWin.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Trade Button */}
               <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors text-sm mt-4">
@@ -319,8 +560,9 @@ export default function MarketDetailsPage() {
         </div>
       </div>
 
+
       {/* Additional Content Below */}
-        <div className="max-w-7xl mx-auto px-3 md:px-4 py-6">
+        <div className="max-w-7xl mx-auto px-0 py-6">
           <div className="max-w-4xl">
             {/* Left Column - Market Details */}
             <div className="space-y-6">
