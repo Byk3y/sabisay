@@ -55,32 +55,32 @@ export const MarketChart = ({ outcomes, onTimePeriodChange }: MarketChartProps) 
             {/* Chart content area */}
             <div className="flex-1 h-full relative">
               {/* Dotted grid lines extending to the right border */}
-              <div className="absolute -left-4 right-0 top-0 bottom-0 flex flex-col justify-between">
+              <div className="absolute -left-4 right-6 top-0 bottom-0 flex flex-col justify-between">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="border-t border-dotted border-gray-300 dark:border-gray-600 w-full"></div>
                 ))}
               </div>
 
               {/* Mock chart lines - solid lines */}
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 900 240">
+              <svg className="absolute inset-0 w-[calc(100%-2rem)] h-full" viewBox="0 0 750 240">
                 {/* 50+ bps decrease line (orange) - trending upward */}
                 <path
-                  d="M10,225 L80,215 L150,200 L220,185 L290,165 L360,145 L430,125 L500,105 L570,95 L640,88 L710,82 L750,78 L800,75 L850,72 L900,70"
+                  d="M10,225 L80,215 L150,200 L220,185 L290,165 L360,145 L430,125 L500,105 L570,95 L640,88 L710,82 L750,78"
                   stroke="#f97316"
                   strokeWidth="2"
                   fill="none"
                 />
                 {/* 25 bps decrease line (blue) - stable to declining */}
                 <path
-                  d="M10,205 L80,200 L150,195 L220,190 L290,185 L360,180 L430,175 L500,170 L570,165 L640,162 L710,160 L750,157 L800,155 L850,153 L900,151"
+                  d="M10,205 L80,200 L150,195 L220,190 L290,185 L360,180 L430,175 L500,170 L570,165 L640,162 L710,160 L750,157"
                   stroke="#3b82f6"
                   strokeWidth="2"
                   fill="none"
                 />
               </svg>
 
-              {/* Y-axis percentage labels positioned outside the chart area */}
-              <div className="absolute right-[-2rem] top-0 h-full w-8">
+              {/* Y-axis percentage labels positioned in front of the dotted lines */}
+              <div className="absolute right-[-0.5rem] top-0 h-full w-8">
                 <div className="absolute top-0 right-0 flex items-center h-0">
                   <span className="text-xs text-gray-500 dark:text-gray-400">80%</span>
                 </div>
@@ -107,7 +107,6 @@ export const MarketChart = ({ outcomes, onTimePeriodChange }: MarketChartProps) 
             <span className="absolute left-[40%]">Jul</span>
             <span className="absolute left-[60%]">Aug</span>
             <span className="absolute left-[80%]">Sep</span>
-            <span className="absolute right-0">Oct</span>
           </div>
         </div>
       </div>

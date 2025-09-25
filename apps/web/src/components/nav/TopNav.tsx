@@ -31,7 +31,7 @@ export function TopNav() {
 
   return (
     <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0b1220]/80 backdrop-blur">
-      <div className="mx-auto max-w-7xl px-0 h-14 flex items-center justify-between">
+      <div className="mx-auto max-w-7xl px-4 md:px-0 h-14 flex items-center justify-between">
         {/* Left side - Logo */}
         <div className="flex items-center gap-2">
           <div className="size-8 rounded bg-blue-500/20 dark:bg-blue-500/20 grid place-items-center">

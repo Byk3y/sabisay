@@ -102,7 +102,7 @@ export default function MarketDetailsPage() {
       <div className="max-w-7xl mx-auto px-0 py-6">
         <div className="relative">
           {/* Left Column - Market Details */}
-          <div className="max-w-4xl space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-4">
+          <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-4 px-4 md:px-0 md:pr-[360px]">
             {/* Market Header */}
             <MarketHeader 
               market={market} 
@@ -145,7 +145,7 @@ export default function MarketDetailsPage() {
 
       {/* Additional Content Below */}
         <div className="max-w-7xl mx-auto px-0 py-0">
-          <div className="max-w-4xl">
+          <div className="px-4 md:px-0 md:pr-[360px]">
             <div className="space-y-6">
               {/* Outcome Section */}
             <OutcomeList
