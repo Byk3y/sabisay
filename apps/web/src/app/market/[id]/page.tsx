@@ -55,6 +55,7 @@ export default function MarketDetailsPage() {
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [tradeType, setTradeType] = useState<"buy" | "sell">("buy");
   const [selectedCandidate, setSelectedCandidate] = useState(0); // Index of the candidate being traded
+  const [selectedOutcome, setSelectedOutcome] = useState(0); // Index of the outcome being traded
   const [orderType, setOrderType] = useState<"market" | "limit">("market");
   const [limitPrice, setLimitPrice] = useState("");
   const [shares, setShares] = useState("");
@@ -105,9 +106,9 @@ export default function MarketDetailsPage() {
       <div className="max-w-7xl mx-auto px-0 py-6">
         <div className="relative">
           {/* Left Column - Market Details */}
-          <div className="max-w-4xl space-y-6">
+          <div className="max-w-4xl space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-4">
             {/* Market Header - Match Polymarket layout */}
-            <div className="mb-8">
+            <div className="mb-4">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center">
                   <span className="text-gray-500 dark:text-gray-400 text-2xl font-bold">📊</span>
@@ -157,7 +158,7 @@ export default function MarketDetailsPage() {
             {/* Chart Section */}
             <div className="mb-6">
               {/* Chart Legend */}
-              <div className="flex items-center gap-6 mb-4 text-sm">
+              <div className="flex items-center gap-6 mb-2 text-sm">
                 {market?.outcomes?.map((outcome, index) => {
                   const colors = ['bg-orange-500', 'bg-blue-500', 'bg-yellow-500', 'bg-gray-500'];
                   return (
@@ -180,63 +181,66 @@ export default function MarketDetailsPage() {
               </div>
 
               {/* Chart Area */}
-              <div className="relative h-60 bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden">
+              <div className="relative h-60 flex items-center justify-center overflow-hidden">
                 {/* Chart placeholder with grid lines */}
                 <div className="absolute inset-0 flex flex-col justify-between p-4">
-                  {/* Chart content area with Y-axis labels on right */}
+                  {/* Chart content area */}
                   <div className="flex justify-between items-center h-full">
                     {/* Chart content area */}
-                    <div className="flex-1 h-full relative mr-6">
-                      {/* Grid lines */}
-                      <div className="absolute inset-0 flex flex-col justify-between">
+                    <div className="flex-1 h-full relative">
+                      {/* Dotted grid lines extending almost to the right border */}
+                      <div className="absolute -left-4 right-8 top-0 bottom-0 flex flex-col justify-between">
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <div key={i} className="border-t border-gray-200 dark:border-gray-700"></div>
+                          <div key={i} className="border-t border-dotted border-gray-300 dark:border-gray-600 w-full"></div>
                         ))}
                       </div>
 
-                      {/* Mock chart lines */}
+                      {/* Mock chart lines - solid lines */}
                       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 749 240">
-                        {/* Peter Obi line (orange) - trending upward */}
+                        {/* 50+ bps decrease line (orange) - trending upward */}
                         <path
-                          d="M0,220 L100,210 L200,190 L300,170 L400,140 L500,120 L600,100 L700,90 L749,85"
+                          d="M10,225 L80,215 L150,200 L220,185 L290,165 L360,145 L430,125 L500,105 L570,95 L640,88 L710,82 L749,80"
                           stroke="#f97316"
                           strokeWidth="2"
                           fill="none"
                         />
-                        {/* Bola Tinubu line (blue) - stable to declining */}
+                        {/* 25 bps decrease line (blue) - stable to declining */}
                         <path
-                          d="M0,200 L100,195 L200,190 L300,185 L400,180 L500,175 L600,170 L700,165 L749,160"
+                          d="M10,205 L80,200 L150,195 L220,190 L290,185 L360,180 L430,175 L500,170 L570,165 L640,162 L710,160 L749,158"
                           stroke="#3b82f6"
                           strokeWidth="2"
                           fill="none"
                         />
-                        {/* Others line (yellow) - low and stable */}
-                        <path
-                          d="M0,230 L100,228 L200,226 L300,224 L400,222 L500,220 L600,218 L700,216 L749,214"
-                          stroke="#eab308"
-                          strokeWidth="2"
-                          fill="none"
-                        />
                       </svg>
-                    </div>
 
-                    {/* Y-axis labels on right */}
-                    <div className="flex flex-col justify-between text-xs text-gray-500 dark:text-gray-400 h-full py-2">
-                      <span>80%</span>
-                      <span>60%</span>
-                      <span>40%</span>
-                      <span>20%</span>
-                      <span>0%</span>
+                      {/* Y-axis percentage labels positioned at the absolute right edge */}
+                      <div className="absolute right-0 top-0 h-full w-8">
+                        <div className="absolute top-0 right-0 flex items-center h-0">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">80%</span>
+                        </div>
+                        <div className="absolute top-1/4 right-0 flex items-center h-0">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">60%</span>
+                        </div>
+                        <div className="absolute top-1/2 right-0 flex items-center h-0">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">40%</span>
+                        </div>
+                        <div className="absolute top-3/4 right-0 flex items-center h-0">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">20%</span>
+                        </div>
+                        <div className="absolute bottom-0 right-0 flex items-center h-0">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">0%</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   {/* X-axis labels */}
-                  <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2 mr-6">
-                    <span>May</span>
-                    <span>Jun</span>
-                    <span>Jul</span>
-                    <span>Aug</span>
-                    <span>Sep</span>
+                  <div className="relative text-xs text-gray-500 dark:text-gray-400 mt-2 h-4">
+                    <span className="absolute left-0">May</span>
+                    <span className="absolute left-[20%]">Jun</span>
+                    <span className="absolute left-[40%]">Jul</span>
+                    <span className="absolute left-[60%]">Aug</span>
+                    <span className="absolute left-[80%]">Sep</span>
                   </div>
                 </div>
               </div>
@@ -254,19 +258,19 @@ export default function MarketDetailsPage() {
           </div>
 
           {/* Right Column - Trading Sidebar */}
-          <div className="absolute top-0 right-0 w-[340px] space-y-4">
+          <div className="absolute top-0 right-0 w-[340px] h-[calc(100vh-200px)] overflow-y-auto space-y-4">
             {/* Trading Interface */}
             <div className="w-full bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
               {/* Profile Section */}
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-lg font-bold text-white">
-                    {market.outcomes[0]?.name?.split(' ').map(n => n[0]).join('').substring(0, 2) || "PO"}
+                    {market.outcomes[selectedOutcome]?.name?.split(' ').map(n => n[0]).join('').substring(0, 2) || "PO"}
                   </span>
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                    {market.outcomes[0]?.name || "Peter Obi"}
+                    {market.outcomes[selectedOutcome]?.name || "Peter Obi"}
                   </h3>
                 </div>
               </div>
@@ -322,13 +326,13 @@ export default function MarketDetailsPage() {
                     } mr-2`}>Yes</span>
                     <span className={`text-lg font-bold ${
                       selectedCandidate === 0 ? "text-white" : "text-gray-900 dark:text-white"
-                    }`}>{market.outcomes[0]?.probability || 88}¢</span>
+                    }`}>{market.outcomes[selectedOutcome]?.price?.yes || 88}¢</span>
                   </button>
                   <button
                     onClick={() => setSelectedCandidate(1)}
                     className={`px-3 py-2 border rounded-lg text-center transition-colors ${
                       selectedCandidate === 1
-                        ? "bg-green-500 border-green-500 hover:bg-green-600"
+                        ? "bg-red-500 border-red-500 hover:bg-red-600"
                         : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                   >
@@ -337,7 +341,7 @@ export default function MarketDetailsPage() {
                     } mr-2`}>No</span>
                     <span className={`text-lg font-bold ${
                       selectedCandidate === 1 ? "text-white" : "text-gray-900 dark:text-white"
-                    }`}>{market.outcomes[1]?.probability || 12.2}¢</span>
+                    }`}>{market.outcomes[selectedOutcome]?.price?.no || 12.2}¢</span>
                   </button>
                 </div>
               </div>
@@ -658,73 +662,104 @@ export default function MarketDetailsPage() {
 
 
       {/* Additional Content Below */}
-        <div className="max-w-7xl mx-auto px-0 py-6">
+        <div className="max-w-7xl mx-auto px-0 py-0">
           <div className="max-w-4xl">
             {/* Left Column - Market Details */}
             <div className="space-y-6">
-              {/* Outcome Table */}
-              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {/* Outcome Section */}
+              <div className="mb-2">
+                <div className="flex items-center pb-3 border-b border-gray-200 dark:border-gray-700 mb-0">
+                  <div className="flex-1">
+                    <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                       OUTCOME
                     </h2>
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-                      % CHANGE
-                    </span>
                   </div>
+                  <div className="flex-1 flex justify-center">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                        % CHANCE
+                      </span>
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1"></div>
                 </div>
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
                   {market.outcomes.map((outcome, index) => (
-                    <div key={index} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                              {outcome.name.charAt(0)}
-                            </span>
+                    <div key={index} className="flex items-center py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-lg flex items-center justify-center">
+                          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                            {outcome.name.charAt(0)}
+                          </span>
+                        </div>
+                        <div>
+                          <div className="font-semibold text-gray-900 dark:text-white text-base">
+                            {outcome.name}
                           </div>
-                          <div>
-                            <div className="font-semibold text-gray-900 dark:text-white text-lg">
-                              {outcome.name}
-                            </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                              ${outcome.volume.toLocaleString()} Vol.
-                            </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            ${outcome.volume.toLocaleString()} Vol. 📊
                           </div>
                         </div>
-                        <div className="flex items-center gap-6">
-                          <div className="text-right">
-                            <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                              {outcome.probability}%
-                            </div>
-                          </div>
-                          <div className="flex gap-3">
-                            <button className="px-4 py-2 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors">
-                              Buy Yes {outcome.price.yes}¢
-                            </button>
-                            <button className="px-4 py-2 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
-                              Buy No {outcome.price.no}¢
-                            </button>
-                          </div>
+                      </div>
+                      <div className="flex-1 flex justify-center">
+                        <div className="text-xl font-bold text-gray-900 dark:text-white">
+                          {outcome.probability}%
                         </div>
+                      </div>
+                      <div className="flex gap-2 flex-1 justify-end">
+                        <button
+                          onClick={() => {
+                            setSelectedCandidate(0);
+                            setSelectedOutcome(index);
+                          }}
+                          className={`py-3.5 rounded text-xs font-medium transition-colors w-[100px] text-center ${
+                            selectedCandidate === 0 && selectedOutcome === index
+                              ? "bg-green-600 text-white hover:bg-green-700"
+                              : "bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800/30"
+                          }`}>
+                          Buy Yes {outcome.price.yes}¢
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedCandidate(1);
+                            setSelectedOutcome(index);
+                          }}
+                          className={`py-3.5 rounded text-xs font-medium transition-colors w-[100px] text-center ${
+                            selectedCandidate === 1 && selectedOutcome === index
+                              ? "bg-red-600 text-white hover:bg-red-700"
+                              : "bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800/30"
+                          }`}>
+                          Buy No {outcome.price.no}¢
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Chart Placeholder */}
-              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Probability Over Time
-                </h2>
-                <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-500 dark:text-gray-400">
-                    Chart will be implemented here
-                  </span>
+              {/* Rules Section */}
+              <div className="mb-2">
+                <div className="pb-3 border-b border-gray-200 dark:border-gray-700 mb-4">
+                  <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    Rules
+                  </h2>
+                </div>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-900 dark:text-white leading-relaxed">
+                    The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City.
+                  </p>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                    <span>Show more</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
                 </div>
               </div>
+
             </div>
         </div>
       </div>
