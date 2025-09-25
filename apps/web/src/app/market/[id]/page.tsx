@@ -1,67 +1,67 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { mockMarkets, type Category } from "@/lib/mock";
 import { TopNavClient } from "@/components/nav/TopNavClient";
 import { CategoryTabs } from "@/components/nav/CategoryTabs";
-import { MarketHeader } from "@/features/market/components/MarketHeader";
-import { ChartPlaceholder } from "@/features/market/components/ChartPlaceholder";
-import { OutcomeRow } from "@/features/market/components/OutcomeRow";
-import { TradePanel } from "@/features/market/components/TradePanel";
-import { StateBanner } from "@/features/market/components/StateBanner";
-
-// Helper function to get market by ID
-function getMarketById(id: string) {
-  const market = mockMarkets.find(m => m.id === id);
-  if (!market) return null;
-  
-  return {
-    id: market.id,
-    title: market.question,
-    volume: market.poolUsd,
-    endDate: new Date(market.closesAt || new Date()),
-    outcomes: market.outcomes.map(outcome => ({
-      name: outcome.label,
-      probability: outcome.oddsPct,
-      volume: Math.round(market.poolUsd * (outcome.oddsPct / 100)),
-      price: {
-        yes: Math.round(outcome.oddsPct),
-        no: Math.round(100 - outcome.oddsPct)
-      }
-    })),
-    relatedMarkets: [
-      {
-        id: "1",
-        title: "Will the Democratic candidate win the 2025 NYC mayoral election?",
-        probability: 90,
-        volume: 15000000
-      },
-      {
-        id: "2", 
-        title: "Will Andrew Cuomo win second place in the 2025 NYC mayoral election?",
-        probability: 85,
-        volume: 8000000
-      }
-    ]
-  };
-}
+import { MarketHeader } from "@/components/market/MarketHeader";
+import { MarketChart } from "@/components/market/MarketChart";
+import { TradingSidebar } from "@/components/market/TradingSidebar";
+import { OutcomeList } from "@/components/market/OutcomeList";
+import { RulesSection } from "@/components/market/RulesSection";
+import { useMarketData } from "@/hooks/useMarketData";
+import { useMarketUI } from "@/hooks/useMarketUI";
+import { useTradingState } from "@/hooks/useTradingState";
+import type { TradeData, Category } from "@/types/market";
 
 export default function MarketDetailsPage() {
   const params = useParams();
   const { mounted } = useTheme();
   const marketId = params.id as string;
-  const [market, setMarket] = useState(getMarketById(marketId));
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("All");
-  const [activeCategory, setActiveCategory] = useState<Category>("Trending");
-  const [selectedCandidate, setSelectedCandidate] = useState(0);
-  const [selectedOutcome, setSelectedOutcome] = useState(0);
+  
+  // Use custom hooks for state management
+  const { market, isLoading } = useMarketData(marketId);
+  const { activeTab, activeCategory, isInputFocused, setActiveCategory } = useMarketUI();
+  const {
+    tradeAmount,
+    tradeType,
+    selectedCandidate,
+    selectedOutcome,
+    orderType,
+    limitPrice,
+    shares,
+    expirationEnabled,
+    expirationDropdownOpen,
+    selectedExpiration,
+    setTradeAmount,
+    setTradeType,
+    setSelectedCandidate,
+    setSelectedOutcome,
+    setOrderType,
+    setLimitPrice,
+    setShares,
+    setExpirationEnabled,
+    setExpirationDropdownOpen,
+    setSelectedExpiration,
+    handleOutcomeAndCandidateSelect
+  } = useTradingState();
 
-  useEffect(() => {
-    console.log('Market:', market?.title || 'Not found', 'Tab:', activeTab);
-  }, [market, activeTab]);
+  // Event handlers
+  const handleShare = () => {
+    console.log('Share market:', market?.title);
+  };
+
+  const handleBookmark = () => {
+    console.log('Bookmark market:', market?.title);
+  };
+
+  const handleTrade = (tradeData: TradeData) => {
+    console.log('Execute trade:', tradeData);
+  };
+
+  const handleTimePeriodChange = (period: string) => {
+    console.log('Time period changed:', period);
+  };
 
   if (isLoading) {
     return (
@@ -99,89 +99,68 @@ export default function MarketDetailsPage() {
       <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="max-w-7xl mx-auto px-0 py-6">
+        <div className="relative">
           {/* Left Column - Market Details */}
-          <section className="lg:col-span-2 space-y-6">
+          <div className="max-w-4xl space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-4">
             {/* Market Header */}
-            <MarketHeader
-              title={market.title}
-              volume={market.volume}
-              endDate={market.endDate}
-              onShare={() => console.log('Share clicked')}
-              onBookmark={() => console.log('Bookmark clicked')}
+            <MarketHeader 
+              market={market} 
+              onShare={handleShare} 
+              onBookmark={handleBookmark} 
             />
 
             {/* Chart Section */}
-            <ChartPlaceholder outcomes={market.outcomes} />
-
-            {/* Outcome Section */}
-            <div className="mb-2">
-              <div className="flex items-center pb-3 border-b border-gray-200 dark:border-gray-700 mb-0">
-                <div className="flex-1">
-                  <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                    OUTCOME
-                  </h2>
-                </div>
-                <div className="flex-1 flex justify-center">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                      % CHANCE
-                    </span>
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex-1"></div>
-              </div>
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                {market.outcomes.map((outcome, index) => (
-                  <OutcomeRow
-                    key={index}
-                    outcome={outcome}
-                    index={index}
-                    isSelected={selectedOutcome === index}
-                    selectedCandidate={selectedCandidate}
-                    onSelect={(candidate, outcomeIndex) => {
-                      setSelectedCandidate(candidate);
-                      setSelectedOutcome(outcomeIndex);
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Rules Section */}
-            <div className="mb-2">
-              <div className="pb-3 border-b border-gray-200 dark:border-gray-700 mb-4">
-                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                  Rules
-                </h2>
-              </div>
-              <div className="space-y-4">
-                <p className="text-sm text-gray-900 dark:text-white leading-relaxed">
-                  The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <span>Show more</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </section>
+            <MarketChart 
+              outcomes={market.outcomes} 
+              onTimePeriodChange={handleTimePeriodChange} 
+            />
+          </div>
 
           {/* Right Column - Trading Sidebar */}
-          <aside className="lg:col-span-1 lg:sticky lg:top-24 space-y-4">
-            <TradePanel
-              selectedOutcome={market.outcomes[selectedOutcome]}
-              onTrade={(amount, isYes) => {
-                console.log('Trade:', { amount, isYes, outcome: market.outcomes[selectedOutcome] });
-              }}
+          <TradingSidebar
+            market={market}
+            selectedOutcome={selectedOutcome}
+            selectedCandidate={selectedCandidate}
+            tradeAmount={tradeAmount}
+            tradeType={tradeType}
+            orderType={orderType}
+            limitPrice={limitPrice}
+            shares={shares}
+            expirationEnabled={expirationEnabled}
+            selectedExpiration={selectedExpiration}
+            onTrade={handleTrade}
+            onOutcomeSelect={handleOutcomeAndCandidateSelect}
+            onCandidateSelect={setSelectedCandidate}
+            onAmountChange={setTradeAmount}
+            onOrderTypeChange={setOrderType}
+            onTradeTypeChange={setTradeType}
+            onLimitPriceChange={setLimitPrice}
+            onSharesChange={setShares}
+            onExpirationToggle={setExpirationEnabled}
+            onExpirationSelect={setSelectedExpiration}
+          />
+        </div>
+      </div>
+
+      {/* Additional Content Below */}
+        <div className="max-w-7xl mx-auto px-0 py-0">
+          <div className="max-w-4xl">
+            <div className="space-y-6">
+              {/* Outcome Section */}
+            <OutcomeList
+              outcomes={market.outcomes}
+              selectedOutcome={selectedOutcome}
+              selectedCandidate={selectedCandidate}
+              onOutcomeSelect={handleOutcomeAndCandidateSelect}
             />
-          </aside>
+
+              {/* Rules Section */}
+            <RulesSection 
+              rules="The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City."
+              onShowMore={() => console.log('Show more rules')}
+            />
+            </div>
         </div>
       </div>
     </div>
