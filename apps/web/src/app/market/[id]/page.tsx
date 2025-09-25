@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { TopNavClient } from "@/components/nav/TopNavClient";
@@ -9,6 +10,9 @@ import { MarketChart } from "@/components/market/MarketChart";
 import { TradingSidebar } from "@/components/market/TradingSidebar";
 import { OutcomeList } from "@/components/market/OutcomeList";
 import { RulesSection } from "@/components/market/RulesSection";
+import { MobileOverlay } from "@/components/ui/MobileOverlay";
+import { BottomNav } from "@/components/nav/BottomNav";
+import { SidePanel } from "@/components/nav/SidePanel";
 import { useMarketData } from "@/hooks/useMarketData";
 import { useMarketUI } from "@/hooks/useMarketUI";
 import { useTradingState } from "@/hooks/useTradingState";
@@ -21,7 +25,7 @@ export default function MarketDetailsPage() {
   
   // Use custom hooks for state management
   const { market, isLoading } = useMarketData(marketId);
-  const { activeTab, activeCategory, isInputFocused, setActiveCategory } = useMarketUI();
+  const { activeTab, activeCategory, isInputFocused, isMobile, setActiveCategory } = useMarketUI();
   const {
     tradeAmount,
     tradeType,
@@ -33,6 +37,7 @@ export default function MarketDetailsPage() {
     expirationEnabled,
     expirationDropdownOpen,
     selectedExpiration,
+    isMobileSidebarOpen,
     setTradeAmount,
     setTradeType,
     setSelectedCandidate,
@@ -43,8 +48,12 @@ export default function MarketDetailsPage() {
     setExpirationEnabled,
     setExpirationDropdownOpen,
     setSelectedExpiration,
+    setIsMobileSidebarOpen,
     handleOutcomeAndCandidateSelect
   } = useTradingState();
+
+  // Side panel state
+  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
   // Event handlers
   const handleShare = () => {
@@ -61,6 +70,24 @@ export default function MarketDetailsPage() {
 
   const handleTimePeriodChange = (period: string) => {
     console.log('Time period changed:', period);
+  };
+
+  // Mobile-specific handlers
+  const handleMobileSidebarOpen = () => {
+    setIsMobileSidebarOpen(true);
+  };
+
+  const handleMobileSidebarClose = () => {
+    setIsMobileSidebarOpen(false);
+    setTradeAmount(""); // Reset trade amount when modal closes
+  };
+
+  const handleSidePanelOpen = () => {
+    setIsSidePanelOpen(true);
+  };
+
+  const handleSidePanelClose = () => {
+    setIsSidePanelOpen(false);
   };
 
   if (isLoading) {
@@ -102,12 +129,15 @@ export default function MarketDetailsPage() {
       <div className="max-w-7xl mx-auto px-0 py-6">
         <div className="relative">
           {/* Left Column - Market Details */}
-          <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-4 px-4 md:px-0 md:pr-[360px]">
+          <div className={`space-y-6 pr-4 px-4 md:px-0 ${
+            isMobile ? 'md:pr-0' : 'md:pr-[360px] max-h-[calc(100vh-200px)] overflow-y-auto'
+          }`}>
             {/* Market Header */}
             <MarketHeader 
               market={market} 
               onShare={handleShare} 
-              onBookmark={handleBookmark} 
+              onBookmark={handleBookmark}
+              isMobile={isMobile}
             />
 
             {/* Chart Section */}
@@ -117,7 +147,66 @@ export default function MarketDetailsPage() {
             />
           </div>
 
-          {/* Right Column - Trading Sidebar */}
+          {/* Right Column - Trading Sidebar - Desktop Only */}
+          {!isMobile && (
+            <TradingSidebar
+              market={market}
+              selectedOutcome={selectedOutcome}
+              selectedCandidate={selectedCandidate}
+              tradeAmount={tradeAmount}
+              tradeType={tradeType}
+              orderType={orderType}
+              limitPrice={limitPrice}
+              shares={shares}
+              expirationEnabled={expirationEnabled}
+              selectedExpiration={selectedExpiration}
+              onTrade={handleTrade}
+              onOutcomeSelect={handleOutcomeAndCandidateSelect}
+              onCandidateSelect={setSelectedCandidate}
+              onAmountChange={setTradeAmount}
+              onOrderTypeChange={setOrderType}
+              onTradeTypeChange={setTradeType}
+              onLimitPriceChange={setLimitPrice}
+              onSharesChange={setShares}
+              onExpirationToggle={setExpirationEnabled}
+              onExpirationSelect={setSelectedExpiration}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Additional Content Below */}
+        <div className="max-w-7xl mx-auto px-0 py-0">
+        <div className={`px-4 md:px-0 ${
+          isMobile ? 'md:pr-0 pb-20' : 'md:pr-[360px]'
+        }`}>
+            <div className="space-y-6">
+              {/* Outcome Section */}
+            <OutcomeList
+              outcomes={market.outcomes}
+              selectedOutcome={selectedOutcome}
+              selectedCandidate={selectedCandidate}
+              onOutcomeSelect={handleOutcomeAndCandidateSelect}
+              isMobile={isMobile}
+              onMobileSidebarOpen={handleMobileSidebarOpen}
+            />
+
+              {/* Rules Section */}
+            <RulesSection 
+              rules="The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City."
+              onShowMore={() => console.log('Show more rules')}
+            />
+            </div>
+        </div>
+      </div>
+
+      {/* Mobile Sidebar and Overlay */}
+      {isMobile && (
+        <>
+          <MobileOverlay 
+            isOpen={isMobileSidebarOpen} 
+            onClose={handleMobileSidebarClose} 
+          />
           <TradingSidebar
             market={market}
             selectedOutcome={selectedOutcome}
@@ -129,6 +218,8 @@ export default function MarketDetailsPage() {
             shares={shares}
             expirationEnabled={expirationEnabled}
             selectedExpiration={selectedExpiration}
+            isMobile={isMobile}
+            isMobileSidebarOpen={isMobileSidebarOpen}
             onTrade={handleTrade}
             onOutcomeSelect={handleOutcomeAndCandidateSelect}
             onCandidateSelect={setSelectedCandidate}
@@ -139,30 +230,32 @@ export default function MarketDetailsPage() {
             onSharesChange={setShares}
             onExpirationToggle={setExpirationEnabled}
             onExpirationSelect={setSelectedExpiration}
+            onMobileSidebarClose={handleMobileSidebarClose}
           />
-        </div>
-      </div>
+        </>
+      )}
 
-      {/* Additional Content Below */}
-        <div className="max-w-7xl mx-auto px-0 py-0">
-          <div className="px-4 md:px-0 md:pr-[360px]">
-            <div className="space-y-6">
-              {/* Outcome Section */}
-            <OutcomeList
-              outcomes={market.outcomes}
-              selectedOutcome={selectedOutcome}
-              selectedCandidate={selectedCandidate}
-              onOutcomeSelect={handleOutcomeAndCandidateSelect}
-            />
+      {/* Bottom Navigation - Mobile only */}
+      {isMobile && (
+        <BottomNav 
+          activeTab="home" 
+          onTabChange={(tab) => {
+            if (tab === "more") {
+              handleSidePanelOpen();
+            } else {
+              console.log('Tab changed to:', tab);
+            }
+          }} 
+        />
+      )}
 
-              {/* Rules Section */}
-            <RulesSection 
-              rules="The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City."
-              onShowMore={() => console.log('Show more rules')}
-            />
-            </div>
-        </div>
-      </div>
+      {/* Side Panel - Mobile only */}
+      {isMobile && (
+        <SidePanel 
+          isOpen={isSidePanelOpen} 
+          onClose={handleSidePanelClose} 
+        />
+      )}
     </div>
   );
 }

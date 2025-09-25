@@ -18,6 +18,7 @@ These rules guide **all code generation, refactoring, and review**.
   `/apps/web`, `/packages/sdk`, `/contracts`, `/docs`.
 - **MUST** separate UI, SDK, and contracts cleanly.
 - **MUST** avoid "god files" — max 200 lines for components, 600 lines for contracts.
+- **MUST** use **pnpm** as the package manager (NOT npm or yarn).
 
 ---
 

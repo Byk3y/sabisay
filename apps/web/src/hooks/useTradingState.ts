@@ -22,6 +22,9 @@ export const useTradingState = (): UseTradingStateReturn => {
   const [expirationEnabled, setExpirationEnabled] = useState(false);
   const [expirationDropdownOpen, setExpirationDropdownOpen] = useState(false);
   const [selectedExpiration, setSelectedExpiration] = useState("End of day");
+  
+  // Mobile sidebar state
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   /**
    * Reset all trading state to initial values
@@ -37,6 +40,7 @@ export const useTradingState = (): UseTradingStateReturn => {
     setExpirationEnabled(false);
     setExpirationDropdownOpen(false);
     setSelectedExpiration("End of day");
+    setIsMobileSidebarOpen(false);
   };
 
   /**
@@ -143,6 +147,7 @@ export const useTradingState = (): UseTradingStateReturn => {
     expirationEnabled,
     expirationDropdownOpen,
     selectedExpiration,
+    isMobileSidebarOpen,
     
     // Setters
     setTradeAmount: handleTradeAmountChange,
@@ -155,6 +160,7 @@ export const useTradingState = (): UseTradingStateReturn => {
     setExpirationEnabled: handleExpirationToggle,
     setExpirationDropdownOpen: toggleExpirationDropdown,
     setSelectedExpiration: handleExpirationSelect,
+    setIsMobileSidebarOpen,
     
     // Additional handlers
     resetTradingState,

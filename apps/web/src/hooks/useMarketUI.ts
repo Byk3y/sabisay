@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useIsMobile } from './useIsMobile';
 import type { UseMarketUIReturn, Category } from '@/types/market';
 
 /**
@@ -14,11 +15,15 @@ export const useMarketUI = (): UseMarketUIReturn => {
   const [activeTab, setActiveTab] = useState("All");
   const [activeCategory, setActiveCategory] = useState<Category>("Trending");
   const [isInputFocused, setIsInputFocused] = useState(false);
+  
+  // Mobile detection
+  const isMobile = useIsMobile();
 
   return {
     activeTab,
     activeCategory,
     isInputFocused,
+    isMobile,
     setActiveTab,
     setActiveCategory,
     setIsInputFocused

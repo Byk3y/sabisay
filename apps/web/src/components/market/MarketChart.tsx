@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import type { MarketChartProps } from '@/types/market';
 
 /**
@@ -13,6 +14,7 @@ import type { MarketChartProps } from '@/types/market';
  */
 export const MarketChart = ({ outcomes, onTimePeriodChange }: MarketChartProps) => {
   const [selectedTimePeriod, setSelectedTimePeriod] = useState("ALL");
+  const isMobile = useIsMobile();
 
   const timePeriods = ["1H", "6H", "1D", "1W", "1M", "ALL"];
 
@@ -22,32 +24,10 @@ export const MarketChart = ({ outcomes, onTimePeriodChange }: MarketChartProps) 
   };
 
   return (
-    <div className="mb-6">
-      {/* Chart Legend */}
-      <div className="flex items-center gap-6 mb-2 text-sm">
-        {outcomes?.map((outcome, index) => {
-          const colors = ['bg-orange-500', 'bg-blue-500', 'bg-yellow-500', 'bg-gray-500'];
-          return (
-            <div key={index} className="flex items-center gap-2">
-              <div className={`w-3 h-3 ${colors[index]} rounded-full`}></div>
-              <span className="text-gray-900 dark:text-white font-medium">
-                {outcome.name} {outcome.probability}%
-              </span>
-            </div>
-          );
-        }) || (
-          // Fallback legend if market data is not available
-          <>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-              <span className="text-gray-900 dark:text-white font-medium">Loading...</span>
-            </div>
-          </>
-        )}
-      </div>
+    <div className={`mb-6 ${isMobile ? '-mt-1' : '-mt-6'}`}>
 
       {/* Chart Area */}
-      <div className="relative h-60 flex items-center justify-center pr-8">
+      <div className={`relative ${isMobile ? 'h-[145px]' : 'h-60'} flex items-center justify-center pr-8`}>
         {/* Chart placeholder with grid lines */}
         <div className="absolute inset-0 flex flex-col justify-between p-4">
           {/* Chart content area */}
@@ -66,15 +46,19 @@ export const MarketChart = ({ outcomes, onTimePeriodChange }: MarketChartProps) 
                 {/* 50+ bps decrease line (orange) - trending upward */}
                 <path
                   d="M10,225 L80,215 L150,200 L220,185 L290,165 L360,145 L430,125 L500,105 L570,95 L640,88 L710,82 L750,78"
-                  stroke="#f97316"
-                  strokeWidth="2"
+                  stroke={isMobile ? "#ea580c" : "#f97316"}
+                  strokeWidth={isMobile ? "7" : "2"}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   fill="none"
                 />
                 {/* 25 bps decrease line (blue) - stable to declining */}
                 <path
                   d="M10,205 L80,200 L150,195 L220,190 L290,185 L360,180 L430,175 L500,170 L570,165 L640,162 L710,160 L750,157"
-                  stroke="#3b82f6"
-                  strokeWidth="2"
+                  stroke={isMobile ? "#1d4ed8" : "#3b82f6"}
+                  strokeWidth={isMobile ? "7" : "2"}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   fill="none"
                 />
               </svg>
@@ -112,15 +96,15 @@ export const MarketChart = ({ outcomes, onTimePeriodChange }: MarketChartProps) 
       </div>
 
       {/* Time period buttons */}
-      <div className="flex items-center gap-2 mt-4">
+      <div className={`flex items-center gap-2 ${isMobile ? 'mt-1' : 'mt-4'}`}>
         {timePeriods.map((period) => (
           <button
             key={period}
             onClick={() => handleTimePeriodChange(period)}
-            className={`px-3 py-1.5 text-sm rounded transition-colors ${
+            className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
               selectedTimePeriod === period
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                ? "bg-gray-200 dark:bg-gray-600 text-black dark:text-white font-semibold"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
             }`}
           >
             {period}

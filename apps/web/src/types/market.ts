@@ -79,6 +79,7 @@ export interface TradingState {
   expirationEnabled: boolean;
   expirationDropdownOpen: boolean;
   selectedExpiration: string;
+  isMobileSidebarOpen: boolean;
 }
 
 /**
@@ -88,6 +89,7 @@ export interface MarketUIState {
   activeTab: string;
   activeCategory: Category;
   isInputFocused: boolean;
+  isMobile: boolean;
 }
 
 /**
@@ -113,6 +115,7 @@ export interface MarketHeaderProps {
   market: Market;
   onShare?: () => void;
   onBookmark?: () => void;
+  isMobile?: boolean;
 }
 
 export interface MarketChartProps {
@@ -131,6 +134,8 @@ export interface TradingSidebarProps {
   shares: string;
   expirationEnabled: boolean;
   selectedExpiration: string;
+  isMobile?: boolean;
+  isMobileSidebarOpen?: boolean;
   onTrade: (tradeData: TradeData) => void;
   onOutcomeSelect: (outcomeIndex: number, candidateIndex: number) => void;
   onCandidateSelect: (candidateIndex: number) => void;
@@ -141,6 +146,7 @@ export interface TradingSidebarProps {
   onSharesChange: (shares: string) => void;
   onExpirationToggle: (enabled: boolean) => void;
   onExpirationSelect: (expiration: string) => void;
+  onMobileSidebarClose?: () => void;
 }
 
 export interface OutcomeListProps {
@@ -148,6 +154,8 @@ export interface OutcomeListProps {
   selectedOutcome: number;
   selectedCandidate: number;
   onOutcomeSelect: (outcomeIndex: number, candidateIndex: number) => void;
+  isMobile?: boolean;
+  onMobileSidebarOpen?: () => void;
 }
 
 export interface RulesSectionProps {
@@ -185,6 +193,7 @@ export interface UseTradingStateReturn extends TradingState {
   setExpirationEnabled: (enabled: boolean) => void;
   setExpirationDropdownOpen: (open: boolean) => void;
   setSelectedExpiration: (expiration: string) => void;
+  setIsMobileSidebarOpen: (open: boolean) => void;
   resetTradingState: () => void;
   handleOutcomeAndCandidateSelect: (outcome: number, candidate: number) => void;
 }
