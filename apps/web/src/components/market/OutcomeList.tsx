@@ -73,7 +73,7 @@ export const OutcomeList = ({
                         onMobileSidebarOpen();
                       }
                     }}
-                    className={`flex-1 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex-1 py-3 rounded-lg text-sm font-bold transition-colors ${
                       isMobile 
                         ? "bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800/30"
                         : selectedCandidate === 0 && selectedOutcome === index
@@ -81,7 +81,7 @@ export const OutcomeList = ({
                         : "bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800/30"
                     }`}
                   >
-                    Buy Yes {outcome.price.yes}¢
+                    Buy Yes <span className="text-base">{outcome.price.yes}¢</span>
                   </button>
                   <button
                     onClick={() => {
@@ -90,7 +90,7 @@ export const OutcomeList = ({
                         onMobileSidebarOpen();
                       }
                     }}
-                    className={`flex-1 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex-1 py-3 rounded-lg text-sm font-bold transition-colors ${
                       isMobile 
                         ? "bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800/30"
                         : selectedCandidate === 1 && selectedOutcome === index
@@ -98,7 +98,7 @@ export const OutcomeList = ({
                         : "bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800/30"
                     }`}
                   >
-                    Buy No {outcome.price.no}¢
+                    Buy No <span className="text-base">{outcome.price.no}¢</span>
                   </button>
                 </div>
               </div>
@@ -133,13 +133,13 @@ export const OutcomeList = ({
                         onMobileSidebarOpen();
                       }
                     }}
-                    className={`py-3.5 rounded text-xs font-medium transition-colors w-[100px] text-center ${
+                    className={`py-3.5 rounded text-xs font-bold transition-colors w-[100px] text-center ${
                       selectedCandidate === 0 && selectedOutcome === index
                         ? "bg-green-600 text-white hover:bg-green-700"
                         : "bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800/30"
                     }`}
                   >
-                    Buy Yes {outcome.price.yes}¢
+                    Buy Yes <span className="text-sm">{outcome.price.yes}¢</span>
                   </button>
                   <button
                     onClick={() => {
@@ -148,13 +148,13 @@ export const OutcomeList = ({
                         onMobileSidebarOpen();
                       }
                     }}
-                    className={`py-3.5 rounded text-xs font-medium transition-colors w-[100px] text-center ${
+                    className={`py-3.5 rounded text-xs font-bold transition-colors w-[100px] text-center ${
                       selectedCandidate === 1 && selectedOutcome === index
                         ? "bg-red-600 text-white hover:bg-red-700"
                         : "bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800/30"
                     }`}
                   >
-                    Buy No {outcome.price.no}¢
+                    Buy No <span className="text-sm">{outcome.price.no}¢</span>
                   </button>
                 </div>
               </>

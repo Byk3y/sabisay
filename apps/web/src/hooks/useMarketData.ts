@@ -14,13 +14,41 @@ import type { Market, UseMarketDataReturn } from '@/types/market';
  */
 export const useMarketData = (marketId: string): UseMarketDataReturn => {
   const [market, setMarket] = useState<Market | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load market data on mount or when marketId changes
   useEffect(() => {
-    const loadMarket = async () => {
+    const loadMarket = () => {
       setIsLoading(true);
       try {
+        // Temporary hardcoded market for testing
+        if (marketId === "6") {
+          const testMarket = {
+            id: "6",
+            title: "Nigerian Presidential Election 2027",
+            volume: 12000000,
+            endDate: new Date("2027-02-25T14:00:00Z"),
+            outcomes: [
+              {
+                name: "Peter Obi",
+                probability: 45,
+                volume: 5400000,
+                price: { yes: 45, no: 55 }
+              },
+              {
+                name: "Bola Tinubu", 
+                probability: 38,
+                volume: 4560000,
+                price: { yes: 38, no: 62 }
+              }
+            ],
+            relatedMarkets: []
+          };
+          setMarket(testMarket);
+          setIsLoading(false);
+          return;
+        }
+        
         const marketData = getMarketById(marketId);
         setMarket(marketData);
       } catch (error) {
@@ -33,6 +61,8 @@ export const useMarketData = (marketId: string): UseMarketDataReturn => {
 
     if (marketId) {
       loadMarket();
+    } else {
+      setIsLoading(false);
     }
   }, [marketId]);
 

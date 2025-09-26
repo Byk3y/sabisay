@@ -3,8 +3,8 @@
  * Extracted from page.tsx for better organization and reusability
  */
 
-import { mockMarkets } from '@/lib/mock';
-import type { Market, Outcome, RelatedMarket, RawMarket } from '@/types/market';
+import { mockMarkets, type Market as RawMarket } from '@/lib/mock';
+import type { Market, Outcome, RelatedMarket } from '@/types/market';
 
 /**
  * Get market by ID from mock data

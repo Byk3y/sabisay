@@ -184,6 +184,26 @@ export const getWinAmountFontSize = (winAmount: number): string => {
 };
 
 /**
+ * Calculate dynamic font size for sell section receive amount
+ * More aggressive scaling to prevent text wrapping
+ * @param receiveAmount - The receive amount
+ * @returns CSS font size string
+ */
+export const getSellReceiveAmountFontSize = (receiveAmount: number): string => {
+  const receiveString = receiveAmount.toLocaleString('en-US', { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  });
+  const length = receiveString.length;
+  
+  if (length <= 6) return '2.25rem';    // Reduced from 2.75rem
+  if (length <= 8) return '1.875rem';    // Reduced from 2.25rem
+  if (length <= 10) return '1.5rem';     // Reduced from 1.875rem
+  if (length <= 12) return '1.25rem';    // Reduced from 1.625rem
+  return '1rem';                         // Reduced from 1.375rem
+};
+
+/**
  * Get expiration options for limit orders
  * @returns Array of expiration options
  */

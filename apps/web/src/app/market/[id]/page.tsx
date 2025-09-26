@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { TopNavClient } from "@/components/nav/TopNavClient";
@@ -89,6 +89,22 @@ export default function MarketDetailsPage() {
   const handleSidePanelClose = () => {
     setIsSidePanelOpen(false);
   };
+
+  // Cleanup effect to restore body scroll on unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
+  // Effect to handle body scroll based on mobile sidebar state
+  useEffect(() => {
+    if (isMobileSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [isMobileSidebarOpen]);
 
   if (isLoading) {
     return (
