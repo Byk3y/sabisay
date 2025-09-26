@@ -68,7 +68,7 @@ export function MarketCard({
             ))
           ) : (
             /* For markets with more than 2 outcomes, constrain to fixed height and make all scrollable */
-            <div className="max-h-[88px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+            <div className="max-h-[76px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
               {market.outcomes.map((outcome, index) => (
                 <div key={index} className="flex items-center justify-between gap-3 py-1">
                   <div className="truncate text-gray-800 dark:text-gray-200 text-sm font-medium">
