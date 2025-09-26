@@ -132,3 +132,62 @@ export const formatPool = (n: number) =>
   n >= 1e6 ? `$${Math.round(n / 1e6)}m` : 
   n >= 1e3 ? `$${Math.round(n / 1e3)}k` : 
   `$${n}`;
+
+// Import the new market types for the discriminated union
+import type { MarketItem } from "@/types/market";
+
+// New market examples for chance and group markets
+export const extraFeedItems: MarketItem[] = [
+  {
+    kind: "market",
+    id: "chance-001",
+    question: "Will ETH be above $3,500 on Mar 31?",
+    poolUsd: 1250000,
+    closesAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 20).toISOString(),
+    uiStyle: "chance",
+    outcomes: [{ label: "Yes", oddsPct: 62.5 }], // single yes-prob reference; buy/sell yes/no on detail page
+  },
+  {
+    kind: "group",
+    groupId: "election-nyc-2025",
+    title: "NYC Mayor 2025",
+    members: [
+      { label: "Zohran Mamdani", marketId: "mkt-nyc-mamdani" },
+      { label: "Andrew Cuomo", marketId: "mkt-nyc-cuomo" },
+      { label: "Eric Adams", marketId: "mkt-nyc-adams" },
+      { label: "Curtis Sliwa", marketId: "mkt-nyc-sliwa" },
+    ],
+  },
+];
+
+// Binary markets referenced by the group
+export const binaryMembers: MarketItem[] = [
+  {
+    kind: "market",
+    id: "mkt-nyc-mamdani",
+    question: "Zohran Mamdani to win NYC Mayor 2025?",
+    poolUsd: 450000,
+    outcomes: [{ label: "Yes", oddsPct: 38 }, { label: "No", oddsPct: 62 }],
+  },
+  {
+    kind: "market",
+    id: "mkt-nyc-cuomo",
+    question: "Andrew Cuomo to win NYC Mayor 2025?",
+    poolUsd: 520000,
+    outcomes: [{ label: "Yes", oddsPct: 42 }, { label: "No", oddsPct: 58 }],
+  },
+  {
+    kind: "market",
+    id: "mkt-nyc-adams",
+    question: "Eric Adams to win NYC Mayor 2025?",
+    poolUsd: 300000,
+    outcomes: [{ label: "Yes", oddsPct: 25 }, { label: "No", oddsPct: 75 }],
+  },
+  {
+    kind: "market",
+    id: "mkt-nyc-sliwa",
+    question: "Curtis Sliwa to win NYC Mayor 2025?",
+    poolUsd: 180000,
+    outcomes: [{ label: "Yes", oddsPct: 15 }, { label: "No", oddsPct: 85 }],
+  },
+];

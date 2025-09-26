@@ -11,7 +11,7 @@ import { formatCurrencyNoSymbol, formatDate } from '@/lib/formattingUtils';
  * @param props - Component props
  * @returns JSX element
  */
-export const MarketHeader = ({ market, onShare, onBookmark, isMobile = false }: MarketHeaderProps) => {
+export const MarketHeader = ({ market, onShare, onBookmark, isMobile = false, isChanceMarket = false }: MarketHeaderProps) => {
   return (
     <div className="mb-4">
       {/* Volume Bar - Mobile only, positioned at top */}
@@ -80,8 +80,8 @@ export const MarketHeader = ({ market, onShare, onBookmark, isMobile = false }: 
         )}
       </div>
 
-      {/* Mobile-only outcomes under icon */}
-      {isMobile && (
+      {/* Mobile-only outcomes under icon - hide for chance markets */}
+      {isMobile && !isChanceMarket && (
         <div className="mb-4">
           <div className="space-y-1">
             {market.outcomes
@@ -122,24 +122,26 @@ export const MarketHeader = ({ market, onShare, onBookmark, isMobile = false }: 
               </span>
             </div>
           </div>
-          {/* Desktop outcomes - horizontal layout */}
-          <div className="flex items-center gap-6 text-sm">
-            {market.outcomes
-              ?.sort((a, b) => b.volume - a.volume)
-              ?.slice(0, 4)
-              ?.map((outcome, index) => {
-                const colors = ['bg-orange-500', 'bg-blue-500', 'bg-yellow-500', 'bg-gray-500'];
-                const colorClass = colors[index % colors.length];
-                return (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className={`w-3 h-3 ${colorClass} rounded-full`}></div>
-                    <span className="text-gray-900 dark:text-white font-medium">
-                      {outcome.name} {outcome.probability}%
-                    </span>
-                  </div>
-                );
-              })}
-          </div>
+          {/* Desktop outcomes - horizontal layout - hide for chance markets */}
+          {!isChanceMarket && (
+            <div className="flex items-center gap-6 text-sm">
+              {market.outcomes
+                ?.sort((a, b) => b.volume - a.volume)
+                ?.slice(0, 4)
+                ?.map((outcome, index) => {
+                  const colors = ['bg-orange-500', 'bg-blue-500', 'bg-yellow-500', 'bg-gray-500'];
+                  const colorClass = colors[index % colors.length];
+                  return (
+                    <div key={index} className="flex items-center gap-2">
+                      <div className={`w-3 h-3 ${colorClass} rounded-full`}></div>
+                      <span className="text-gray-900 dark:text-white font-medium">
+                        {outcome.name} {outcome.probability}%
+                      </span>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
         </div>
       )}
     </div>

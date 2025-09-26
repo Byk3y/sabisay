@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { TopNavClient } from "@/components/nav/TopNavClient";
 import { CategoryTabs } from "@/components/nav/CategoryTabs";
 import { MarketHeader } from "@/components/market/MarketHeader";
-import { MarketChart } from "@/components/market/MarketChart";
+import { MarketChart } from "@/components/market/charts/MarketChart";
 import { TradingSidebar } from "@/components/market/TradingSidebar";
+import { isChanceMarket, type MarketItem } from "@/types/market";
 import { OutcomeList } from "@/components/market/OutcomeList";
 import { RulesSection } from "@/components/market/RulesSection";
 import { MobileOverlay } from "@/components/ui/MobileOverlay";
@@ -16,6 +17,7 @@ import { SidePanel } from "@/components/nav/SidePanel";
 import { useMarketData } from "@/hooks/useMarketData";
 import { useMarketUI } from "@/hooks/useMarketUI";
 import { useTradingState } from "@/hooks/useTradingState";
+import { generateChanceSeries, generateMultiSeries, type TimeRange } from "@/lib/mockSeries";
 import type { TradeData, Category } from "@/types/market";
 
 export default function MarketDetailsPage() {
@@ -26,6 +28,19 @@ export default function MarketDetailsPage() {
   // Use custom hooks for state management
   const { market, isLoading } = useMarketData(marketId);
   const { activeTab, activeCategory, isInputFocused, isMobile, setActiveCategory } = useMarketUI();
+  
+  // Convert market to MarketItem format for type checking
+  const marketItem: MarketItem | null = market ? {
+    kind: "market",
+    id: market.id,
+    question: market.title,
+    poolUsd: market.volume,
+    ...(market.uiStyle && { uiStyle: market.uiStyle }), // Add this line to preserve uiStyle
+    outcomes: market.outcomes.map(outcome => ({
+      label: outcome.name,
+      oddsPct: outcome.probability
+    }))
+  } : null;
   const {
     tradeAmount,
     tradeType,
@@ -54,6 +69,24 @@ export default function MarketDetailsPage() {
 
   // Side panel state
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+  
+  // Chart state
+  const [timeRange, setTimeRange] = useState<TimeRange>("1D");
+  
+  // Generate chart data based on market type
+  const chartData = React.useMemo(() => {
+    if (!market) return [];
+    
+    if (marketItem && isChanceMarket(marketItem)) {
+      // For chance markets, generate single series
+      const currentChance = market.outcomes?.[0]?.probability || 50;
+      return generateChanceSeries(marketId, timeRange, currentChance);
+    } else {
+      // For multi-outcome markets, generate multiple series
+      const labels = market.outcomes?.map(outcome => outcome.name) || [];
+      return generateMultiSeries(marketId, timeRange, labels);
+    }
+  }, [market, marketItem, marketId, timeRange]);
 
   // Event handlers
   const handleShare = () => {
@@ -69,6 +102,7 @@ export default function MarketDetailsPage() {
   };
 
   const handleTimePeriodChange = (period: string) => {
+    setTimeRange(period as TimeRange);
     console.log('Time period changed:', period);
   };
 
@@ -142,7 +176,7 @@ export default function MarketDetailsPage() {
       <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-0 py-6">
+      <div className={`max-w-7xl mx-auto px-0 py-6 ${isMobile && marketItem && isChanceMarket(marketItem) ? 'pb-24' : ''}`}>
         <div className="relative">
           {/* Left Column - Market Details */}
           <div className={`space-y-6 pr-4 px-4 md:px-0 ${
@@ -154,13 +188,36 @@ export default function MarketDetailsPage() {
               onShare={handleShare} 
               onBookmark={handleBookmark}
               isMobile={isMobile}
+              isChanceMarket={!!(marketItem && isChanceMarket(marketItem))}
             />
 
             {/* Chart Section */}
-            <MarketChart 
-              outcomes={market.outcomes} 
-              onTimePeriodChange={handleTimePeriodChange} 
-            />
+            <div className="mb-6">
+              <MarketChart 
+                variant={marketItem && isChanceMarket(marketItem) ? "chance" : "multi"}
+                series={chartData}
+                showChanceHeader={!!(marketItem && isChanceMarket(marketItem))}
+                currentChancePct={marketItem && isChanceMarket(marketItem) ? market.outcomes?.[0]?.probability : 50}
+                timeRange={timeRange}
+              />
+              
+              {/* Time range buttons */}
+              <div className="flex items-center gap-2 mt-4">
+                {(["1H", "6H", "1D", "1W", "1M", "ALL"] as TimeRange[]).map((period) => (
+                  <button
+                    key={period}
+                    onClick={() => handleTimePeriodChange(period)}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                      timeRange === period
+                        ? "bg-gray-200 dark:bg-gray-600 text-black dark:text-white font-semibold"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
+                    }`}
+                  >
+                    {period}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Right Column - Trading Sidebar - Desktop Only */}
@@ -176,6 +233,7 @@ export default function MarketDetailsPage() {
               shares={shares}
               expirationEnabled={expirationEnabled}
               selectedExpiration={selectedExpiration}
+              isChanceMarket={!!(marketItem && isChanceMarket(marketItem))}
               onTrade={handleTrade}
               onOutcomeSelect={handleOutcomeAndCandidateSelect}
               onCandidateSelect={setSelectedCandidate}
@@ -197,15 +255,17 @@ export default function MarketDetailsPage() {
           isMobile ? 'md:pr-0 pb-20' : 'md:pr-[360px]'
         }`}>
             <div className="space-y-6">
-              {/* Outcome Section */}
-            <OutcomeList
-              outcomes={market.outcomes}
-              selectedOutcome={selectedOutcome}
-              selectedCandidate={selectedCandidate}
-              onOutcomeSelect={handleOutcomeAndCandidateSelect}
-              isMobile={isMobile}
-              onMobileSidebarOpen={handleMobileSidebarOpen}
-            />
+              {/* Outcome Section - Hide for chance markets */}
+              {!(marketItem && isChanceMarket(marketItem)) && (
+                <OutcomeList
+                  outcomes={market.outcomes}
+                  selectedOutcome={selectedOutcome}
+                  selectedCandidate={selectedCandidate}
+                  onOutcomeSelect={handleOutcomeAndCandidateSelect}
+                  isMobile={isMobile}
+                  onMobileSidebarOpen={handleMobileSidebarOpen}
+                />
+              )}
 
               {/* Rules Section */}
             <RulesSection 
@@ -236,6 +296,7 @@ export default function MarketDetailsPage() {
             selectedExpiration={selectedExpiration}
             isMobile={isMobile}
             isMobileSidebarOpen={isMobileSidebarOpen}
+            isChanceMarket={!!(marketItem && isChanceMarket(marketItem))}
             onTrade={handleTrade}
             onOutcomeSelect={handleOutcomeAndCandidateSelect}
             onCandidateSelect={setSelectedCandidate}
@@ -249,6 +310,36 @@ export default function MarketDetailsPage() {
             onMobileSidebarClose={handleMobileSidebarClose}
           />
         </>
+      )}
+
+      {/* Mobile Chance Market Buttons - Only for chance markets on mobile */}
+      {isMobile && marketItem && isChanceMarket(marketItem) && (
+        <div className="fixed bottom-16 left-0 right-0 z-40 px-4 pb-2 bg-white dark:bg-gray-900">
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                setSelectedOutcome(0);
+                setSelectedCandidate(0);
+                setTradeType("buy");
+                setIsMobileSidebarOpen(true);
+              }}
+              className="flex-1 bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-colors duration-200"
+            >
+              Buy Yes {market?.outcomes[0]?.price?.yes}¢
+            </button>
+            <button
+              onClick={() => {
+                setSelectedOutcome(0);
+                setSelectedCandidate(1);
+                setTradeType("buy");
+                setIsMobileSidebarOpen(true);
+              }}
+              className="flex-1 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-colors duration-200"
+            >
+              Buy No {market?.outcomes[0]?.price?.no}¢
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Bottom Navigation - Mobile only */}

@@ -30,7 +30,7 @@ export function TopNav() {
   }, [isDropdownOpen]);
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0b1220]/80 backdrop-blur">
+    <header className="sticky top-0 z-[100] bg-white/80 dark:bg-[#0b1220]/80 backdrop-blur">
       <div className="mx-auto max-w-7xl px-4 md:px-0 h-14 flex items-center justify-between">
         {/* Left side - Logo */}
         <div className="flex items-center gap-2">
@@ -67,7 +67,7 @@ export function TopNav() {
             
             {/* Dropdown Menu */}
             {isDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl z-50">
+              <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl z-[9999]">
                 <div className="p-2">
                   {/* Account Actions */}
                   <div className="space-y-1 mb-3">

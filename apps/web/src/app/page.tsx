@@ -10,7 +10,10 @@ import { SidePanel } from "@/components/nav/SidePanel";
 import { WalletConnect } from "@/components/wallet-connect";
 import { SignUpModal } from "@/components/auth/SignUpModal";
 import { useSignUpModalContext } from "@/contexts/SignUpModalContext";
-import { mockMarkets, type Category } from "@/lib/mock";
+import { mockMarkets, extraFeedItems, type Category } from "@/lib/mock";
+import { isGroup, isChanceMarket, type MarketItem } from "@/types/market";
+import { ChanceCard } from "@/components/market/ChanceCard";
+import { GroupCard } from "@/components/market/GroupCard";
 import { useAccount, useChainId } from "wagmi";
 import { config } from "@/lib/config";
 
@@ -47,15 +50,28 @@ export default function HomePage() {
     };
   }, [isSortOpen]);
 
+  // Build feed with discriminated union
+  const legacyItems: MarketItem[] = mockMarkets.map(m => ({
+    kind: "market",
+    ...m,
+  }));
+
+  const feed: MarketItem[] = process.env.NODE_ENV === "development"
+    ? [...legacyItems, ...extraFeedItems]
+    : legacyItems;
+
   // TODO: Replace with actual contract data fetching
-  const filteredMarkets = mockMarkets.filter(market => {
+  const filteredMarkets = feed.filter(item => {
+    // Handle both legacy markets and new MarketItem types
+    const question = item.kind === "market" ? item.question : item.kind === "group" ? item.title : "";
+    
     const matchesCategory = activeCategory === "Trending" || 
-      (activeCategory === "Politics" && market.question.toLowerCase().includes("election")) ||
-      (activeCategory === "Economy" && (market.question.toLowerCase().includes("fed") || market.question.toLowerCase().includes("bitcoin") || market.question.toLowerCase().includes("tesla"))) ||
-      (activeCategory === "Naija Picks" && market.question.toLowerCase().includes("nigerian"));
+      (activeCategory === "Politics" && question.toLowerCase().includes("election")) ||
+      (activeCategory === "Economy" && (question.toLowerCase().includes("fed") || question.toLowerCase().includes("bitcoin") || question.toLowerCase().includes("tesla") || question.toLowerCase().includes("eth"))) ||
+      (activeCategory === "Naija Picks" && question.toLowerCase().includes("nigerian"));
     
     const matchesSearch = searchQuery === "" || 
-      market.question.toLowerCase().includes(searchQuery.toLowerCase());
+      question.toLowerCase().includes(searchQuery.toLowerCase());
     
     return matchesCategory && matchesSearch;
   }).sort((a, b) => {
@@ -65,18 +81,27 @@ export default function HomePage() {
     }
     
     // For other categories, apply sorting
+    const getPoolUsd = (item: MarketItem) => item.kind === "market" ? item.poolUsd : 0;
+    const getClosesAt = (item: MarketItem) => item.kind === "market" ? item.closesAt : undefined;
+    
     switch (sortBy) {
       case "volume":
-        return b.poolUsd - a.poolUsd;
+        return getPoolUsd(b) - getPoolUsd(a);
       case "newest":
-        if (!a.closesAt || !b.closesAt) return 0;
-        return new Date(b.closesAt).getTime() - new Date(a.closesAt).getTime();
+        const aClosesAt = getClosesAt(a);
+        const bClosesAt = getClosesAt(b);
+        if (!aClosesAt || !bClosesAt) return 0;
+        return new Date(bClosesAt).getTime() - new Date(aClosesAt).getTime();
       case "oldest":
-        if (!a.closesAt || !b.closesAt) return 0;
-        return new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime();
+        const aClosesAtOld = getClosesAt(a);
+        const bClosesAtOld = getClosesAt(b);
+        if (!aClosesAtOld || !bClosesAtOld) return 0;
+        return new Date(aClosesAtOld).getTime() - new Date(bClosesAtOld).getTime();
       case "closing":
-        if (!a.closesAt || !b.closesAt) return 0;
-        return new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime();
+        const aClosesAtClosing = getClosesAt(a);
+        const bClosesAtClosing = getClosesAt(b);
+        if (!aClosesAtClosing || !bClosesAtClosing) return 0;
+        return new Date(aClosesAtClosing).getTime() - new Date(bClosesAtClosing).getTime();
       default:
         return 0;
     }
@@ -306,19 +331,33 @@ export default function HomePage() {
             <p className="text-gray-500 dark:text-gray-400">No markets found</p>
           </div>
         ) : (
-                        filteredMarkets.map((market) => (
-                          <MarketCard
-                            key={market.id}
-                            market={market}
-                            onYesClick={(marketId, outcomeIndex) =>
-                              handleMarketAction("Yes", marketId, outcomeIndex)
-                            }
-                            onNoClick={(marketId, outcomeIndex) =>
-                              handleMarketAction("No", marketId, outcomeIndex)
-                            }
-                          />
-                        ))
-          )}
+          filteredMarkets.map((item) => {
+            if (isGroup(item)) {
+              return <GroupCard key={item.groupId} group={item} />;
+            }
+            if (item.kind === "market" && item.uiStyle === "chance") {
+              return <ChanceCard key={item.id} market={item} />;
+            }
+            // Fallback to your original card for legacy markets
+            // At this point, item must be a market (not group)
+            if (item.kind === "market") {
+              return (
+                <MarketCard
+                  key={item.id}
+                  market={item as any}
+                  onYesClick={(marketId, outcomeIndex) =>
+                    handleMarketAction("Yes", marketId, outcomeIndex)
+                  }
+                  onNoClick={(marketId, outcomeIndex) =>
+                    handleMarketAction("No", marketId, outcomeIndex)
+                  }
+                />
+              );
+            }
+            // This should never happen, but TypeScript needs it
+            return null;
+          })
+        )}
         </div>
       </main>
 

@@ -78,3 +78,6 @@ export interface TradeParams {
   slippage?: number;
   deadline?: number;
 }
+
+// Export the new market types
+export * from './market';

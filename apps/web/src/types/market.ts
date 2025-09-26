@@ -6,6 +6,41 @@
 // Re-export existing types from mock.ts for consistency
 export type { Market as RawMarket, MarketOutcome } from '@/lib/mock';
 
+// New discriminated union types for different market presentations
+export type UiStyle = "default" | "chance";
+
+export interface BaseMarket {
+  id: string;
+  question: string;
+  poolUsd: number;
+  imageUrl?: string;
+  closesAt?: string;
+  outcomes?: Array<{ label: string; oddsPct: number }>;
+}
+
+export type MarketItem =
+  | ({
+      kind: "market";
+      uiStyle?: UiStyle; // default or chance
+    } & BaseMarket)
+  | ({
+      kind: "group";
+      groupId: string;
+      title: string;
+      members: Array<{
+        label: string;
+        marketId: string; // points to a MarketItem with kind:"market"
+      }>;
+    });
+
+export function isGroup(item: MarketItem): item is Extract<MarketItem, { kind: "group" }> {
+  return item.kind === "group";
+}
+
+export function isChanceMarket(item: MarketItem): item is Extract<MarketItem, { kind: "market"; uiStyle: "chance" }> {
+  return item.kind === "market" && item.uiStyle === "chance";
+}
+
 // Define Category type locally to avoid import issues
 export type Category = "Trending" | "Politics" | "Breaking" | "New" | "Sports" | "Crypto" | "Earnings" | "Geopolitics" | "Tech" | "Culture" | "World" | "Economy" | "Naija Picks";
 
@@ -20,6 +55,7 @@ export interface Market {
   endDate: Date;
   outcomes: Outcome[];
   relatedMarkets: RelatedMarket[];
+  uiStyle?: UiStyle; // Add this field to preserve uiStyle
 }
 
 /**
@@ -116,6 +152,7 @@ export interface MarketHeaderProps {
   onShare?: () => void;
   onBookmark?: () => void;
   isMobile?: boolean;
+  isChanceMarket?: boolean;
 }
 
 export interface MarketChartProps {
@@ -136,6 +173,7 @@ export interface TradingSidebarProps {
   selectedExpiration: string;
   isMobile?: boolean;
   isMobileSidebarOpen?: boolean;
+  isChanceMarket?: boolean;
   onTrade: (tradeData: TradeData) => void;
   onOutcomeSelect: (outcomeIndex: number, candidateIndex: number) => void;
   onCandidateSelect: (candidateIndex: number) => void;

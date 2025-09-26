@@ -3,7 +3,7 @@
  * Extracted from page.tsx for better organization and reusability
  */
 
-import { mockMarkets, type Market as RawMarket } from '@/lib/mock';
+import { mockMarkets, extraFeedItems, binaryMembers, type Market as RawMarket } from '@/lib/mock';
 import type { Market, Outcome, RelatedMarket } from '@/types/market';
 
 /**
@@ -12,10 +12,14 @@ import type { Market, Outcome, RelatedMarket } from '@/types/market';
  * @returns Market object or null if not found
  */
 export const getMarketById = (id: string): Market | null => {
-  const market = mockMarkets.find(m => m.id === id);
+  // Search in all mock data arrays
+  const allMarkets = [...mockMarkets, ...extraFeedItems, ...binaryMembers];
+  
+  // Find market by ID (only look at items with 'id' property, not 'groupId')
+  const market = allMarkets.find(m => 'id' in m && m.id === id);
   if (!market) return null;
   
-  return transformMarketData(market);
+  return transformMarketData(market as RawMarket);
 };
 
 /**
@@ -38,7 +42,8 @@ export const transformMarketData = (rawMarket: RawMarket): Market => {
         no: Math.round(100 - outcome.oddsPct)
       }
     })),
-    relatedMarkets: getRelatedMarkets(rawMarket.id)
+    relatedMarkets: getRelatedMarkets(rawMarket.id),
+    uiStyle: 'uiStyle' in rawMarket ? (rawMarket as any).uiStyle : undefined // Add this line to preserve uiStyle
   };
 };
 
