@@ -34,14 +34,17 @@ export const mockMarkets: Market[] = [
     closesAt: "2024-09-15T14:00:00Z"
   },
   {
-    id: "2",
-    question: "New York City Mayoral Election",
+    id: "nyc-mayor-2025",
+    question: "NYC Mayor 2025",
     outcomes: [
-      { label: "Zohran Mamdani", oddsPct: 82 },
-      { label: "Andrew Cuomo", oddsPct: 17 }
+      { label: "Zohran Mamdani", oddsPct: 38 },
+      { label: "Andrew Cuomo", oddsPct: 42 },
+      { label: "Eric Adams", oddsPct: 25 },
+      { label: "Curtis Sliwa", oddsPct: 15 },
+      { label: "Other", oddsPct: 5 }
     ],
-    poolUsd: 70000000, // $70m
-    closesAt: "2024-11-05T20:00:00Z"
+    poolUsd: 1450000, // $1.45m total pool
+    closesAt: "2025-11-04T20:00:00Z"
   },
   {
     id: "3",
@@ -147,47 +150,40 @@ export const extraFeedItems: MarketItem[] = [
     uiStyle: "chance",
     outcomes: [{ label: "Yes", oddsPct: 62.5 }], // single yes-prob reference; buy/sell yes/no on detail page
   },
-  {
-    kind: "group",
-    groupId: "election-nyc-2025",
-    title: "NYC Mayor 2025",
-    members: [
-      { label: "Zohran Mamdani", marketId: "mkt-nyc-mamdani" },
-      { label: "Andrew Cuomo", marketId: "mkt-nyc-cuomo" },
-      { label: "Eric Adams", marketId: "mkt-nyc-adams" },
-      { label: "Curtis Sliwa", marketId: "mkt-nyc-sliwa" },
-    ],
-  },
+  // NYC Mayor 2025 is now a single legacy market in mockMarkets, not a group
 ];
 
-// Binary markets referenced by the group
-export const binaryMembers: MarketItem[] = [
-  {
-    kind: "market",
-    id: "mkt-nyc-mamdani",
-    question: "Zohran Mamdani to win NYC Mayor 2025?",
-    poolUsd: 450000,
-    outcomes: [{ label: "Yes", oddsPct: 38 }, { label: "No", oddsPct: 62 }],
-  },
-  {
-    kind: "market",
-    id: "mkt-nyc-cuomo",
-    question: "Andrew Cuomo to win NYC Mayor 2025?",
-    poolUsd: 520000,
-    outcomes: [{ label: "Yes", oddsPct: 42 }, { label: "No", oddsPct: 58 }],
-  },
-  {
-    kind: "market",
-    id: "mkt-nyc-adams",
-    question: "Eric Adams to win NYC Mayor 2025?",
-    poolUsd: 300000,
-    outcomes: [{ label: "Yes", oddsPct: 25 }, { label: "No", oddsPct: 75 }],
-  },
-  {
-    kind: "market",
-    id: "mkt-nyc-sliwa",
-    question: "Curtis Sliwa to win NYC Mayor 2025?",
-    poolUsd: 180000,
-    outcomes: [{ label: "Yes", oddsPct: 15 }, { label: "No", oddsPct: 85 }],
-  },
-];
+// Binary markets referenced by the group - COMMENTED OUT since NYC Mayor is now a single legacy market
+// export const binaryMembers: MarketItem[] = [
+//   {
+//     kind: "market",
+//     id: "mkt-nyc-mamdani",
+//     question: "Zohran Mamdani to win NYC Mayor 2025?",
+//     poolUsd: 450000,
+//     outcomes: [{ label: "Yes", oddsPct: 38 }, { label: "No", oddsPct: 62 }],
+//   },
+//   {
+//     kind: "market",
+//     id: "mkt-nyc-cuomo",
+//     question: "Andrew Cuomo to win NYC Mayor 2025?",
+//     poolUsd: 520000,
+//     outcomes: [{ label: "Yes", oddsPct: 42 }, { label: "No", oddsPct: 58 }],
+//   },
+//   {
+//     kind: "market",
+//     id: "mkt-nyc-adams",
+//     question: "Eric Adams to win NYC Mayor 2025?",
+//     poolUsd: 300000,
+//     outcomes: [{ label: "Yes", oddsPct: 25 }, { label: "No", oddsPct: 75 }],
+//   },
+//   {
+//     kind: "market",
+//     id: "mkt-nyc-sliwa",
+//     question: "Curtis Sliwa to win NYC Mayor 2025?",
+//     poolUsd: 180000,
+//     outcomes: [{ label: "Yes", oddsPct: 15 }, { label: "No", oddsPct: 85 }],
+//   },
+// ];
+
+// Empty array for now since NYC Mayor is a single legacy market
+export const binaryMembers: MarketItem[] = [];

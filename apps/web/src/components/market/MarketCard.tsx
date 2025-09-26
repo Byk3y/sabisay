@@ -39,30 +39,63 @@ export function MarketCard({
           </div>
 
         {/* Outcomes */}
-        {market.outcomes.map((outcome, index) => (
-          <div key={index} className="flex items-center justify-between gap-3 py-1">
-            <div className="truncate text-gray-800 dark:text-gray-200 text-sm font-medium">
-              {outcome.label}
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="w-10 text-right text-[15px] font-semibold text-gray-900 dark:text-white">
-                {outcome.oddsPct}%
+        <div className="relative">
+          {market.outcomes.length <= 2 ? (
+            /* For markets with 2 or fewer outcomes, show all */
+            market.outcomes.map((outcome, index) => (
+              <div key={index} className="flex items-center justify-between gap-3 py-1">
+                <div className="truncate text-gray-800 dark:text-gray-200 text-sm font-medium">
+                  {outcome.label}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="w-10 text-right text-[15px] font-semibold text-gray-900 dark:text-white">
+                    {outcome.oddsPct}%
+                  </div>
+                  <button
+                    className="rounded-md bg-green-100 hover:bg-green-200 dark:bg-green-500/20 dark:hover:bg-green-500/30 border border-green-300 dark:border-green-500/30 px-2.5 py-1.5 text-xs font-medium text-green-800 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 transition-colors shadow-sm"
+                    onClick={() => onYesClick?.(market.id, index)}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    className="rounded-md bg-red-100 hover:bg-red-200 dark:bg-red-500/20 dark:hover:bg-red-500/30 border border-red-300 dark:border-red-500/30 px-2.5 py-1.5 text-xs font-medium text-red-800 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors shadow-sm"
+                    onClick={() => onNoClick?.(market.id, index)}
+                  >
+                    No
+                  </button>
+                </div>
               </div>
-              <button 
-                className="rounded-md bg-green-100 hover:bg-green-200 dark:bg-green-500/20 dark:hover:bg-green-500/30 border border-green-300 dark:border-green-500/30 px-2.5 py-1.5 text-xs font-medium text-green-800 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 transition-colors shadow-sm"
-                onClick={() => onYesClick?.(market.id, index)}
-              >
-                Yes
-              </button>
-              <button 
-                className="rounded-md bg-red-100 hover:bg-red-200 dark:bg-red-500/20 dark:hover:bg-red-500/30 border border-red-300 dark:border-red-500/30 px-2.5 py-1.5 text-xs font-medium text-red-800 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors shadow-sm"
-                onClick={() => onNoClick?.(market.id, index)}
-              >
-                No
-              </button>
+            ))
+          ) : (
+            /* For markets with more than 2 outcomes, constrain to fixed height and make all scrollable */
+            <div className="max-h-[88px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+              {market.outcomes.map((outcome, index) => (
+                <div key={index} className="flex items-center justify-between gap-3 py-1">
+                  <div className="truncate text-gray-800 dark:text-gray-200 text-sm font-medium">
+                    {outcome.label}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="w-10 text-right text-[15px] font-semibold text-gray-900 dark:text-white">
+                      {outcome.oddsPct}%
+                    </div>
+                    <button
+                      className="rounded-md bg-green-100 hover:bg-green-200 dark:bg-green-500/20 dark:hover:bg-green-500/30 border border-green-300 dark:border-green-500/30 px-2.5 py-1.5 text-xs font-medium text-green-800 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 transition-colors shadow-sm"
+                      onClick={() => onYesClick?.(market.id, index)}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      className="rounded-md bg-red-100 hover:bg-red-200 dark:bg-red-500/20 dark:hover:bg-red-500/30 border border-red-300 dark:border-red-500/30 px-2.5 py-1.5 text-xs font-medium text-red-800 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors shadow-sm"
+                      onClick={() => onNoClick?.(market.id, index)}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        ))}
+          )}
+        </div>
 
         <div className="mt-2">
           <div className="text-xs text-blue-700 dark:text-blue-400 font-semibold">
