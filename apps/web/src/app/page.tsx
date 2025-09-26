@@ -7,7 +7,6 @@ import { CategoryTabs } from "@/components/nav/CategoryTabs";
 import { MarketCard } from "@/components/market/MarketCard";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { SidePanel } from "@/components/nav/SidePanel";
-import { WalletConnect } from "@/components/wallet-connect";
 import { SignUpModal } from "@/components/auth/SignUpModal";
 import { useSignUpModalContext } from "@/contexts/SignUpModalContext";
 import { mockMarkets, extraFeedItems, type Category } from "@/lib/mock";

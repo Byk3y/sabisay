@@ -2,7 +2,6 @@
 
 import { Flag, Search, Menu, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { WalletConnect } from "@/components/wallet-connect";
 import { useSignUpModalContext } from "@/contexts/SignUpModalContext";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -56,7 +55,21 @@ export function TopNav() {
         {/* Right side - Navigation */}
         <div className="flex items-center gap-4">
           <button className="hidden md:block text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">How it works</button>
-          <WalletConnect />
+          
+          {/* Login and Sign Up buttons */}
+          <button 
+            onClick={() => openSignUpModal("signin")}
+            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+          >
+            Log In
+          </button>
+          <button 
+            onClick={() => openSignUpModal("signup")}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            Sign Up
+          </button>
+          
           <div className="hidden lg:block relative" ref={dropdownRef}>
             <button 
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}

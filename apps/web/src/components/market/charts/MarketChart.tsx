@@ -121,7 +121,7 @@ export function MarketChart({
     <div className={`w-full ${className}`}>
       {chanceHeader}
       
-      <div className="h-56 relative mb-8">
+      <div className="h-32 md:h-56 relative mb-8">
         {/* Custom horizontal lines that extend full width */}
         <div className="absolute inset-0 pointer-events-none">
           {[0, 25, 50, 75, 100].map((value, index) => (
@@ -156,8 +156,8 @@ export function MarketChart({
         </div>
 
         {/* Custom time labels positioned below the bottom dotted line */}
-        <div className="absolute -bottom-3 left-0 right-10 pointer-events-none z-10">
-          <div className="flex justify-between items-center h-6 px-4">
+        <div className="absolute -bottom-6 md:-bottom-3 left-0 right-10 pointer-events-none z-10">
+          <div className="flex items-center h-6 px-2 md:px-8" style={{ justifyContent: 'space-evenly' }}>
             {series[0]?.data && series[0].data.length > 0 && (() => {
               const data = series[0].data;
               const timePoints = [

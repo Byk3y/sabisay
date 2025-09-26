@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
-import { WalletConnect } from "@/components/wallet-connect";
+import { useConnect } from "wagmi";
+import { metaMask, walletConnect, coinbaseWallet } from "wagmi/connectors";
 import { useTheme } from "@/contexts/ThemeContext";
 import { WalletBrandIcon } from "./WalletBrandIcon";
 
@@ -16,6 +17,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { theme } = useTheme();
+  const { connect } = useConnect();
 
   if (!isOpen) return null;
 
@@ -33,8 +35,29 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
   };
 
   const handleWalletConnect = (walletType: string) => {
-    // TODO: Implement wallet connection
-    console.log("Connect wallet:", walletType);
+    try {
+      switch (walletType) {
+        case "metamask":
+          connect({ connector: metaMask() });
+          break;
+        case "walletconnect":
+          connect({ connector: walletConnect({ projectId: "your-project-id" }) });
+          break;
+        case "coinbase":
+          connect({ connector: coinbaseWallet() });
+          break;
+        case "phantom":
+          // Phantom is Solana-specific, would need different connector
+          console.log("Phantom wallet connection not implemented for Ethereum");
+          break;
+        default:
+          console.log("Unknown wallet type:", walletType);
+      }
+      // Close modal after successful connection
+      onClose();
+    } catch (error) {
+      console.error("Wallet connection failed:", error);
+    }
   };
 
   return (
