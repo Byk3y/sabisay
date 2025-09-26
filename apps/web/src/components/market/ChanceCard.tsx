@@ -39,7 +39,7 @@ export function ChanceCard({ market }: { market: Extract<MarketItem, {kind:"mark
             <svg className="w-17 h-10 mt-1" viewBox="0 0 68 32">
               {/* Background semi-circle (umbrella shape) */}
               <path
-                d="M 6 29.5 A 22 22 0 0 1 62 29.5"
+                d="M 8 29.5 A 20 20 0 0 1 60 29.5"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="4"
@@ -47,20 +47,23 @@ export function ChanceCard({ market }: { market: Extract<MarketItem, {kind:"mark
               />
               {/* Progress semi-circle */}
               <path
-                d="M 6 29.5 A 22 22 0 0 1 62 29.5"
+                d="M 8 29.5 A 20 20 0 0 1 60 29.5"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="4"
-                strokeDasharray={`${Math.PI * 22}`}
-                strokeDashoffset={`${Math.PI * 22 * (1 - yesPct / 100)}`}
+                strokeDasharray={`${Math.PI * 20}`}
+                strokeDashoffset={`${Math.PI * 20 * (1 - yesPct / 100)}`}
                 className="text-green-500"
                 strokeLinecap="round"
               />
             </svg>
             {/* Percentage text below semi-circle */}
-            <div className="absolute inset-x-0 top-4 flex flex-col items-center">
-              <span className="text-sm font-bold text-gray-900 dark:text-white">{yesPct}%</span>
-              <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 -mt-0.5">chance</span>
+            <div className="absolute inset-x-0 top-4 flex items-center justify-center">
+              <span className="text-base font-bold text-gray-900 dark:text-white">{yesPct}%</span>
+            </div>
+            {/* Chance text below the indicator */}
+            <div className="absolute inset-x-0 top-10 flex items-center justify-center">
+              <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300">chance</span>
             </div>
           </div>
         </div>
