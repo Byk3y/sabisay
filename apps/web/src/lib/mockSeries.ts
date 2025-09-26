@@ -32,8 +32,8 @@ function generateTimePoints(range: TimeRange): number[] {
   
   switch (range) {
     case '1H':
-      for (let i = 0; i < 12; i++) {
-        points.push(now - (11 - i) * 5 * 60 * 1000); // 5-minute intervals
+      for (let i = 0; i < 6; i++) {
+        points.push(now - (5 - i) * 10 * 60 * 1000); // 10-minute intervals, 6 points
       }
       break;
     case '6H':
@@ -187,15 +187,15 @@ export function formatTimeLabel(timestamp: number, range: TimeRange): string {
     case '1H':
     case '6H':
       return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
+        hour: 'numeric', 
         minute: '2-digit',
-        hour12: false 
+        hour12: true 
       });
     case '1D':
       return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
+        hour: 'numeric', 
         minute: '2-digit',
-        hour12: false 
+        hour12: true 
       });
     case '1W':
     case '1M':

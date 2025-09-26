@@ -121,13 +121,51 @@ export function MarketChart({
     <div className={`w-full ${className}`}>
       {chanceHeader}
       
-      <div className="h-64">
+      <div className="h-64 relative">
+        {/* Custom horizontal lines that extend full width */}
+        <div className="absolute inset-0 pointer-events-none">
+          {[0, 25, 50, 75, 100].map((value, index) => (
+            <div
+              key={index}
+              className="absolute border-t border-dashed border-gray-300 dark:border-gray-600"
+              style={{
+                top: `${5 + (value / 100) * (100 - 10)}%`, // 5% top margin, 10% total margin
+                height: '1px',
+                left: '0',
+                right: '40px' // Leave space for percentage labels
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Custom percentage labels positioned in front of horizontal lines */}
+        <div className="absolute inset-0 pointer-events-none z-10">
+          {[100, 75, 50, 25, 0].map((value, index) => (
+            <div
+              key={value}
+              className="absolute text-xs text-gray-600 dark:text-gray-400"
+              style={{
+                top: `${5 + (value / 100) * (100 - 10)}%`, // Match horizontal line position
+                right: '8px',
+                transform: 'translateY(-50%)' // Center the text on the line
+              }}
+            >
+              {value}%
+            </div>
+          ))}
+        </div>
+        
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={series[0]?.data || []}>
+          <LineChart 
+            data={series[0]?.data || []}
+            margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
+          >
             <CartesianGrid 
               strokeDasharray="3 3" 
               stroke="#E5E7EB" 
               className="dark:stroke-gray-700"
+              horizontal={false}
+              vertical={false}
             />
             
             <XAxis
@@ -138,18 +176,14 @@ export function MarketChart({
               tickFormatter={(value) => formatTimeLabel(value, timeRange)}
               tick={{ fontSize: 12, fill: '#6B7280' }}
               className="dark:fill-gray-400"
-              axisLine={{ stroke: '#E5E7EB' }}
-              className="dark:axisLine-gray-700"
+              axisLine={false}
             />
             
             <YAxis
               orientation="right"
               domain={[0, 100]}
-              tick={{ fontSize: 12, fill: '#6B7280' }}
-              className="dark:fill-gray-400"
-              axisLine={{ stroke: '#E5E7EB' }}
-              className="dark:axisLine-gray-700"
-              tickFormatter={(value) => `${value}%`}
+              tick={false}
+              axisLine={false}
             />
             
             <Tooltip content={<CustomTooltip timeRange={timeRange} variant={variant} />} />
@@ -176,7 +210,7 @@ export function MarketChart({
                   stroke={CHART_COLORS[index % CHART_COLORS.length]}
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 4, stroke: CHART_COLORS[index % CHART_COLORS.length], strokeWidth: 2 }}
+                  activeDot={{ r: 4, stroke: CHART_COLORS[index % CHART_COLORS.length] || '#3B82F6', strokeWidth: 2 }}
                 />
               ))
             )}
