@@ -121,7 +121,7 @@ export function MarketChart({
     <div className={`w-full ${className}`}>
       {chanceHeader}
       
-      <div className="h-64 relative">
+      <div className="h-56 relative mb-8">
         {/* Custom horizontal lines that extend full width */}
         <div className="absolute inset-0 pointer-events-none">
           {[0, 25, 50, 75, 100].map((value, index) => (
@@ -140,12 +140,12 @@ export function MarketChart({
 
         {/* Custom percentage labels positioned in front of horizontal lines */}
         <div className="absolute inset-0 pointer-events-none z-10">
-          {[100, 75, 50, 25, 0].map((value, index) => (
+          {[0, 25, 50, 75, 100].map((value, index) => (
             <div
               key={value}
               className="absolute text-xs text-gray-600 dark:text-gray-400"
               style={{
-                top: `${5 + (value / 100) * (100 - 10)}%`, // Match horizontal line position
+                top: `${5 + ((100 - value) / 100) * (100 - 10)}%`, // Invert positioning: 0% at bottom, 100% at top
                 right: '8px',
                 transform: 'translateY(-50%)' // Center the text on the line
               }}
@@ -154,9 +154,34 @@ export function MarketChart({
             </div>
           ))}
         </div>
+
+        {/* Custom time labels positioned below the bottom dotted line */}
+        <div className="absolute -bottom-3 left-0 right-10 pointer-events-none z-10">
+          <div className="flex justify-between items-center h-6 px-4">
+            {series[0]?.data && series[0].data.length > 0 && (() => {
+              const data = series[0].data;
+              const timePoints = [
+                data[0], // First point
+                data[Math.floor(data.length * 0.25)], // 25% point
+                data[Math.floor(data.length * 0.5)], // 50% point
+                data[Math.floor(data.length * 0.75)], // 75% point
+                data[data.length - 1] // Last point
+              ].filter(Boolean);
+
+              return timePoints.map((point, index) => (
+                <div
+                  key={index}
+                  className="text-xs text-gray-600 dark:text-gray-400"
+                >
+                  {formatTimeLabel(point.t, timeRange)}
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
         
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart 
+          <LineChart
             data={series[0]?.data || []}
             margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
           >
@@ -173,9 +198,7 @@ export function MarketChart({
               type="number"
               scale="time"
               domain={['dataMin', 'dataMax']}
-              tickFormatter={(value) => formatTimeLabel(value, timeRange)}
-              tick={{ fontSize: 12, fill: '#6B7280' }}
-              className="dark:fill-gray-400"
+              tick={false}
               axisLine={false}
             />
             
