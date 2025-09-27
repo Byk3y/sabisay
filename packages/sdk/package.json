@@ -1,7 +1,7 @@
 {
-  "name": "@sabisay/sdk",
+  "name": "@pakomarket/sdk",
   "version": "0.1.0",
-  "description": "TypeScript SDK for SabiSay prediction markets",
+  "description": "TypeScript SDK for PakoMarket prediction markets",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -21,7 +21,10 @@
   },
   "devDependencies": {
     "typescript": "^5.0.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
   },
   "peerDependencies": {
     "react": "^18.0.0"

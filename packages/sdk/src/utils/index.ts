@@ -1,4 +1,4 @@
-// Utility functions for SabiSay SDK
+// Utility functions for PakoMarket SDK
 
 /**
  * Format currency for Nigerian users

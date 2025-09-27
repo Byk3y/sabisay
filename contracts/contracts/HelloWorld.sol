@@ -9,7 +9,7 @@ contract HelloWorld {
     string public message;
     
     constructor() {
-        message = "Hello, SabiSay!";
+        message = "Hello, PakoMarket!";
     }
     
     function setMessage(string memory _message) external {

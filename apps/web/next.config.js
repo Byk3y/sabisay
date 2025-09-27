@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@sabisay/sdk'],
+  transpilePackages: ['@pakomarket/sdk'],
   env: {
     NEXT_PUBLIC_CHAIN_ID: '80002', // Polygon Amoy testnet
     NEXT_PUBLIC_RPC_URL: process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc-amoy.polygon.technology',

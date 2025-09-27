@@ -1,8 +1,8 @@
-# 🚀 **MEGA PLAN: SabiSay Market Details Page - Complete Implementation Strategy**
+# 🚀 **MEGA PLAN: PakoMarket Market Details Page - Complete Implementation Strategy**
 
 ## 📋 **Executive Summary**
 
-Transform the current prototype market details page into a production-ready, contract-integrated component that serves as the cornerstone of the SabiSay prediction market platform. This plan combines architectural excellence, Web3 integration, and user experience optimization into a systematic 4-week implementation roadmap.
+Transform the current prototype market details page into a production-ready, contract-integrated component that serves as the cornerstone of the PakoMarket prediction market platform. This plan combines architectural excellence, Web3 integration, and user experience optimization into a systematic 4-week implementation roadmap.
 
 ## 🎯 **Strategic Objectives**
 
@@ -1663,12 +1663,12 @@ export async function generateMetadata({
 
   if (!market) {
     return {
-      title: 'Market Not Found - SabiSay',
+      title: 'Market Not Found - PakoMarket',
     };
   }
 
   return {
-    title: `${market.title} - SabiSay`,
+    title: `${market.title} - PakoMarket`,
     description: `Trade on "${market.title}" - Volume: ${FinancialMath.formatUSDC(market.volume)}`,
     openGraph: {
       title: market.title,
@@ -1898,6 +1898,6 @@ export function trackTrade(marketId: string, outcome: string, amount: string) {
 
 ---
 
-This mega plan transforms the current prototype into a production-ready, contract-integrated market details page that serves as the foundation for the entire SabiSay platform. The systematic approach ensures security, scalability, and exceptional user experience while building toward full Web3 integration.
+This mega plan transforms the current prototype into a production-ready, contract-integrated market details page that serves as the foundation for the entire PakoMarket platform. The systematic approach ensures security, scalability, and exceptional user experience while building toward full Web3 integration.
 
 **Remember**: Use this plan as a guide, not a rigid checklist. Adapt and iterate based on your team's progress and changing requirements. The key is to maintain momentum while ensuring quality at each step.

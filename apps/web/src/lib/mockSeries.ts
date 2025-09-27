@@ -85,15 +85,15 @@ function generateSmoothCurve(
     currentValue += (random() - 0.5) * volatility;
     
     // Add some momentum (previous value influences current)
-    if (i > 0) {
-      currentValue = currentValue * 0.7 + data[i - 1].p * 0.3;
+    if (i > 0 && data[i - 1]) {
+      currentValue = currentValue * 0.7 + data[i - 1]!.p * 0.3;
     }
     
     // Clamp between 0 and 100
     currentValue = Math.max(0, Math.min(100, currentValue));
     
     data.push({
-      t: timePoints[i],
+      t: timePoints[i]!,
       p: Math.round(currentValue * 100) / 100
     });
   }
@@ -122,7 +122,10 @@ export function generateChanceSeries(
   
   // Ensure the last data point matches the current chance if provided
   if (baseChance !== undefined && data.length > 0) {
-    data[data.length - 1].p = baseChance;
+    const lastDataPoint = data[data.length - 1];
+    if (lastDataPoint) {
+      lastDataPoint.p = baseChance;
+    }
   }
   
   return [{
@@ -165,7 +168,7 @@ export function generateMultiSeries(
     const volatility = 3 + random() * 7; // 3-10% volatility
     const trend = (random() - 0.5) * 1.5; // Slight trend
     
-    const data = generateSmoothCurve(timePoints, baseValue, volatility, trend, random);
+    const data = generateSmoothCurve(timePoints, baseValue || 0, volatility, trend, random);
     
     series.push({
       id: `${marketId}-${label.toLowerCase().replace(/\s+/g, '-')}`,

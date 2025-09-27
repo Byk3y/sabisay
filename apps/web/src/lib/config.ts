@@ -1,4 +1,4 @@
-// SabiSay Configuration
+// PakoMarket Configuration
 import localAddrs from "../../../../contracts/addresses/local.json"; // dev only
 
 export const config = {
@@ -23,7 +23,7 @@ export const config = {
   
   // App Configuration
   app: {
-    name: 'SabiSay',
+    name: 'PakoMarket',
     description: 'Crypto-native prediction markets for Africa',
     version: '0.1.0',
   },

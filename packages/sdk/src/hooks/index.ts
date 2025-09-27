@@ -1,4 +1,4 @@
-// React hooks for SabiSay SDK
+// React hooks for PakoMarket SDK
 // These will be implemented when we add React dependencies
 
 export { useMarkets } from './useMarkets';

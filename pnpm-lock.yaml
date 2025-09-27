@@ -32,6 +32,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@pakomarket/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
       '@radix-ui/react-dialog':
         specifier: ^1.0.5
         version: 1.1.15(@types/react-dom@18.3.7)(@types/react@18.3.24)(react-dom@18.3.1)(react@18.3.1)
@@ -44,9 +47,6 @@ importers:
       '@radix-ui/react-toast':
         specifier: ^1.1.5
         version: 1.2.15(@types/react-dom@18.3.7)(@types/react@18.3.24)(react-dom@18.3.1)(react@18.3.1)
-      '@sabisay/sdk':
-        specifier: workspace:*
-        version: link:../../packages/sdk
       '@tanstack/react-query':
         specifier: ^5.0.0
         version: 5.87.4(react@18.3.1)
@@ -73,7 +73,7 @@ importers:
         version: 5.5.0(react@18.3.1)
       recharts:
         specifier: ^3.2.1
-        version: 3.2.1(@types/react@18.3.24)(react-dom@18.3.1)(react-is@16.13.1)(react@18.3.1)(redux@5.0.1)
+        version: 3.2.1(@types/react@18.3.24)(react-dom@18.3.1)(react-is@18.3.1)(react@18.3.1)(redux@5.0.1)
       tailwind-merge:
         specifier: ^2.0.0
         version: 2.6.0
@@ -158,6 +158,15 @@ importers:
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.14
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^6.0.0
+        version: 6.21.0(@typescript-eslint/parser@6.21.0)(eslint@8.57.1)(typescript@5.9.2)
+      '@typescript-eslint/parser':
+        specifier: ^6.0.0
+        version: 6.21.0(eslint@8.57.1)(typescript@5.9.2)
+      eslint:
+        specifier: ^8.0.0
+        version: 8.57.1
       typescript:
         specifier: ^5.0.0
         version: 5.9.2
@@ -7307,10 +7316,10 @@ packages:
 
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
+    dev: true
 
   /react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
-    dev: true
 
   /react-redux@9.2.0(@types/react@18.3.24)(react@18.3.1)(redux@5.0.1):
     resolution: {integrity: sha512-ROY9fvHhwOD9ySfrF0wmvu//bKCQ6AeZZq1nJNtbDC+kk5DuSuNX/n6YWYF/SYy7bSba4D4FSz8DJeKY/S/r+g==}
@@ -7431,7 +7440,7 @@ packages:
     engines: {node: '>= 12.13.0'}
     dev: false
 
-  /recharts@3.2.1(@types/react@18.3.24)(react-dom@18.3.1)(react-is@16.13.1)(react@18.3.1)(redux@5.0.1):
+  /recharts@3.2.1(@types/react@18.3.24)(react-dom@18.3.1)(react-is@18.3.1)(react@18.3.1)(redux@5.0.1):
     resolution: {integrity: sha512-0JKwHRiFZdmLq/6nmilxEZl3pqb4T+aKkOkOi/ZISRZwfBhVMgInxzlYU9D4KnCH3KINScLy68m/OvMXoYGZUw==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -7447,7 +7456,7 @@ packages:
       immer: 10.1.3
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-is: 16.13.1
+      react-is: 18.3.1
       react-redux: 9.2.0(@types/react@18.3.24)(react@18.3.1)(redux@5.0.1)
       reselect: 5.1.1
       tiny-invariant: 1.3.3

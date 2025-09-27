@@ -1,10 +1,10 @@
-# SabiSay Documentation
+# PakoMarket Documentation
 
 Crypto-native prediction markets for Africa, built for Nigerian users.
 
 ## Overview
 
-SabiSay is a prediction market platform that allows users to stake USDC on real-world events. Inspired by Polymarket but simplified for African users, it provides a clean, mobile-first interface for betting on politics, economy, and other events.
+PakoMarket is a prediction market platform that allows users to stake USDC on real-world events. Inspired by Polymarket but simplified for African users, it provides a clean, mobile-first interface for betting on politics, economy, and other events.
 
 ## Architecture
 

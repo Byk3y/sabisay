@@ -82,12 +82,12 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
         <div className="flex-1 flex flex-col justify-center md:hidden pt-20">
           {/* Logo and Title - Mobile only */}
           <div className="text-center pb-4 px-8">
-            {/* Logo placeholder - you can add your SabiSay logo here */}
+            {/* Logo placeholder - you can add your PakoMarket logo here */}
             <div className="w-12 h-12 bg-blue-600 rounded-lg mx-auto mb-3 flex items-center justify-center">
               <span className="text-white font-bold text-lg">S</span>
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {mode === "signup" ? "Welcome to SabiSay" : "Welcome Back"}
+              {mode === "signup" ? "Welcome to PakoMarket" : "Welcome Back"}
             </h2>
           </div>
 
@@ -206,7 +206,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
         {/* Desktop Title - No logo */}
         <div className="hidden md:block text-center pt-8 pb-6 px-8">
           <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
-            {mode === "signup" ? "Welcome to SabiSay" : "Welcome Back"}
+            {mode === "signup" ? "Welcome to PakoMarket" : "Welcome Back"}
           </h2>
         </div>
 

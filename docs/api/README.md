@@ -1,8 +1,8 @@
-# SabiSay API Documentation
+# PakoMarket API Documentation
 
 ## Overview
 
-SabiSay uses a combination of on-chain data and IPFS for market information. All data is read directly from the blockchain using viem/wagmi.
+PakoMarket uses a combination of on-chain data and IPFS for market information. All data is read directly from the blockchain using viem/wagmi.
 
 ## Contract Addresses
 

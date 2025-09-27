@@ -1,6 +1,6 @@
-# SabiSay Roadmap
+# PakoMarket Roadmap
 
-Single source of truth for SabiSay's Polymarket-style platform. We ship in phases; each phase is independently shippable.
+Single source of truth for PakoMarket's Polymarket-style platform. We ship in phases; each phase is independently shippable.
 
 ---
 

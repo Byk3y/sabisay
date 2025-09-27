@@ -33,7 +33,7 @@ contract MockToken18 is ERC20 {
     }
 }
 
-contract SabiSayMVPTest is Test {
+contract PakoMarketMVPTest is Test {
     MarketFactory factory;
     MockUSDC usdc;
     MockToken18 token18;

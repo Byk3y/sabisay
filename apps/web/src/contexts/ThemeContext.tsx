@@ -22,7 +22,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setMounted(true);
     
     // Check for saved theme preference or default to system preference
-    const savedTheme = localStorage.getItem('sabisay-theme') as Theme;
+    const savedTheme = localStorage.getItem('pakomarket-theme') as Theme;
     if (savedTheme) {
       setTheme(savedTheme);
     } else {
@@ -44,7 +44,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.classList.remove('dark');
     }
 
-    localStorage.setItem('sabisay-theme', theme);
+    localStorage.setItem('pakomarket-theme', theme);
   }, [theme, mounted]);
 
   const toggleTheme = () => {

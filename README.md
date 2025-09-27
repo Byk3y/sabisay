@@ -1,8 +1,8 @@
-# 🛡️ SabiSay
+# 🛡️ PakoMarket
 
 **Crypto-native prediction markets for Africa**
 
-SabiSay is a prediction market platform that allows users to stake USDC on real-world events. Inspired by Polymarket but simplified for Nigerian users, it provides a clean, mobile-first interface for betting on politics, economy, and other events.
+PakoMarket is a prediction market platform that allows users to stake USDC on real-world events. Inspired by Polymarket but simplified for Nigerian users, it provides a clean, mobile-first interface for betting on politics, economy, and other events.
 
 ## 🎯 Features
 
@@ -34,8 +34,8 @@ SabiSay is a prediction market platform that allows users to stake USDC on real-
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/sabisay.git
-cd sabisay
+git clone https://github.com/your-org/pakomarket.git
+cd pakomarket
 
 # Install dependencies
 pnpm install
@@ -177,9 +177,9 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 ## 🆘 Support
 
-- **Discord**: [Join our community](https://discord.gg/sabisay)
-- **Email**: [support@sabisay.com](mailto:support@sabisay.com)
-- **Twitter**: [@SabiSayApp](https://twitter.com/SabiSayApp)
+- **Discord**: [Join our community](https://discord.gg/pakomarket)
+- **Email**: [support@pakomarket.com](mailto:support@pakomarket.com)
+- **Twitter**: [@PakoMarketApp](https://twitter.com/PakoMarketApp)
 
 ---
 

@@ -1,4 +1,4 @@
-# SabiSay Web App
+# PakoMarket Web App
 
 A Next.js application for prediction markets, inspired by Polymarket's design.
 
@@ -36,7 +36,7 @@ The app will be available at http://localhost:3000
 
 ## TODO
 
-- [ ] Integrate with SabiSay smart contracts
+- [ ] Integrate with PakoMarket smart contracts
 - [ ] Add wallet connection
 - [ ] Implement actual market interactions
 - [ ] Add user authentication

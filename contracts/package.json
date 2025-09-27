@@ -1,7 +1,7 @@
 {
-  "name": "@sabisay/contracts",
+  "name": "@pakomarket/contracts",
   "version": "0.1.0",
-  "description": "SabiSay smart contracts",
+  "description": "PakoMarket smart contracts",
   "scripts": {
     "build": "forge build",
     "test": "forge test",

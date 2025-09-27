@@ -81,7 +81,7 @@ describe('marketUtils', () => {
       });
 
       it('should return false for undefined uiStyle', () => {
-        const market = { uiStyle: undefined };
+        const market = { uiStyle: undefined } as any;
         expect(isBinaryMarketView(market)).toBe(false);
       });
     });
@@ -163,7 +163,7 @@ describe('marketUtils', () => {
       });
 
       it('should return false for undefined outcomes', () => {
-        const market = { outcomes: undefined };
+        const market = { outcomes: undefined } as any;
         expect(isBinaryMarketView(market)).toBe(false);
       });
     });
@@ -212,7 +212,7 @@ describe('marketUtils', () => {
             { name: 'Yes', probability: 60 },
             { name: 'No', probability: 40 }
           ]
-        };
+        } as any;
         expect(isBinaryMarketView(binaryMarket)).toBe(true);
       });
 
@@ -223,7 +223,7 @@ describe('marketUtils', () => {
             { name: 'Candidate A', probability: 60 },
             { name: 'Candidate B', probability: 40 }
           ]
-        };
+        } as any;
         expect(isBinaryMarketView(fakeBinaryMarket)).toBe(false);
       });
 
@@ -235,7 +235,7 @@ describe('marketUtils', () => {
             { name: 'Candidate B', probability: 35 },
             { name: 'Candidate C', probability: 25 }
           ]
-        };
+        } as any;
         expect(isBinaryMarketView(multiMarket)).toBe(false);
       });
 

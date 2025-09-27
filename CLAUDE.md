@@ -1,9 +1,9 @@
-# 🛡️ SabiSay - Claude Code Instructions
+# 🛡️ PakoMarket - Claude Code Instructions
 
-This file contains specific instructions for Claude Code when working on the SabiSay prediction market platform.
+This file contains specific instructions for Claude Code when working on the PakoMarket prediction market platform.
 
 ## Project Overview
-SabiSay is a crypto-native prediction market platform for Africa built as a TypeScript monorepo targeting Polygon Amoy testnet.
+PakoMarket is a crypto-native prediction market platform for Africa built as a TypeScript monorepo targeting Polygon Amoy testnet.
 
 ## Architecture & Structure
 - **Monorepo**: `/apps/web` (Next.js), `/packages/sdk` (TypeScript), `/contracts` (Solidity/Foundry), `/docs`

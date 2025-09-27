@@ -1,4 +1,4 @@
-# SabiSay Resolution Log
+# PakoMarket Resolution Log
 
 This document tracks all market resolutions with source links and evidence.
 
@@ -33,4 +33,4 @@ Each resolution includes:
 
 ## Contact
 
-For disputes or questions about resolutions, contact: [admin@sabisay.com](mailto:admin@sabisay.com)
+For disputes or questions about resolutions, contact: [admin@pakomarket.com](mailto:admin@pakomarket.com)

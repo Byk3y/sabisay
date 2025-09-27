@@ -1,5 +1,5 @@
 {
-  "name": "sabisay",
+  "name": "pakomarket",
   "version": "0.1.0",
   "private": true,
   "description": "Crypto-native prediction market for Africa",
@@ -10,9 +10,9 @@
     "docs"
   ],
   "scripts": {
-    "dev": "pnpm --filter @sabisay/web dev",
-    "build": "pnpm --filter @sabisay/web build",
-    "test": "pnpm --filter @sabisay/contracts test",
+    "dev": "pnpm --filter @pakomarket/web dev",
+    "build": "pnpm --filter @pakomarket/web build",
+    "test": "pnpm --filter @pakomarket/contracts test",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "format": "prettier --write .",

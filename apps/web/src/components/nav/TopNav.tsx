@@ -36,7 +36,7 @@ export function TopNav() {
           <div className="size-8 rounded bg-blue-500/20 dark:bg-blue-500/20 grid place-items-center">
             <span className="text-blue-600 dark:text-white font-bold text-lg">S</span>
           </div>
-          <span className="font-semibold text-lg text-gray-900 dark:text-white">SabiSay</span>
+          <span className="font-semibold text-lg text-gray-900 dark:text-white">PakoMarket</span>
           <Flag className="size-4 text-gray-500 dark:text-gray-400" />
         </div>
 
@@ -46,7 +46,7 @@ export function TopNav() {
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400 dark:text-gray-500" />
                         <input
                           type="text"
-                          placeholder="Search SabiSay"
+                          placeholder="Search PakoMarket"
                           className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg pl-10 pr-4 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                         />
                       </div>

@@ -1,4 +1,4 @@
-// SDK Configuration for SabiSay
+// SDK Configuration for PakoMarket
 import localAddrs from "../../../contracts/addresses/local.json"; // dev only
 
 export const SDK_CONFIG = {
