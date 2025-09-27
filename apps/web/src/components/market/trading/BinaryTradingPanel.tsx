@@ -1,7 +1,7 @@
 "use client";
 import type { MarketItem } from "@/types/market";
 
-export function ChanceTradingPanel({ market }: { market: Extract<MarketItem,{kind:"market"}> }) {
+export function BinaryTradingPanel({ market }: { market: Extract<MarketItem,{kind:"market"}> }) {
   // Placeholder panel: keep minimal controls so we don't break your current sidebar.
   const yesPct =
     market.outcomes && market.outcomes.length > 0 && market.outcomes[0]

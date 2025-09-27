@@ -12,7 +12,7 @@ export interface RawMarket {
   poolUsd: number;
   imageUrl?: string;
   closesAt?: string;
-  uiStyle?: "default" | "chance"; // Add uiStyle field for binary/chance markets
+  uiStyle?: "default" | "binary" | "chance"; // Add uiStyle field for binary/chance markets
 }
 
 // Alias for backward compatibility - use RawMarket instead
@@ -27,8 +27,8 @@ export const mockMarkets: Market[] = [
       { label: "Bola Tinubu", oddsPct: 38 }
     ],
     poolUsd: 12000000, // $12m
-    closesAt: "2027-02-25T14:00:00Z",
-    uiStyle: "chance" // Binary market with 2 outcomes
+    closesAt: "2027-02-25T14:00:00Z"
+    // No uiStyle - this is a multi-outcome election market
   },
   {
     id: "1",
@@ -38,8 +38,8 @@ export const mockMarkets: Market[] = [
       { label: "25 bps decrease", oddsPct: 91 }
     ],
     poolUsd: 125000000, // $125m
-    closesAt: "2024-09-15T14:00:00Z",
-    uiStyle: "chance" // Binary market with 2 outcomes
+    closesAt: "2024-09-15T14:00:00Z"
+    // No uiStyle - this is a multi-outcome policy decision market
   },
   {
     id: "nyc-mayor-2025",
@@ -63,8 +63,8 @@ export const mockMarkets: Market[] = [
       { label: "Unemployment / Employment 20+...", oddsPct: 90 }
     ],
     poolUsd: 178000, // $178k
-    closesAt: "2024-09-15T15:30:00Z",
-    uiStyle: "chance" // Binary market with 2 outcomes
+    closesAt: "2024-09-15T15:30:00Z"
+    // No uiStyle - this is a multi-outcome prediction market
   },
   {
     id: "4",
@@ -74,8 +74,8 @@ export const mockMarkets: Market[] = [
       { label: "Buffalo Bills", oddsPct: 18 }
     ],
     poolUsd: 2500000, // $2.5m
-    closesAt: "2026-02-08T18:30:00Z",
-    uiStyle: "chance" // Binary market with 2 outcomes
+    closesAt: "2026-02-08T18:30:00Z"
+    // No uiStyle - this is a multi-outcome sports market
   },
   {
     id: "5",
@@ -86,7 +86,7 @@ export const mockMarkets: Market[] = [
     ],
     poolUsd: 45000000, // $45m
     closesAt: "2024-12-31T23:59:59Z",
-    uiStyle: "chance" // Binary market with 2 outcomes
+    uiStyle: "binary" // Binary market with 2 outcomes
   },
   {
     id: "7",
@@ -97,7 +97,7 @@ export const mockMarkets: Market[] = [
     ],
     poolUsd: 8500000, // $8.5m
     closesAt: "2024-12-31T23:59:59Z",
-    uiStyle: "chance" // Binary market with 2 outcomes
+    uiStyle: "binary" // Binary market with 2 outcomes
   },
   {
     id: "8",
@@ -108,7 +108,7 @@ export const mockMarkets: Market[] = [
     ],
     poolUsd: 3200000, // $3.2m
     closesAt: "2024-12-31T23:59:59Z",
-    uiStyle: "chance" // Binary market with 2 outcomes
+    uiStyle: "binary" // Binary market with 2 outcomes
   }
 ];
 
@@ -161,7 +161,7 @@ export const extraFeedItems: MarketItem[] = [
     question: "Will ETH be above $3,500 on Mar 31?",
     poolUsd: 1250000,
     closesAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 20).toISOString(),
-    uiStyle: "chance",
+    uiStyle: "binary",
     outcomes: [{ label: "Yes", oddsPct: 62.5 }], // single yes-prob reference; buy/sell yes/no on detail page
   },
   // NYC Mayor 2025 is now a single legacy market in mockMarkets, not a group

@@ -1,6 +1,6 @@
 /**
  * Shared UI primitives extracted from MarketCard for consistent styling
- * Ensures ChanceCard and GroupCard blend perfectly with existing grid
+ * Ensures BinaryCard and GroupCard blend perfectly with existing grid
  */
 
 import React from 'react';

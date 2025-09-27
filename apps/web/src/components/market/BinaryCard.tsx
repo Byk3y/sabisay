@@ -4,8 +4,15 @@ import type { MarketItem } from "@/types/market";
 import { CardShell, CardHeader, ActionPill } from "./_primitives";
 import { formatPool } from "@/lib/mock";
 
-export function ChanceCard({ market }: { market: Extract<MarketItem, {kind:"market"}> }) {
-  // Expect market.uiStyle === "chance" (caller ensures)
+// Helper function to determine color based on percentage
+function getChanceColor(percentage: number): string {
+  if (percentage < 40) return "text-red-500";
+  if (percentage < 60) return "text-amber-500";
+  return "text-green-500";
+}
+
+export function BinaryCard({ market }: { market: Extract<MarketItem, {kind:"market"}> }) {
+  // Expect market.uiStyle === "binary" (caller ensures)
   const yesPct =
     market.outcomes && market.outcomes.length > 0 && market.outcomes[0]
       ? Math.round(market.outcomes[0].oddsPct)
@@ -41,9 +48,9 @@ export function ChanceCard({ market }: { market: Extract<MarketItem, {kind:"mark
               <path
                 d="M 8 29.5 A 20 20 0 0 1 60 29.5"
                 fill="none"
-                stroke="currentColor"
+                stroke="#E5E7EB"
                 strokeWidth="4"
-                className="text-gray-200 dark:text-gray-700"
+                className="dark:stroke-gray-700"
               />
               {/* Progress semi-circle */}
               <path
@@ -51,9 +58,9 @@ export function ChanceCard({ market }: { market: Extract<MarketItem, {kind:"mark
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="4"
-                strokeDasharray={`${Math.PI * 20}`}
-                strokeDashoffset={`${Math.PI * 20 * (1 - yesPct / 100)}`}
-                className="text-green-500"
+                strokeDasharray={`${Math.PI * 20 * yesPct / 100} ${Math.PI * 20 * 2}`}
+                strokeDashoffset="0"
+                className={getChanceColor(yesPct)}
                 strokeLinecap="round"
               />
             </svg>

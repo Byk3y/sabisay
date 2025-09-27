@@ -8,7 +8,8 @@ import { CategoryTabs } from "@/components/nav/CategoryTabs";
 import { MarketHeader } from "@/components/market/MarketHeader";
 import { MarketChart } from "@/components/market/charts/MarketChart";
 import { TradingSidebar } from "@/components/market/TradingSidebar";
-import { isChanceMarket, type MarketItem } from "@/types/market";
+import { type MarketItem } from "@/types/market";
+import { isBinaryMarketView } from "@/lib/marketUtils";
 import { OutcomeList } from "@/components/market/OutcomeList";
 import { RulesSection } from "@/components/market/RulesSection";
 import { MobileOverlay } from "@/components/ui/MobileOverlay";
@@ -77,8 +78,8 @@ export default function MarketDetailsPage() {
   const chartData = React.useMemo(() => {
     if (!market) return [];
     
-    if (marketItem && isChanceMarket(marketItem)) {
-      // For chance markets, generate single series
+    if (marketItem && isBinaryMarketView(marketItem)) {
+      // For binary markets, generate single series
       const currentChance = market.outcomes?.[0]?.probability || 50;
       return generateChanceSeries(marketId, timeRange, currentChance);
     } else {
@@ -176,7 +177,7 @@ export default function MarketDetailsPage() {
       <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
 
       {/* Main Content */}
-      <div className={`max-w-7xl mx-auto px-0 py-6 ${isMobile && marketItem && isChanceMarket(marketItem) ? 'pb-24' : ''}`}>
+      <div className={`max-w-7xl mx-auto px-0 py-6 ${isMobile && marketItem && isBinaryMarketView(marketItem) ? 'pb-24' : ''}`}>
         <div className="relative">
           {/* Left Column - Market Details */}
           <div className={`space-y-6 pr-4 px-4 md:px-0 ${
@@ -188,16 +189,16 @@ export default function MarketDetailsPage() {
               onShare={handleShare} 
               onBookmark={handleBookmark}
               isMobile={isMobile}
-              isChanceMarket={!!(marketItem && isChanceMarket(marketItem))}
+              isChanceMarket={!!(marketItem && isBinaryMarketView(marketItem))}
             />
 
             {/* Chart Section */}
             <div className="mb-6">
               <MarketChart 
-                variant={marketItem && isChanceMarket(marketItem) ? "chance" : "multi"}
+                variant={marketItem && isBinaryMarketView(marketItem) ? "chance" : "multi"}
                 series={chartData}
-                showChanceHeader={!!(marketItem && isChanceMarket(marketItem))}
-                currentChancePct={marketItem && isChanceMarket(marketItem) ? market.outcomes?.[0]?.probability : 50}
+                showChanceHeader={!!(marketItem && isBinaryMarketView(marketItem))}
+                currentChancePct={marketItem && isBinaryMarketView(marketItem) ? market.outcomes?.[0]?.probability : 50}
                 timeRange={timeRange}
               />
               
@@ -233,7 +234,7 @@ export default function MarketDetailsPage() {
               shares={shares}
               expirationEnabled={expirationEnabled}
               selectedExpiration={selectedExpiration}
-              isChanceMarket={!!(marketItem && isChanceMarket(marketItem))}
+              isChanceMarket={!!(marketItem && isBinaryMarketView(marketItem))}
               onTrade={handleTrade}
               onOutcomeSelect={handleOutcomeAndCandidateSelect}
               onCandidateSelect={setSelectedCandidate}
@@ -256,7 +257,7 @@ export default function MarketDetailsPage() {
         }`}>
             <div className="space-y-6">
               {/* Outcome Section - Hide for chance markets */}
-              {!(marketItem && isChanceMarket(marketItem)) && (
+              {!(marketItem && isBinaryMarketView(marketItem)) && (
                 <OutcomeList
                   outcomes={market.outcomes}
                   selectedOutcome={selectedOutcome}
@@ -296,7 +297,7 @@ export default function MarketDetailsPage() {
             selectedExpiration={selectedExpiration}
             isMobile={isMobile}
             isMobileSidebarOpen={isMobileSidebarOpen}
-            isChanceMarket={!!(marketItem && isChanceMarket(marketItem))}
+            isChanceMarket={!!(marketItem && isBinaryMarketView(marketItem))}
             onTrade={handleTrade}
             onOutcomeSelect={handleOutcomeAndCandidateSelect}
             onCandidateSelect={setSelectedCandidate}
@@ -313,7 +314,7 @@ export default function MarketDetailsPage() {
       )}
 
       {/* Mobile Chance Market Buttons - Only for chance markets on mobile */}
-      {isMobile && marketItem && isChanceMarket(marketItem) && (
+      {isMobile && marketItem && isBinaryMarketView(marketItem) && (
         <div className="fixed bottom-16 left-0 right-0 z-40 px-4 pb-2 bg-white dark:bg-gray-900">
           <div className="flex gap-3">
             <button

@@ -7,7 +7,7 @@
 export type { RawMarket, MarketOutcome } from '@/lib/mock';
 
 // New discriminated union types for different market presentations
-export type UiStyle = "default" | "chance";
+export type UiStyle = "default" | "binary" | "chance"; // "chance" deprecated
 
 export interface BaseMarket {
   id: string;
@@ -37,6 +37,7 @@ export function isGroup(item: MarketItem): item is Extract<MarketItem, { kind: "
   return item.kind === "group";
 }
 
+/** @deprecated Use isBinaryMarketView */
 export function isChanceMarket(item: MarketItem): item is Extract<MarketItem, { kind: "market"; uiStyle: "chance" }> {
   return item.kind === "market" && item.uiStyle === "chance";
 }

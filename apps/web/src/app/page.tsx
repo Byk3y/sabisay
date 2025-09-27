@@ -10,8 +10,9 @@ import { SidePanel } from "@/components/nav/SidePanel";
 import { SignUpModal } from "@/components/auth/SignUpModal";
 import { useSignUpModalContext } from "@/contexts/SignUpModalContext";
 import { mockMarkets, extraFeedItems, type Category } from "@/lib/mock";
-import { isGroup, isChanceMarket, type MarketItem } from "@/types/market";
-import { ChanceCard } from "@/components/market/ChanceCard";
+import { isGroup, type MarketItem } from "@/types/market";
+import { isBinaryMarketView } from "@/lib/marketUtils";
+import { BinaryCard } from "@/components/market/BinaryCard";
 import { GroupCard } from "@/components/market/GroupCard";
 import { useAccount, useChainId } from "wagmi";
 import { config } from "@/lib/config";
@@ -334,8 +335,8 @@ export default function HomePage() {
             if (isGroup(item)) {
               return <GroupCard key={item.groupId} group={item} />;
             }
-            if (item.kind === "market" && item.uiStyle === "chance") {
-              return <ChanceCard key={item.id} market={item} />;
+            if (item.kind === "market" && isBinaryMarketView(item)) {
+              return <BinaryCard key={item.id} market={item} />;
             }
             // Fallback to your original card for legacy markets
             // At this point, item must be a market (not group)

@@ -4,7 +4,7 @@
  */
 
 import { mockMarkets, extraFeedItems, binaryMembers, type RawMarket } from '@/lib/mock';
-import type { Market, Outcome, RelatedMarket } from '@/types/market';
+import type { Market, Outcome, RelatedMarket, UiStyle } from '@/types/market';
 
 /**
  * Get market by ID from mock data
@@ -23,6 +23,41 @@ export const getMarketById = (id: string): Market | null => {
 };
 
 /**
+ * Map old style name to new one while reading
+ * @param style - The uiStyle value to normalize
+ * @returns Normalized uiStyle value
+ */
+export function normalizeUiStyle(style?: UiStyle): UiStyle | undefined {
+  if (style === "chance") return "binary";
+  return style;
+}
+
+/**
+ * True binary by Yes/No labels (case/space tolerant)
+ * @param labels - Array of outcome labels
+ * @returns true if exactly 2 outcomes with "Yes" and "No" labels
+ */
+export function labelsAreYesNo(labels: string[] = []): boolean {
+  if (labels.length !== 2) return false;
+  const norm = (s: string) => (s ?? "").trim().toLowerCase();
+  const set = new Set(labels.map(norm));
+  return set.has("yes") && set.has("no");
+}
+
+/**
+ * Authoritative check for binary market view - only true Yes/No markets or explicitly tagged
+ * @param market - Market object with uiStyle and outcomes
+ * @returns true if market should render with binary UI
+ */
+export function isBinaryMarketView(market: { uiStyle?: string; outcomes?: any[] }): boolean {
+  const style = normalizeUiStyle(market?.uiStyle as UiStyle);
+  if (style === "binary") return true;
+  const labels = market?.outcomes?.map((o: any) => o?.name ?? o?.label) ?? [];
+  return labelsAreYesNo(labels);
+}
+
+/**
+ * @deprecated Use isBinaryMarketView instead - this only checks outcome count
  * Check if a market should be classified as a binary/chance market
  * @param rawMarket - Raw market data from mock
  * @returns true if market has exactly 2 outcomes and should be a chance market
@@ -37,8 +72,8 @@ export const isBinaryMarket = (rawMarket: RawMarket): boolean => {
  * @returns Transformed market data
  */
 export const transformMarketData = (rawMarket: RawMarket): Market => {
-  // Automatically detect binary markets and set uiStyle to "chance"
-  const uiStyle: "default" | "chance" | undefined = rawMarket.uiStyle || (isBinaryMarket(rawMarket) ? "chance" : undefined);
+  // Only set uiStyle to "binary" for true Yes/No markets or explicitly tagged markets
+  const uiStyle: UiStyle | undefined = rawMarket.uiStyle || (labelsAreYesNo(rawMarket.outcomes.map(o => o.label)) ? "binary" : undefined);
   
   const market: Market = {
     id: rawMarket.id,
@@ -58,8 +93,9 @@ export const transformMarketData = (rawMarket: RawMarket): Market => {
   };
 
   // Only add uiStyle if it's defined to avoid undefined assignment
-  if (uiStyle) {
-    market.uiStyle = uiStyle;
+  const normalizedStyle = normalizeUiStyle(uiStyle);
+  if (normalizedStyle) {
+    market.uiStyle = normalizedStyle;
   }
 
   return market;

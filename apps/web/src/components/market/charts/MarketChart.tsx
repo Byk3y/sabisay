@@ -173,7 +173,7 @@ export function MarketChart({
                   key={index}
                   className="text-xs text-gray-600 dark:text-gray-400"
                 >
-                  {formatTimeLabel(point.t, timeRange)}
+                  {point?.t ? formatTimeLabel(point.t, timeRange) : ''}
                 </div>
               ));
             })()}
