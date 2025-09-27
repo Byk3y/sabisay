@@ -11,7 +11,7 @@ import { formatCurrencyNoSymbol, formatDate } from '@/lib/formattingUtils';
  * @param props - Component props
  * @returns JSX element
  */
-export const MarketHeader = ({ market, onShare, onBookmark, isMobile = false, isChanceMarket = false }: MarketHeaderProps) => {
+export const MarketHeader = ({ market, onShare, onBookmark, isMobile = false, isBinaryMarket = false }: MarketHeaderProps) => {
   return (
     <div className="mb-4">
       {/* Volume Bar - Mobile only, positioned at top */}
@@ -81,7 +81,7 @@ export const MarketHeader = ({ market, onShare, onBookmark, isMobile = false, is
       </div>
 
       {/* Mobile-only outcomes under icon - hide for chance markets */}
-      {isMobile && !isChanceMarket && (
+      {isMobile && !isBinaryMarket && (
         <div className="mb-4">
           <div className="space-y-1">
             {market.outcomes
@@ -123,7 +123,7 @@ export const MarketHeader = ({ market, onShare, onBookmark, isMobile = false, is
             </div>
           </div>
           {/* Desktop outcomes - horizontal layout - hide for chance markets */}
-          {!isChanceMarket && (
+          {!isBinaryMarket && (
             <div className="flex items-center gap-6 text-sm">
               {market.outcomes
                 ?.sort((a, b) => b.volume - a.volume)

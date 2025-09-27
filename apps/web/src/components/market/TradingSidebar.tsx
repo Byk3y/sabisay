@@ -34,7 +34,7 @@ export const TradingSidebar = ({
   selectedExpiration,
   isMobile = false,
   isMobileSidebarOpen = false,
-  isChanceMarket = false,
+  isBinaryMarket = false,
   onTrade,
   onOutcomeSelect,
   onCandidateSelect,
@@ -87,14 +87,14 @@ export const TradingSidebar = ({
         fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out
         md:absolute md:top-0 md:right-0 md:left-auto md:transform-none
         ${isMobileSidebarOpen ? 'translate-y-0' : 'translate-y-full md:translate-y-0'}
-        w-[430px] ${isChanceMarket ? (isMobile ? (orderType === "limit" ? 'min-h-[500px]' : 'min-h-[418px]') : 'h-auto') : (orderType === "limit" ? 'min-h-[500px]' : 'min-h-[418px]')} md:w-[340px] md:h-[calc(100vh-200px)]
+        w-[430px] ${isBinaryMarket ? (isMobile ? (orderType === "limit" ? 'min-h-[500px]' : 'min-h-[418px]') : 'h-auto') : (orderType === "limit" ? 'min-h-[500px]' : 'min-h-[418px]')} md:w-[340px] md:h-[calc(100vh-200px)]
         md:overflow-y-auto md:space-y-4
       `}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
       {/* Trading Interface */}
-      <div className={`w-full bg-white dark:bg-gray-900 ${isChanceMarket ? (isMobile ? (orderType === "limit" ? 'min-h-[500px]' : 'min-h-[418px]') : 'h-auto') : (orderType === "limit" ? 'min-h-[500px]' : 'min-h-[418px]')} flex flex-col rounded-t-xl border-t border-l border-r border-gray-200 dark:border-gray-700 md:min-h-auto md:rounded-xl md:border md:border-gray-200 dark:md:border-gray-700 p-4 transition-all duration-300 ease-in-out`}>
+      <div className={`w-full bg-white dark:bg-gray-900 ${isBinaryMarket ? (isMobile ? (orderType === "limit" ? 'min-h-[500px]' : 'min-h-[418px]') : 'h-auto') : (orderType === "limit" ? 'min-h-[500px]' : 'min-h-[418px]')} flex flex-col rounded-t-xl border-t border-l border-r border-gray-200 dark:border-gray-700 md:min-h-auto md:rounded-xl md:border md:border-gray-200 dark:md:border-gray-700 p-4 transition-all duration-300 ease-in-out`}>
         {/* Mobile Handle - Swipe Down Indicator */}
         <div className="block md:hidden flex justify-center pt-3 pb-0">
           <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
@@ -116,7 +116,7 @@ export const TradingSidebar = ({
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Profile Section - Show for all markets on mobile, hide for chance markets on desktop */}
-          {currentOutcome && (!isChanceMarket || isMobile) && (
+          {currentOutcome && (!isBinaryMarket || isMobile) && (
             <ProfileSection
               market={market}
               currentOutcome={currentOutcome}
@@ -126,7 +126,7 @@ export const TradingSidebar = ({
           )}
 
           {/* Buy/Sell Tabs and Market Dropdown - Desktop only */}
-          <div className={`hidden md:flex items-center justify-between ${!isChanceMarket ? 'mb-6' : 'mb-4'}`}>
+          <div className={`hidden md:flex items-center justify-between ${!isBinaryMarket ? 'mb-6' : 'mb-4'}`}>
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
             <button
               onClick={() => onTradeTypeChange("buy")}

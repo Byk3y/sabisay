@@ -189,7 +189,7 @@ export default function MarketDetailsPage() {
               onShare={handleShare} 
               onBookmark={handleBookmark}
               isMobile={isMobile}
-              isChanceMarket={!!(marketItem && isBinaryMarketView(marketItem))}
+              isBinaryMarket={!!(marketItem && isBinaryMarketView(marketItem))}
             />
 
             {/* Chart Section */}
@@ -234,7 +234,7 @@ export default function MarketDetailsPage() {
               shares={shares}
               expirationEnabled={expirationEnabled}
               selectedExpiration={selectedExpiration}
-              isChanceMarket={!!(marketItem && isBinaryMarketView(marketItem))}
+              isBinaryMarket={!!(marketItem && isBinaryMarketView(marketItem))}
               onTrade={handleTrade}
               onOutcomeSelect={handleOutcomeAndCandidateSelect}
               onCandidateSelect={setSelectedCandidate}
@@ -297,7 +297,7 @@ export default function MarketDetailsPage() {
             selectedExpiration={selectedExpiration}
             isMobile={isMobile}
             isMobileSidebarOpen={isMobileSidebarOpen}
-            isChanceMarket={!!(marketItem && isBinaryMarketView(marketItem))}
+            isBinaryMarket={!!(marketItem && isBinaryMarketView(marketItem))}
             onTrade={handleTrade}
             onOutcomeSelect={handleOutcomeAndCandidateSelect}
             onCandidateSelect={setSelectedCandidate}

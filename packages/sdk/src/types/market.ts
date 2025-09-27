@@ -3,7 +3,7 @@
  * Supports binary "chance" markets and "group/rows" markets
  */
 
-export type UiStyle = "default" | "chance";
+export type UiStyle = "default" | "binary";
 
 export interface BaseMarket {
   id: string;
@@ -33,6 +33,3 @@ export function isGroup(item: MarketItem): item is Extract<MarketItem, { kind: "
   return item.kind === "group";
 }
 
-export function isChanceMarket(item: MarketItem): item is Extract<MarketItem, { kind: "market"; uiStyle: "chance" }> {
-  return item.kind === "market" && item.uiStyle === "chance";
-}

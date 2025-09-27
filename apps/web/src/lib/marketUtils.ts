@@ -56,15 +56,6 @@ export function isBinaryMarketView(market: { uiStyle?: string; outcomes?: any[] 
   return labelsAreYesNo(labels);
 }
 
-/**
- * @deprecated Use isBinaryMarketView instead - this only checks outcome count
- * Check if a market should be classified as a binary/chance market
- * @param rawMarket - Raw market data from mock
- * @returns true if market has exactly 2 outcomes and should be a chance market
- */
-export const isBinaryMarket = (rawMarket: RawMarket): boolean => {
-  return rawMarket.outcomes.length === 2;
-};
 
 /**
  * Transform raw market data to the format used in the market details page

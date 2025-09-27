@@ -37,10 +37,6 @@ export function isGroup(item: MarketItem): item is Extract<MarketItem, { kind: "
   return item.kind === "group";
 }
 
-/** @deprecated Use isBinaryMarketView */
-export function isChanceMarket(item: MarketItem): item is Extract<MarketItem, { kind: "market"; uiStyle: "chance" }> {
-  return item.kind === "market" && item.uiStyle === "chance";
-}
 
 // Define Category type locally to avoid import issues
 export type Category = "Trending" | "Politics" | "Breaking" | "New" | "Sports" | "Crypto" | "Earnings" | "Geopolitics" | "Tech" | "Culture" | "World" | "Economy" | "Naija Picks";
@@ -153,7 +149,7 @@ export interface MarketHeaderProps {
   onShare?: () => void;
   onBookmark?: () => void;
   isMobile?: boolean;
-  isChanceMarket?: boolean;
+  isBinaryMarket?: boolean;
 }
 
 export interface MarketChartProps {
@@ -174,7 +170,7 @@ export interface TradingSidebarProps {
   selectedExpiration: string;
   isMobile?: boolean;
   isMobileSidebarOpen?: boolean;
-  isChanceMarket?: boolean;
+  isBinaryMarket?: boolean;
   onTrade: (tradeData: TradeData) => void;
   onOutcomeSelect: (outcomeIndex: number, candidateIndex: number) => void;
   onCandidateSelect: (candidateIndex: number) => void;
