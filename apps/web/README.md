@@ -21,6 +21,7 @@ A Next.js application for prediction markets, inspired by Polymarket's design.
 ## Mock Data
 
 The app currently uses mock data defined in `src/lib/mock.ts` with 8 sample markets covering:
+
 - Federal Reserve decisions
 - Political elections
 - Cryptocurrency predictions

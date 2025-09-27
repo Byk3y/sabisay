@@ -21,7 +21,7 @@ interface TradeButtonProps {
 export const TradeButton = ({
   tradeData,
   tradeType,
-  onTrade
+  onTrade,
 }: TradeButtonProps) => {
   const handleTrade = () => {
     onTrade(tradeData);
@@ -29,13 +29,13 @@ export const TradeButton = ({
 
   return (
     <div className="mt-4">
-      <button 
+      <button
         onClick={handleTrade}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 rounded-lg transition-colors text-sm py-3.5 md:py-2.5"
       >
         {tradeType === 'buy' ? 'Trade' : 'Sell'}
       </button>
-      
+
       {/* Terms of Use - Mobile only */}
       <p className="block md:hidden text-sm font-bold text-gray-500 dark:text-gray-400 text-center mt-2">
         By trading, you agree to the{' '}

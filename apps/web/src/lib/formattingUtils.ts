@@ -13,7 +13,7 @@ export const formatCurrency = (amount: number): string => {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   });
 };
 
@@ -25,7 +25,7 @@ export const formatCurrency = (amount: number): string => {
 export const formatCurrencyNoSymbol = (amount: number): string => {
   return amount.toLocaleString('en-US', {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   });
 };
 
@@ -38,7 +38,7 @@ export const formatDate = (date: Date): string => {
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
   });
 };
 

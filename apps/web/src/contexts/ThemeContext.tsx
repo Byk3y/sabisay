@@ -20,14 +20,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Handle hydration
   useEffect(() => {
     setMounted(true);
-    
+
     // Check for saved theme preference or default to system preference
     const savedTheme = localStorage.getItem('pakomarket-theme') as Theme;
     if (savedTheme) {
       setTheme(savedTheme);
     } else {
       // Check system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
       setTheme(prefersDark ? 'dark' : 'light');
     }
   }, []);
@@ -37,7 +39,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (!mounted) return;
 
     const root = document.documentElement;
-    
+
     if (theme === 'dark') {
       root.classList.add('dark');
     } else {
@@ -48,13 +50,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme, mounted]);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, mounted }}>
       {!mounted ? (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#0b1220]">{children}</div>
+        <div className="min-h-screen bg-gray-50 dark:bg-[#0b1220]">
+          {children}
+        </div>
       ) : (
         children
       )}

@@ -7,7 +7,7 @@
     "test": "forge test",
     "test:gas": "forge test --gas-report",
     "test:coverage": "forge coverage",
-    "deploy:amoy": "forge script script/Deploy.s.sol --rpc-url $AMOY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify",
+    "deploy:amoy": "forge script script/Deploy.s.sol --rpc-url $ALCHEMY_AMOY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify",
     "deploy:polygon": "forge script script/Deploy.s.sol --rpc-url $POLYGON_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify",
     "clean": "forge clean"
   },

@@ -3,7 +3,12 @@
  * Extracted from page.tsx for better organization and reusability
  */
 
-import { mockMarkets, extraFeedItems, binaryMembers, type RawMarket } from '@/lib/mock';
+import {
+  mockMarkets,
+  extraFeedItems,
+  binaryMembers,
+  type RawMarket,
+} from '@/lib/mock';
 import type { Market, Outcome, RelatedMarket, UiStyle } from '@/types/market';
 
 /**
@@ -14,11 +19,11 @@ import type { Market, Outcome, RelatedMarket, UiStyle } from '@/types/market';
 export const getMarketById = (id: string): Market | null => {
   // Search in all mock data arrays
   const allMarkets = [...mockMarkets, ...extraFeedItems, ...binaryMembers];
-  
+
   // Find market by ID (only look at items with 'id' property, not 'groupId')
   const market = allMarkets.find(m => 'id' in m && m.id === id);
   if (!market) return null;
-  
+
   return transformMarketData(market as RawMarket);
 };
 
@@ -28,7 +33,7 @@ export const getMarketById = (id: string): Market | null => {
  * @returns Normalized uiStyle value
  */
 export function normalizeUiStyle(style?: UiStyle): UiStyle | undefined {
-  if (style === "chance") return "binary";
+  if (style === 'chance') return 'binary';
   return style;
 }
 
@@ -39,9 +44,9 @@ export function normalizeUiStyle(style?: UiStyle): UiStyle | undefined {
  */
 export function labelsAreYesNo(labels: string[] = []): boolean {
   if (labels.length !== 2) return false;
-  const norm = (s: string) => (s ?? "").trim().toLowerCase();
+  const norm = (s: string) => (s ?? '').trim().toLowerCase();
   const set = new Set(labels.map(norm));
-  return set.has("yes") && set.has("no");
+  return set.has('yes') && set.has('no');
 }
 
 /**
@@ -49,13 +54,15 @@ export function labelsAreYesNo(labels: string[] = []): boolean {
  * @param market - Market object with uiStyle and outcomes
  * @returns true if market should render with binary UI
  */
-export function isBinaryMarketView(market: { uiStyle?: string; outcomes?: any[] }): boolean {
+export function isBinaryMarketView(market: {
+  uiStyle?: string;
+  outcomes?: any[];
+}): boolean {
   const style = normalizeUiStyle(market?.uiStyle as UiStyle);
-  if (style === "binary") return true;
+  if (style === 'binary') return true;
   const labels = market?.outcomes?.map((o: any) => o?.name ?? o?.label) ?? [];
   return labelsAreYesNo(labels);
 }
-
 
 /**
  * Transform raw market data to the format used in the market details page
@@ -64,8 +71,12 @@ export function isBinaryMarketView(market: { uiStyle?: string; outcomes?: any[] 
  */
 export const transformMarketData = (rawMarket: RawMarket): Market => {
   // Only set uiStyle to "binary" for true Yes/No markets or explicitly tagged markets
-  const uiStyle: UiStyle | undefined = rawMarket.uiStyle || (labelsAreYesNo(rawMarket.outcomes.map(o => o.label)) ? "binary" : undefined);
-  
+  const uiStyle: UiStyle | undefined =
+    rawMarket.uiStyle ||
+    (labelsAreYesNo(rawMarket.outcomes.map(o => o.label))
+      ? 'binary'
+      : undefined);
+
   const market: Market = {
     id: rawMarket.id,
     title: rawMarket.question,
@@ -77,10 +88,10 @@ export const transformMarketData = (rawMarket: RawMarket): Market => {
       volume: Math.round(rawMarket.poolUsd * (outcome.oddsPct / 100)),
       price: {
         yes: Math.round(outcome.oddsPct),
-        no: Math.round(100 - outcome.oddsPct)
-      }
+        no: Math.round(100 - outcome.oddsPct),
+      },
     })),
-    relatedMarkets: getRelatedMarkets(rawMarket.id)
+    relatedMarkets: getRelatedMarkets(rawMarket.id),
   };
 
   // Only add uiStyle if it's defined to avoid undefined assignment
@@ -102,17 +113,18 @@ export const getRelatedMarkets = (marketId: string): RelatedMarket[] => {
   // In a real app, this would fetch from an API based on the market ID
   return [
     {
-      id: "1",
-      title: "Will the Democratic candidate win the 2025 NYC mayoral election?",
+      id: '1',
+      title: 'Will the Democratic candidate win the 2025 NYC mayoral election?',
       probability: 90,
-      volume: 15000000
+      volume: 15000000,
     },
     {
-      id: "2", 
-      title: "Will Andrew Cuomo win second place in the 2025 NYC mayoral election?",
+      id: '2',
+      title:
+        'Will Andrew Cuomo win second place in the 2025 NYC mayoral election?',
       probability: 85,
-      volume: 8000000
-    }
+      volume: 8000000,
+    },
   ];
 };
 
@@ -140,11 +152,13 @@ export const calculateMarketLiquidity = (outcomes: Outcome[]): number => {
  * @param endDate - Market end date
  * @returns Market status string
  */
-export const getMarketStatus = (endDate: Date): 'open' | 'closing-soon' | 'closed' => {
+export const getMarketStatus = (
+  endDate: Date
+): 'open' | 'closing-soon' | 'closed' => {
   const now = new Date();
   const timeDiff = endDate.getTime() - now.getTime();
   const hoursDiff = timeDiff / (1000 * 60 * 60);
-  
+
   if (hoursDiff <= 0) return 'closed';
   if (hoursDiff <= 24) return 'closing-soon';
   return 'open';
@@ -159,7 +173,7 @@ export const formatMarketEndDate = (endDate: Date): string => {
   return endDate.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
   });
 };
 
@@ -171,13 +185,15 @@ export const formatMarketEndDate = (endDate: Date): string => {
 export const getTimeRemaining = (endDate: Date): string => {
   const now = new Date();
   const timeDiff = endDate.getTime() - now.getTime();
-  
+
   if (timeDiff <= 0) return 'Closed';
-  
+
   const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const hours = Math.floor(
+    (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+  );
   const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-  
+
   if (days > 0) {
     return `${days}d ${hours}h`;
   } else if (hours > 0) {
@@ -206,14 +222,14 @@ export const getMarketStats = (market: Market) => {
   const liquidity = calculateMarketLiquidity(market.outcomes);
   const status = getMarketStatus(market.endDate);
   const timeRemaining = getTimeRemaining(market.endDate);
-  
+
   return {
     totalVolume,
     liquidity,
     status,
     timeRemaining,
     isTradeable: isMarketTradeable(market.endDate),
-    outcomeCount: market.outcomes.length
+    outcomeCount: market.outcomes.length,
   };
 };
 
@@ -224,14 +240,15 @@ export const getMarketStats = (market: Market) => {
  */
 export const searchMarkets = (query: string): Market[] => {
   if (!query.trim()) return [];
-  
+
   const searchTerm = query.toLowerCase();
   return mockMarkets
-    .filter(market => 
-      market.question.toLowerCase().includes(searchTerm) ||
-      market.outcomes.some(outcome => 
-        outcome.label.toLowerCase().includes(searchTerm)
-      )
+    .filter(
+      market =>
+        market.question.toLowerCase().includes(searchTerm) ||
+        market.outcomes.some(outcome =>
+          outcome.label.toLowerCase().includes(searchTerm)
+        )
     )
     .map(transformMarketData);
 };

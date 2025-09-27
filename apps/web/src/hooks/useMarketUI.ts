@@ -12,10 +12,10 @@ import type { UseMarketUIReturn, Category } from '@/types/market';
  * @returns Market UI state and operations
  */
 export const useMarketUI = (): UseMarketUIReturn => {
-  const [activeTab, setActiveTab] = useState("All");
-  const [activeCategory, setActiveCategory] = useState<Category>("Trending");
+  const [activeTab, setActiveTab] = useState('All');
+  const [activeCategory, setActiveCategory] = useState<Category>('Trending');
   const [isInputFocused, setIsInputFocused] = useState(false);
-  
+
   // Mobile detection
   const isMobile = useIsMobile();
 
@@ -26,6 +26,6 @@ export const useMarketUI = (): UseMarketUIReturn => {
     isMobile,
     setActiveTab,
     setActiveCategory,
-    setIsInputFocused
+    setIsInputFocused,
   };
 };

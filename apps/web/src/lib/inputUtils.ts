@@ -23,13 +23,13 @@ export const formatTradeAmount = (amount: string | number): string => {
 export const parseTradeAmount = (input: string): string => {
   // Remove all non-numeric characters except decimal point
   const cleaned = input.replace(/[^0-9.]/g, '');
-  
+
   // Handle multiple decimal points
   const parts = cleaned.split('.');
   if (parts.length > 2) {
     return parts[0] + '.' + parts.slice(1).join('');
   }
-  
+
   return cleaned;
 };
 
@@ -62,7 +62,10 @@ export const sanitizeInput = (input: string): string => {
  * @param decimals - Number of decimal places (default: 2)
  * @returns Formatted currency string
  */
-export const formatCurrency = (amount: number, decimals: number = 2): string => {
+export const formatCurrency = (
+  amount: number,
+  decimals: number = 2
+): string => {
   return amount.toLocaleString('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
@@ -75,7 +78,10 @@ export const formatCurrency = (amount: number, decimals: number = 2): string => 
  * @param decimals - Number of decimal places (default: 1)
  * @returns Formatted percentage string
  */
-export const formatPercentage = (value: number, decimals: number = 1): string => {
+export const formatPercentage = (
+  value: number,
+  decimals: number = 1
+): string => {
   return `${value.toFixed(decimals)}%`;
 };
 

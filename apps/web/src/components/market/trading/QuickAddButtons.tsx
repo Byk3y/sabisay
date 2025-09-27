@@ -10,7 +10,7 @@ import { isTradeAmountWithinLimits } from '@/lib/tradingUtils';
 interface QuickAddButtonsProps {
   tradeAmount: string;
   onAmountChange: (amount: string) => void;
-  tradeType?: "buy" | "sell";
+  tradeType?: 'buy' | 'sell';
   shares?: string;
   onSharesChange?: (shares: string) => void;
 }
@@ -23,20 +23,23 @@ interface QuickAddButtonsProps {
 const QuickAddButtonsComponent = ({
   tradeAmount,
   onAmountChange,
-  tradeType = "buy",
+  tradeType = 'buy',
   shares,
-  onSharesChange
+  onSharesChange,
 }: QuickAddButtonsProps) => {
-  const handleQuickAdd = useCallback((amount: number) => {
-    const currentAmount = parseFloat(tradeAmount) || 0;
-    const newAmount = currentAmount + amount;
-    if (isTradeAmountWithinLimits(newAmount.toString())) {
-      onAmountChange(newAmount.toString());
-    }
-  }, [tradeAmount, onAmountChange]);
+  const handleQuickAdd = useCallback(
+    (amount: number) => {
+      const currentAmount = parseFloat(tradeAmount) || 0;
+      const newAmount = currentAmount + amount;
+      if (isTradeAmountWithinLimits(newAmount.toString())) {
+        onAmountChange(newAmount.toString());
+      }
+    },
+    [tradeAmount, onAmountChange]
+  );
 
   const handleMax = useCallback(() => {
-    onAmountChange("999999999");
+    onAmountChange('999999999');
   }, [onAmountChange]);
 
   // Buy mode handlers
@@ -45,21 +48,24 @@ const QuickAddButtonsComponent = ({
   const handleAdd100 = useCallback(() => handleQuickAdd(100), [handleQuickAdd]);
 
   // Sell mode handlers (percentage-based)
-  const handleQuickPercentage = useCallback((percentage: number) => {
-    if (!onSharesChange) return;
-    // Assuming user has 100 shares total for demo purposes
-    const totalShares = 100;
-    const newShares = Math.floor(totalShares * (percentage / 100));
-    onSharesChange(newShares.toString());
-  }, [onSharesChange]);
+  const handleQuickPercentage = useCallback(
+    (percentage: number) => {
+      if (!onSharesChange) return;
+      // Assuming user has 100 shares total for demo purposes
+      const totalShares = 100;
+      const newShares = Math.floor(totalShares * (percentage / 100));
+      onSharesChange(newShares.toString());
+    },
+    [onSharesChange]
+  );
 
   const handleMaxShares = useCallback(() => {
     if (!onSharesChange) return;
     // Assuming user has 100 shares total for demo purposes
-    onSharesChange("100");
+    onSharesChange('100');
   }, [onSharesChange]);
 
-  if (tradeType === "sell") {
+  if (tradeType === 'sell') {
     return (
       <div className="flex gap-2 justify-center mb-2">
         <button

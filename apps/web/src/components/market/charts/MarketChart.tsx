@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React from 'react';
 import {
@@ -8,11 +8,11 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip
+  Tooltip,
 } from 'recharts';
 import { Series, formatTimeLabel, type TimeRange } from '@/lib/mockSeries';
 
-export type MarketChartVariant = "chance" | "multi";
+export type MarketChartVariant = 'chance' | 'multi';
 
 export interface MarketChartProps {
   variant: MarketChartVariant;
@@ -39,18 +39,20 @@ const CHART_COLORS = [
 const CustomTooltip = ({ active, payload, label, timeRange, variant }: any) => {
   if (active && payload && payload.length) {
     const timeLabel = formatTimeLabel(label, timeRange);
-    
+
     return (
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg p-3">
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{timeLabel}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+          {timeLabel}
+        </p>
         {payload.map((entry: any, index: number) => (
           <div key={index} className="flex items-center gap-2">
-            <div 
-              className="w-3 h-3 rounded-full" 
+            <div
+              className="w-3 h-3 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
             <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {variant === "chance" ? "Chance" : entry.dataKey}: {entry.value}%
+              {variant === 'chance' ? 'Chance' : entry.dataKey}: {entry.value}%
             </span>
           </div>
         ))}
@@ -60,14 +62,13 @@ const CustomTooltip = ({ active, payload, label, timeRange, variant }: any) => {
   return null;
 };
 
-
 export function MarketChart({
   variant,
   series,
   showChanceHeader = true,
   currentChancePct,
   timeRange,
-  className = ""
+  className = '',
 }: MarketChartProps) {
   if (!series || series.length === 0) {
     return (
@@ -79,15 +80,16 @@ export function MarketChart({
 
   // Calculate change percentage for chance markets
   const calculateChange = () => {
-    if (variant !== "chance" || !series[0]?.data || series[0].data.length < 2) return 0;
-    
+    if (variant !== 'chance' || !series[0]?.data || series[0].data.length < 2)
+      return 0;
+
     const data = series[0].data;
     const current = data[data.length - 1]?.p || 0;
-    
+
     // Look at a few data points back to get a more meaningful change
     const lookback = Math.min(3, data.length - 1);
     const previous = data[data.length - 1 - lookback]?.p || 0;
-    
+
     return current - previous;
   };
 
@@ -96,31 +98,36 @@ export function MarketChart({
   const isPositive = change > 0;
 
   // For chance variant, show header with current percentage and change
-  const chanceHeader = variant === "chance" && showChanceHeader && currentChancePct !== undefined ? (
-    <div className="mb-4 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="text-2xl font-bold text-gray-900 dark:text-white">
-          {Math.round(currentChancePct)}%
-        </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">chance</div>
-        {change !== 0 && (
-          <div className={`flex items-center gap-1 text-sm font-medium ${
-            isPositive ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
-          }`}>
-            <span className="text-xs">
-              {isPositive ? '▲' : '▼'}
-            </span>
-            {changePct}%
+  const chanceHeader =
+    variant === 'chance' &&
+    showChanceHeader &&
+    currentChancePct !== undefined ? (
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+            {Math.round(currentChancePct)}%
           </div>
-        )}
+          <div className="text-sm text-gray-500 dark:text-gray-400">chance</div>
+          {change !== 0 && (
+            <div
+              className={`flex items-center gap-1 text-sm font-medium ${
+                isPositive
+                  ? 'text-red-600 dark:text-red-400'
+                  : 'text-green-600 dark:text-green-400'
+              }`}
+            >
+              <span className="text-xs">{isPositive ? '▲' : '▼'}</span>
+              {changePct}%
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  ) : null;
+    ) : null;
 
   return (
     <div className={`w-full ${className}`}>
       {chanceHeader}
-      
+
       <div className="h-32 md:h-56 relative mb-8">
         {/* Custom horizontal lines that extend full width */}
         <div className="absolute inset-0 pointer-events-none">
@@ -132,7 +139,7 @@ export function MarketChart({
                 top: `${5 + (value / 100) * (100 - 10)}%`, // 5% top margin, 10% total margin
                 height: '1px',
                 left: '0',
-                right: '40px' // Leave space for percentage labels
+                right: '40px', // Leave space for percentage labels
               }}
             />
           ))}
@@ -147,7 +154,7 @@ export function MarketChart({
               style={{
                 top: `${5 + ((100 - value) / 100) * (100 - 10)}%`, // Invert positioning: 0% at bottom, 100% at top
                 right: '8px',
-                transform: 'translateY(-50%)' // Center the text on the line
+                transform: 'translateY(-50%)', // Center the text on the line
               }}
             >
               {value}%
@@ -157,42 +164,47 @@ export function MarketChart({
 
         {/* Custom time labels positioned below the bottom dotted line */}
         <div className="absolute -bottom-6 md:-bottom-3 left-0 right-10 pointer-events-none z-10">
-          <div className="flex items-center h-6 px-2 md:px-8" style={{ justifyContent: 'space-evenly' }}>
-            {series[0]?.data && series[0].data.length > 0 && (() => {
-              const data = series[0].data;
-              const timePoints = [
-                data[0], // First point
-                data[Math.floor(data.length * 0.25)], // 25% point
-                data[Math.floor(data.length * 0.5)], // 50% point
-                data[Math.floor(data.length * 0.75)], // 75% point
-                data[data.length - 1] // Last point
-              ].filter(Boolean);
+          <div
+            className="flex items-center h-6 px-2 md:px-8"
+            style={{ justifyContent: 'space-evenly' }}
+          >
+            {series[0]?.data &&
+              series[0].data.length > 0 &&
+              (() => {
+                const data = series[0].data;
+                const timePoints = [
+                  data[0], // First point
+                  data[Math.floor(data.length * 0.25)], // 25% point
+                  data[Math.floor(data.length * 0.5)], // 50% point
+                  data[Math.floor(data.length * 0.75)], // 75% point
+                  data[data.length - 1], // Last point
+                ].filter(Boolean);
 
-              return timePoints.map((point, index) => (
-                <div
-                  key={index}
-                  className="text-xs text-gray-600 dark:text-gray-400"
-                >
-                  {point?.t ? formatTimeLabel(point.t, timeRange) : ''}
-                </div>
-              ));
-            })()}
+                return timePoints.map((point, index) => (
+                  <div
+                    key={index}
+                    className="text-xs text-gray-600 dark:text-gray-400"
+                  >
+                    {point?.t ? formatTimeLabel(point.t, timeRange) : ''}
+                  </div>
+                ));
+              })()}
           </div>
         </div>
-        
+
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={series[0]?.data || []}
             margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
           >
-            <CartesianGrid 
-              strokeDasharray="3 3" 
-              stroke="#E5E7EB" 
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#E5E7EB"
               className="dark:stroke-gray-700"
               horizontal={false}
               vertical={false}
             />
-            
+
             <XAxis
               dataKey="t"
               type="number"
@@ -201,17 +213,21 @@ export function MarketChart({
               tick={false}
               axisLine={false}
             />
-            
+
             <YAxis
               orientation="right"
               domain={[0, 100]}
               tick={false}
               axisLine={false}
             />
-            
-            <Tooltip content={<CustomTooltip timeRange={timeRange} variant={variant} />} />
-            
-            {variant === "chance" ? (
+
+            <Tooltip
+              content={
+                <CustomTooltip timeRange={timeRange} variant={variant} />
+              }
+            />
+
+            {variant === 'chance' ? (
               // Single line for chance markets
               <Line
                 type="monotone"
@@ -233,7 +249,12 @@ export function MarketChart({
                   stroke={CHART_COLORS[index % CHART_COLORS.length]}
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 4, stroke: CHART_COLORS[index % CHART_COLORS.length] || '#3B82F6', strokeWidth: 2 }}
+                  activeDot={{
+                    r: 4,
+                    stroke:
+                      CHART_COLORS[index % CHART_COLORS.length] || '#3B82F6',
+                    strokeWidth: 2,
+                  }}
                 />
               ))
             )}

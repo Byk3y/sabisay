@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 export function SwitchToLocal() {
   const { switchChain } = useSwitchChain();
   return (
-    <button 
+    <button
       onClick={() => switchChain({ chainId: localAnvil.id })}
       className="px-2 py-1 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-yellow-800 dark:text-yellow-100 rounded text-xs font-medium transition-colors"
     >

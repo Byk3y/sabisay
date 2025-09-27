@@ -15,10 +15,10 @@ interface MobileOverlayProps {
  * @param props - Component props
  * @returns JSX element
  */
-export const MobileOverlay = ({ 
-  isOpen, 
-  onClose, 
-  className = "" 
+export const MobileOverlay = ({
+  isOpen,
+  onClose,
+  className = '',
 }: MobileOverlayProps) => {
   if (!isOpen) return null;
 

@@ -5,7 +5,10 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { getTradeAmountFontSize, getSellReceiveAmountFontSize } from '@/lib/tradingUtils';
+import {
+  getTradeAmountFontSize,
+  getSellReceiveAmountFontSize,
+} from '@/lib/tradingUtils';
 import { useAmountInput } from '@/hooks/useAmountInput';
 import type { Outcome } from '@/types/market';
 
@@ -25,7 +28,7 @@ const SellSectionComponent = ({
   selectedCandidate,
   currentOutcome,
   shares,
-  onSharesChange
+  onSharesChange,
 }: SellSectionProps) => {
   const {
     isInputFocused,
@@ -43,25 +46,40 @@ const SellSectionComponent = ({
   }, []);
 
   // Custom handlers for shares (no cursor protection needed since no $ symbol)
-  const handleSharesKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Allow normal keyboard navigation for shares
-  }, []);
+  const handleSharesKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // Allow normal keyboard navigation for shares
+    },
+    []
+  );
 
-  const handleSharesClick = useCallback((e: React.MouseEvent<HTMLInputElement>) => {
-    // Allow normal click behavior for shares
-  }, []);
+  const handleSharesClick = useCallback(
+    (e: React.MouseEvent<HTMLInputElement>) => {
+      // Allow normal click behavior for shares
+    },
+    []
+  );
 
-  const handleSharesSelect = useCallback((e: React.SyntheticEvent<HTMLInputElement>) => {
-    // Allow normal selection behavior for shares
-  }, []);
+  const handleSharesSelect = useCallback(
+    (e: React.SyntheticEvent<HTMLInputElement>) => {
+      // Allow normal selection behavior for shares
+    },
+    []
+  );
 
-  const currentPrice = selectedCandidate === 0 ? currentOutcome.price.yes : currentOutcome.price.no;
+  const currentPrice =
+    selectedCandidate === 0
+      ? currentOutcome.price.yes
+      : currentOutcome.price.no;
   const sharesNumber = parseFloat(shares) || 0;
   const receiveAmount = sharesNumber * (currentPrice / 100); // Convert cents to dollars
 
-  const handleSharesChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    handleChange(e.target.value, onSharesChange);
-  }, [handleChange, onSharesChange]);
+  const handleSharesChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleChange(e.target.value, onSharesChange);
+    },
+    [handleChange, onSharesChange]
+  );
 
   const handleIncrementClick = useCallback(() => {
     handleIncrement(shares, onSharesChange);
@@ -71,29 +89,38 @@ const SellSectionComponent = ({
     handleDecrement(shares, onSharesChange);
   }, [handleDecrement, shares, onSharesChange]);
 
-  const handleFocusEvent = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
-    handleFocus();
-  }, [handleFocus]);
+  const handleFocusEvent = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      handleFocus();
+    },
+    [handleFocus]
+  );
 
-  const handleBlurEvent = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
-    handleBlur();
-  }, [handleBlur]);
+  const handleBlurEvent = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      handleBlur();
+    },
+    [handleBlur]
+  );
 
-  const handleQuickPercentage = useCallback((percentage: number) => {
-    // Assuming user has 100 shares total for demo purposes
-    const totalShares = 100;
-    const newShares = Math.floor(totalShares * (percentage / 100));
-    onSharesChange(newShares.toString());
-  }, [onSharesChange]);
+  const handleQuickPercentage = useCallback(
+    (percentage: number) => {
+      // Assuming user has 100 shares total for demo purposes
+      const totalShares = 100;
+      const newShares = Math.floor(totalShares * (percentage / 100));
+      onSharesChange(newShares.toString());
+    },
+    [onSharesChange]
+  );
 
   const handleMaxShares = useCallback(() => {
     // Assuming user has 100 shares total for demo purposes
-    onSharesChange("100");
+    onSharesChange('100');
   }, [onSharesChange]);
 
-  const formattedReceiveAmount = receiveAmount.toLocaleString('en-US', { 
-    minimumFractionDigits: 2, 
-    maximumFractionDigits: 2 
+  const formattedReceiveAmount = receiveAmount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 
   return (
@@ -106,11 +133,21 @@ const SellSectionComponent = ({
             onClick={handleDecrementClick}
             className="w-10 h-10 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20 12H4"
+              />
             </svg>
           </button>
-          
+
           {/* Shares Display - Centered */}
           <div className="text-center flex-1 mx-4">
             <input
@@ -126,19 +163,28 @@ const SellSectionComponent = ({
               className="w-full text-4xl font-bold text-gray-900 dark:text-white bg-transparent border-none outline-none text-center placeholder:text-gray-400 dark:placeholder:text-gray-500"
             />
           </div>
-          
+
           {/* Plus Button - Far Right */}
           <button
             onClick={handleIncrementClick}
             className="w-10 h-10 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
             </svg>
           </button>
         </div>
       </div>
-
 
       {/* Desktop: Shares Input - matches AmountInput styling */}
       <div className="hidden md:block mb-1">
@@ -146,7 +192,10 @@ const SellSectionComponent = ({
           <label className="text-base font-bold text-gray-900 dark:text-gray-100 flex-shrink-0">
             Shares
           </label>
-          <div className="flex items-center justify-end relative min-w-0" style={{ flex: '1 1 0%' }}>
+          <div
+            className="flex items-center justify-end relative min-w-0"
+            style={{ flex: '1 1 0%' }}
+          >
             <input
               type="text"
               value={shares ? formatSharesValue(shares) : ''}
@@ -192,10 +241,16 @@ const SellSectionComponent = ({
           {/* Mobile layout - centered, matches ToWinSection mobile */}
           <div className="block md:hidden text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"/>
+              <svg
+                className="w-5 h-5 text-green-600 dark:text-green-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" />
               </svg>
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">You'll receive</span>
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                You'll receive
+              </span>
             </div>
             <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">
               ${formattedReceiveAmount}
@@ -222,7 +277,9 @@ const SellSectionComponent = ({
             <div className="text-right min-w-[140px] flex justify-end">
               <div
                 className="font-bold text-green-600 dark:text-green-400 h-12 flex items-center justify-end"
-                style={{ fontSize: getSellReceiveAmountFontSize(receiveAmount) }}
+                style={{
+                  fontSize: getSellReceiveAmountFontSize(receiveAmount),
+                }}
               >
                 ${formattedReceiveAmount}
               </div>

@@ -29,7 +29,7 @@ function seededRandom(seed: number): () => number {
 function generateTimePoints(range: TimeRange): number[] {
   const now = Date.now();
   const points: number[] = [];
-  
+
   switch (range) {
     case '1H':
       for (let i = 0; i < 6; i++) {
@@ -62,7 +62,7 @@ function generateTimePoints(range: TimeRange): number[] {
       }
       break;
   }
-  
+
   return points;
 }
 
@@ -76,28 +76,28 @@ function generateSmoothCurve(
 ): SeriesDataPoint[] {
   const data: SeriesDataPoint[] = [];
   let currentValue = baseValue;
-  
+
   for (let i = 0; i < timePoints.length; i++) {
     // Add trend (slight upward or downward movement)
     currentValue += trend * (random() - 0.5) * 0.1;
-    
+
     // Add volatility (random fluctuations)
     currentValue += (random() - 0.5) * volatility;
-    
+
     // Add some momentum (previous value influences current)
     if (i > 0 && data[i - 1]) {
       currentValue = currentValue * 0.7 + data[i - 1]!.p * 0.3;
     }
-    
+
     // Clamp between 0 and 100
     currentValue = Math.max(0, Math.min(100, currentValue));
-    
+
     data.push({
       t: timePoints[i]!,
-      p: Math.round(currentValue * 100) / 100
+      p: Math.round(currentValue * 100) / 100,
     });
   }
-  
+
   return data;
 }
 
@@ -112,14 +112,20 @@ export function generateChanceSeries(
 ): Series[] {
   const timePoints = generateTimePoints(range);
   const random = seededRandom(marketId.charCodeAt(0) + marketId.length);
-  
+
   // Use provided base chance or generate one based on market ID
-  const baseValue = baseChance ?? (30 + (random() * 40)); // 30-70% range
+  const baseValue = baseChance ?? 30 + random() * 40; // 30-70% range
   const volatility = 5 + random() * 10; // 5-15% volatility
   const trend = (random() - 0.5) * 2; // Slight trend
-  
-  const data = generateSmoothCurve(timePoints, baseValue, volatility, trend, random);
-  
+
+  const data = generateSmoothCurve(
+    timePoints,
+    baseValue,
+    volatility,
+    trend,
+    random
+  );
+
   // Ensure the last data point matches the current chance if provided
   if (baseChance !== undefined && data.length > 0) {
     const lastDataPoint = data[data.length - 1];
@@ -127,12 +133,14 @@ export function generateChanceSeries(
       lastDataPoint.p = baseChance;
     }
   }
-  
-  return [{
-    id: `${marketId}-chance`,
-    label: 'Chance',
-    data
-  }];
+
+  return [
+    {
+      id: `${marketId}-chance`,
+      label: 'Chance',
+      data,
+    },
+  ];
 }
 
 /**
@@ -146,37 +154,46 @@ export function generateMultiSeries(
 ): Series[] {
   const timePoints = generateTimePoints(range);
   const series: Series[] = [];
-  
+
   // Generate base values that sum to ~100%
   const baseValues: number[] = [];
   let remaining = 100;
-  
+
   for (let i = 0; i < labels.length; i++) {
     if (i === labels.length - 1) {
       baseValues.push(remaining);
     } else {
-      const value = 20 + Math.random() * (remaining - 20 * (labels.length - i - 1));
+      const value =
+        20 + Math.random() * (remaining - 20 * (labels.length - i - 1));
       baseValues.push(value);
       remaining -= value;
     }
   }
-  
+
   // Generate series for each outcome
   labels.forEach((label, index) => {
-    const random = seededRandom(marketId.charCodeAt(0) + marketId.length + index);
+    const random = seededRandom(
+      marketId.charCodeAt(0) + marketId.length + index
+    );
     const baseValue = baseValues[index];
     const volatility = 3 + random() * 7; // 3-10% volatility
     const trend = (random() - 0.5) * 1.5; // Slight trend
-    
-    const data = generateSmoothCurve(timePoints, baseValue || 0, volatility, trend, random);
-    
+
+    const data = generateSmoothCurve(
+      timePoints,
+      baseValue || 0,
+      volatility,
+      trend,
+      random
+    );
+
     series.push({
       id: `${marketId}-${label.toLowerCase().replace(/\s+/g, '-')}`,
       label,
-      data
+      data,
     });
   });
-  
+
   return series;
 }
 
@@ -185,27 +202,27 @@ export function generateMultiSeries(
  */
 export function formatTimeLabel(timestamp: number, range: TimeRange): string {
   const date = new Date(timestamp);
-  
+
   switch (range) {
     case '1H':
     case '6H':
-      return date.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
         minute: '2-digit',
-        hour12: true 
+        hour12: true,
       });
     case '1D':
-      return date.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
         minute: '2-digit',
-        hour12: true 
+        hour12: true,
       });
     case '1W':
     case '1M':
     case 'ALL':
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
       });
     default:
       return date.toLocaleString();

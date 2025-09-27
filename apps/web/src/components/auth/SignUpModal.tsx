@@ -1,73 +1,152 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { X } from "lucide-react";
-import { useConnect } from "wagmi";
-import { metaMask, walletConnect, coinbaseWallet } from "wagmi/connectors";
-import { useTheme } from "@/contexts/ThemeContext";
-import { WalletBrandIcon } from "./WalletBrandIcon";
+import { useState } from 'react';
+import { X } from 'lucide-react';
+import { useConnect } from 'wagmi';
+import { metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { Magic } from 'magic-sdk';
+import { OAuthExtension } from '@magic-ext/oauth2';
+import { WalletBrandIcon } from './WalletBrandIcon';
 
 interface SignUpModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode?: "signup" | "signin";
+  mode?: 'signup' | 'signin';
 }
 
-export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalProps) {
-  const [email, setEmail] = useState("");
+export function SignUpModal({
+  isOpen,
+  onClose,
+  mode = 'signup',
+}: SignUpModalProps) {
+  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { theme } = useTheme();
   const { connect } = useConnect();
+  const { login } = useAuth();
 
   if (!isOpen) return null;
 
-  const handleGoogleSignUp = () => {
-    // TODO: Implement Google OAuth
-    console.log("Google sign up clicked");
+  const handleGoogleSignUp = async () => {
+    try {
+      setIsLoading(true);
+      console.log('Starting Google OAuth flow...');
+
+      // Initialize Magic client with OAuth2 extension
+      const magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY!, {
+        extensions: [new OAuthExtension()],
+      });
+
+      // Start Google OAuth flow with popup
+      const didToken = await magic.oauth2.loginWithPopup({
+        provider: 'google',
+      });
+
+      console.log('Google OAuth completed, DID token:', didToken);
+
+      // Send DID token to our API
+      const response = await fetch('/api/auth/magic/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ didToken }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Google login successful:', result);
+        login(result.userId, result.email);
+        onClose();
+      } else {
+        const error = await response.json();
+        console.error('Google login failed:', error);
+        alert('Google login failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Google sign up error:', error);
+      alert('Google sign up failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEmailSignUp = () => {
+  const handleEmailSignUp = async () => {
     if (!email) return;
-    setIsLoading(true);
-    // TODO: Implement email sign up
-    console.log("Email sign up:", email);
-    setTimeout(() => setIsLoading(false), 2000);
+
+    try {
+      setIsLoading(true);
+
+      // Initialize Magic client
+      const magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY!);
+
+      // Login with email OTP
+      const didToken = await magic.auth.loginWithEmailOTP({ email });
+
+      // Send DID token to our API
+      const response = await fetch('/api/auth/magic/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ didToken }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        login(result.userId, result.email);
+        onClose();
+      } else {
+        const error = await response.json();
+        console.error('Email login failed:', error);
+        alert('Email login failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Email sign up error:', error);
+      alert('Email sign up failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleWalletConnect = (walletType: string) => {
     try {
       switch (walletType) {
-        case "metamask":
+        case 'metamask':
           connect({ connector: metaMask() });
           break;
-        case "walletconnect":
-          connect({ connector: walletConnect({ projectId: "your-project-id" }) });
+        case 'walletconnect':
+          connect({
+            connector: walletConnect({ projectId: 'your-project-id' }),
+          });
           break;
-        case "coinbase":
+        case 'coinbase':
           connect({ connector: coinbaseWallet() });
           break;
-        case "phantom":
+        case 'phantom':
           // Phantom is Solana-specific, would need different connector
-          console.log("Phantom wallet connection not implemented for Ethereum");
+          console.log('Phantom wallet connection not implemented for Ethereum');
           break;
         default:
-          console.log("Unknown wallet type:", walletType);
+          console.log('Unknown wallet type:', walletType);
       }
       // Close modal after successful connection
       onClose();
     } catch (error) {
-      console.error("Wallet connection failed:", error);
+      console.error('Wallet connection failed:', error);
     }
   };
 
   return (
     <div className="fixed inset-0 z-[9999] md:flex md:items-center md:justify-center md:p-4">
       {/* Overlay */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/30 backdrop-blur-[1px]"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="relative bg-white dark:bg-gray-900 w-full h-full md:h-auto md:rounded-2xl md:max-w-md md:shadow-2xl md:border md:border-gray-200 dark:md:border-gray-700 flex flex-col md:block">
         {/* Close button */}
@@ -87,7 +166,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
               <span className="text-white font-bold text-lg">S</span>
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {mode === "signup" ? "Welcome to PakoMarket" : "Welcome Back"}
+              {mode === 'signup' ? 'Welcome to PakoMarket' : 'Welcome Back'}
             </h2>
           </div>
 
@@ -125,7 +204,9 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
               <div className="w-full border-t border-gray-300 dark:border-gray-700" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">OR</span>
+              <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+                OR
+              </span>
             </div>
           </div>
 
@@ -137,7 +218,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
                   type="email"
                   placeholder="Enter Email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 border-r-0 rounded-l-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
                 />
               </div>
@@ -149,7 +230,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
                 {isLoading ? (
                   <div className="w-4 h-4 border-2 border-gray-900 dark:border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  "Continue"
+                  'Continue'
                 )}
               </button>
             </div>
@@ -160,7 +241,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
             <div className="grid grid-cols-4 gap-3">
               {/* MetaMask */}
               <button
-                onClick={() => handleWalletConnect("metamask")}
+                onClick={() => handleWalletConnect('metamask')}
                 className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors flex items-center justify-center border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md"
               >
                 <WalletBrandIcon name="metamask" className="w-8 h-8" />
@@ -168,7 +249,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
 
               {/* WalletConnect */}
               <button
-                onClick={() => handleWalletConnect("walletconnect")}
+                onClick={() => handleWalletConnect('walletconnect')}
                 className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors flex items-center justify-center border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md"
               >
                 <WalletBrandIcon name="walletconnect" className="w-8 h-8" />
@@ -176,7 +257,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
 
               {/* Phantom */}
               <button
-                onClick={() => handleWalletConnect("phantom")}
+                onClick={() => handleWalletConnect('phantom')}
                 className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors flex items-center justify-center border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md"
               >
                 <WalletBrandIcon name="phantom" className="w-8 h-8" />
@@ -184,7 +265,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
 
               {/* Coinbase Wallet */}
               <button
-                onClick={() => handleWalletConnect("coinbase")}
+                onClick={() => handleWalletConnect('coinbase')}
                 className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors flex items-center justify-center border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md"
               >
                 <WalletBrandIcon name="coinbase" className="w-8 h-8" />
@@ -206,7 +287,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
         {/* Desktop Title - No logo */}
         <div className="hidden md:block text-center pt-8 pb-6 px-8">
           <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
-            {mode === "signup" ? "Welcome to PakoMarket" : "Welcome Back"}
+            {mode === 'signup' ? 'Welcome to PakoMarket' : 'Welcome Back'}
           </h2>
         </div>
 
@@ -246,7 +327,9 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
               <div className="w-full border-t border-gray-300 dark:border-gray-700" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">OR</span>
+              <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+                OR
+              </span>
             </div>
           </div>
 
@@ -258,7 +341,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
                   type="email"
                   placeholder="Enter Email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 border-r-0 rounded-l-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
                 />
               </div>
@@ -270,7 +353,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
                 {isLoading ? (
                   <div className="w-4 h-4 border-2 border-gray-900 dark:border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  "Continue"
+                  'Continue'
                 )}
               </button>
             </div>
@@ -281,7 +364,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
             <div className="grid grid-cols-4 gap-3">
               {/* MetaMask */}
               <button
-                onClick={() => handleWalletConnect("metamask")}
+                onClick={() => handleWalletConnect('metamask')}
                 className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors flex items-center justify-center border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md"
               >
                 <WalletBrandIcon name="metamask" className="w-8 h-8" />
@@ -289,7 +372,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
 
               {/* WalletConnect */}
               <button
-                onClick={() => handleWalletConnect("walletconnect")}
+                onClick={() => handleWalletConnect('walletconnect')}
                 className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors flex items-center justify-center border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md"
               >
                 <WalletBrandIcon name="walletconnect" className="w-8 h-8" />
@@ -297,7 +380,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
 
               {/* Phantom */}
               <button
-                onClick={() => handleWalletConnect("phantom")}
+                onClick={() => handleWalletConnect('phantom')}
                 className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors flex items-center justify-center border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md"
               >
                 <WalletBrandIcon name="phantom" className="w-8 h-8" />
@@ -305,7 +388,7 @@ export function SignUpModal({ isOpen, onClose, mode = "signup" }: SignUpModalPro
 
               {/* Coinbase Wallet */}
               <button
-                onClick={() => handleWalletConnect("coinbase")}
+                onClick={() => handleWalletConnect('coinbase')}
                 className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors flex items-center justify-center border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md"
               >
                 <WalletBrandIcon name="coinbase" className="w-8 h-8" />

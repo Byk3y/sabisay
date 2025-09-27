@@ -4,7 +4,11 @@
  */
 
 import { useMemo } from 'react';
-import { calculatePotentialWin, calculateTotal, calculateLimitWin } from '@/lib/tradingUtils';
+import {
+  calculatePotentialWin,
+  calculateTotal,
+  calculateLimitWin,
+} from '@/lib/tradingUtils';
 import type { Market, Outcome } from '@/types/market';
 
 export interface UseTradeCalculationsProps {
@@ -20,17 +24,17 @@ export interface UseTradeCalculationsReturn {
   // Current market data
   currentOutcome: Outcome | undefined;
   currentPrice: number;
-  
+
   // Calculations
   potentialWin: number;
   totalCost: number;
   limitWin: number;
-  
+
   // Formatted values
   formattedPotentialWin: string;
   formattedTotalCost: string;
   formattedLimitWin: string;
-  
+
   // Validation
   isValidAmount: boolean;
   isValidLimitPrice: boolean;
@@ -51,7 +55,10 @@ export const useTradeCalculations = ({
   shares,
 }: UseTradeCalculationsProps): UseTradeCalculationsReturn => {
   const currentOutcome = market.outcomes[selectedOutcome];
-  const currentPrice = selectedCandidate === 0 ? currentOutcome?.price.yes : currentOutcome?.price.no;
+  const currentPrice =
+    selectedCandidate === 0
+      ? currentOutcome?.price.yes
+      : currentOutcome?.price.no;
 
   // Calculate potential win
   const potentialWin = useMemo(() => {
@@ -73,23 +80,23 @@ export const useTradeCalculations = ({
 
   // Format values
   const formattedPotentialWin = useMemo(() => {
-    return potentialWin.toLocaleString('en-US', { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
+    return potentialWin.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     });
   }, [potentialWin]);
 
   const formattedTotalCost = useMemo(() => {
-    return totalCost.toLocaleString('en-US', { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
+    return totalCost.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     });
   }, [totalCost]);
 
   const formattedLimitWin = useMemo(() => {
-    return limitWin.toLocaleString('en-US', { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
+    return limitWin.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     });
   }, [limitWin]);
 

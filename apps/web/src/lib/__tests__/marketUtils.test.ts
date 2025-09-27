@@ -3,7 +3,11 @@
  * Focus on binary market detection logic
  */
 
-import { isBinaryMarketView, labelsAreYesNo, normalizeUiStyle } from '../marketUtils';
+import {
+  isBinaryMarketView,
+  labelsAreYesNo,
+  normalizeUiStyle,
+} from '../marketUtils';
 
 describe('marketUtils', () => {
   describe('labelsAreYesNo', () => {
@@ -89,70 +93,49 @@ describe('marketUtils', () => {
     describe('Yes/No label detection', () => {
       it('should return true for Yes/No outcomes', () => {
         const market = {
-          outcomes: [
-            { name: 'Yes' },
-            { name: 'No' }
-          ]
+          outcomes: [{ name: 'Yes' }, { name: 'No' }],
         };
         expect(isBinaryMarketView(market)).toBe(true);
       });
 
       it('should return true for yes/no outcomes', () => {
         const market = {
-          outcomes: [
-            { name: 'yes' },
-            { name: 'no' }
-          ]
+          outcomes: [{ name: 'yes' }, { name: 'no' }],
         };
         expect(isBinaryMarketView(market)).toBe(true);
       });
 
       it('should return true for mixed case Yes/No', () => {
         const market = {
-          outcomes: [
-            { name: 'YES' },
-            { name: 'no' }
-          ]
+          outcomes: [{ name: 'YES' }, { name: 'no' }],
         };
         expect(isBinaryMarketView(market)).toBe(true);
       });
 
       it('should return true for outcomes with label property', () => {
         const market = {
-          outcomes: [
-            { label: 'Yes' },
-            { label: 'No' }
-          ]
+          outcomes: [{ label: 'Yes' }, { label: 'No' }],
         };
         expect(isBinaryMarketView(market)).toBe(true);
       });
 
       it('should return false for non-Yes/No outcomes', () => {
         const market = {
-          outcomes: [
-            { name: 'Option A' },
-            { name: 'Option B' }
-          ]
+          outcomes: [{ name: 'Option A' }, { name: 'Option B' }],
         };
         expect(isBinaryMarketView(market)).toBe(false);
       });
 
       it('should return false for single outcome', () => {
         const market = {
-          outcomes: [
-            { name: 'Yes' }
-          ]
+          outcomes: [{ name: 'Yes' }],
         };
         expect(isBinaryMarketView(market)).toBe(false);
       });
 
       it('should return false for three outcomes', () => {
         const market = {
-          outcomes: [
-            { name: 'Yes' },
-            { name: 'No' },
-            { name: 'Maybe' }
-          ]
+          outcomes: [{ name: 'Yes' }, { name: 'No' }, { name: 'Maybe' }],
         };
         expect(isBinaryMarketView(market)).toBe(false);
       });
@@ -184,10 +167,7 @@ describe('marketUtils', () => {
       it('should prioritize uiStyle over outcomes', () => {
         const market = {
           uiStyle: 'binary',
-          outcomes: [
-            { name: 'Option A' },
-            { name: 'Option B' }
-          ]
+          outcomes: [{ name: 'Option A' }, { name: 'Option B' }],
         };
         expect(isBinaryMarketView(market)).toBe(true);
       });
@@ -195,10 +175,7 @@ describe('marketUtils', () => {
       it('should fall back to outcomes when uiStyle is not binary', () => {
         const market = {
           uiStyle: 'default',
-          outcomes: [
-            { name: 'Yes' },
-            { name: 'No' }
-          ]
+          outcomes: [{ name: 'Yes' }, { name: 'No' }],
         };
         expect(isBinaryMarketView(market)).toBe(true);
       });
@@ -210,8 +187,8 @@ describe('marketUtils', () => {
           uiStyle: undefined,
           outcomes: [
             { name: 'Yes', probability: 60 },
-            { name: 'No', probability: 40 }
-          ]
+            { name: 'No', probability: 40 },
+          ],
         } as any;
         expect(isBinaryMarketView(binaryMarket)).toBe(true);
       });
@@ -221,8 +198,8 @@ describe('marketUtils', () => {
           uiStyle: undefined,
           outcomes: [
             { name: 'Candidate A', probability: 60 },
-            { name: 'Candidate B', probability: 40 }
-          ]
+            { name: 'Candidate B', probability: 40 },
+          ],
         } as any;
         expect(isBinaryMarketView(fakeBinaryMarket)).toBe(false);
       });
@@ -233,8 +210,8 @@ describe('marketUtils', () => {
           outcomes: [
             { name: 'Candidate A', probability: 40 },
             { name: 'Candidate B', probability: 35 },
-            { name: 'Candidate C', probability: 25 }
-          ]
+            { name: 'Candidate C', probability: 25 },
+          ],
         } as any;
         expect(isBinaryMarketView(multiMarket)).toBe(false);
       });
@@ -244,8 +221,8 @@ describe('marketUtils', () => {
           uiStyle: 'binary',
           outcomes: [
             { name: 'Candidate A', probability: 60 },
-            { name: 'Candidate B', probability: 40 }
-          ]
+            { name: 'Candidate B', probability: 40 },
+          ],
         };
         expect(isBinaryMarketView(taggedBinaryMarket)).toBe(true);
       });

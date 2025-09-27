@@ -10,12 +10,12 @@ export interface UseMobileSidebarReturn {
   // State
   isOpen: boolean;
   isAnimating: boolean;
-  
+
   // Actions
   openSidebar: () => void;
   closeSidebar: () => void;
   toggleSidebar: () => void;
-  
+
   // Handlers
   handleBackdropClick: () => void;
   handleEscapeKey: (event: KeyboardEvent) => void;
@@ -26,7 +26,9 @@ export interface UseMobileSidebarReturn {
  * @param onClose - Optional callback when sidebar closes
  * @returns Object containing sidebar state and handlers
  */
-export const useMobileSidebar = (onClose?: () => void): UseMobileSidebarReturn => {
+export const useMobileSidebar = (
+  onClose?: () => void
+): UseMobileSidebarReturn => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const isMobile = useIsMobile();
@@ -35,22 +37,22 @@ export const useMobileSidebar = (onClose?: () => void): UseMobileSidebarReturn =
     if (!isMobile) return;
     setIsOpen(true);
     setIsAnimating(true);
-    
+
     // Prevent body scroll when sidebar is open
     document.body.style.overflow = 'hidden';
   }, [isMobile]);
 
   const closeSidebar = useCallback(() => {
     if (!isOpen) return;
-    
+
     setIsAnimating(true);
-    
+
     // Restore body scroll
     document.body.style.overflow = 'unset';
-    
+
     // Call optional onClose callback
     onClose?.();
-    
+
     // Delay the actual close to allow animation
     setTimeout(() => {
       setIsOpen(false);
@@ -70,11 +72,14 @@ export const useMobileSidebar = (onClose?: () => void): UseMobileSidebarReturn =
     closeSidebar();
   }, [closeSidebar]);
 
-  const handleEscapeKey = useCallback((event: KeyboardEvent) => {
-    if (event.key === 'Escape' && isOpen) {
-      closeSidebar();
-    }
-  }, [isOpen, closeSidebar]);
+  const handleEscapeKey = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        closeSidebar();
+      }
+    },
+    [isOpen, closeSidebar]
+  );
 
   // Handle escape key
   useEffect(() => {

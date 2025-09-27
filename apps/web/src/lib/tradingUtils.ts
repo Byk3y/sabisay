@@ -11,7 +11,10 @@ import type { TradeData, Outcome } from '@/types/market';
  * @param price - The price as percentage (0-100)
  * @returns Potential win amount
  */
-export const calculatePotentialWin = (amount: number, price: number): number => {
+export const calculatePotentialWin = (
+  amount: number,
+  price: number
+): number => {
   if (price <= 0 || price >= 100) return 0;
   const priceDecimal = price / 100;
   return amount / priceDecimal;
@@ -33,7 +36,10 @@ export const calculateTotal = (price: number, shares: number): number => {
  * @param limitPrice - The limit price as percentage (0-100)
  * @returns Win amount
  */
-export const calculateLimitWin = (shares: number, limitPrice: number): number => {
+export const calculateLimitWin = (
+  shares: number,
+  limitPrice: number
+): number => {
   const totalCost = calculateTotal(limitPrice, shares);
   return Math.max(0, shares - totalCost);
 };
@@ -77,7 +83,10 @@ export const validateShares = (shares: string): boolean => {
  * @param candidate - The candidate index (0 for Yes, 1 for No)
  * @returns The current price as percentage
  */
-export const getCurrentPrice = (outcome: Outcome, candidate: number): number => {
+export const getCurrentPrice = (
+  outcome: Outcome,
+  candidate: number
+): number => {
   if (candidate === 0) {
     return outcome.price.yes;
   } else {
@@ -91,7 +100,10 @@ export const getCurrentPrice = (outcome: Outcome, candidate: number): number => 
  * @param candidate - The candidate index (0 for Yes, 1 for No)
  * @returns The average price as percentage
  */
-export const getAveragePrice = (outcome: Outcome, candidate: number): number => {
+export const getAveragePrice = (
+  outcome: Outcome,
+  candidate: number
+): number => {
   return getCurrentPrice(outcome, candidate);
 };
 
@@ -115,7 +127,9 @@ export const formatTradeAmount = (amount: string): string => {
 export const cleanTradeAmountInput = (input: string): string => {
   // Extract raw number from formatted input
   const rawValue = input.replace(/[$,]/g, '');
-  const cleanValue = rawValue.replace(/[^0-9.]/g, '').replace(/(\..*?)\./g, '$1');
+  const cleanValue = rawValue
+    .replace(/[^0-9.]/g, '')
+    .replace(/(\..*?)\./g, '$1');
   return cleanValue;
 };
 
@@ -144,7 +158,7 @@ export const createTradeData = (tradeData: Partial<TradeData>): TradeData => {
     orderType: tradeData.orderType || 'market',
     limitPrice: tradeData.limitPrice || '',
     shares: tradeData.shares || '',
-    expiration: tradeData.expiration || 'End of day'
+    expiration: tradeData.expiration || 'End of day',
   };
 };
 
@@ -155,7 +169,7 @@ export const createTradeData = (tradeData: Partial<TradeData>): TradeData => {
  */
 export const getTradeAmountFontSize = (amount: string): string => {
   if (!amount) return '3rem';
-  
+
   const length = amount.length;
   if (length <= 3) return '3rem';
   if (length <= 5) return '2.5rem';
@@ -170,12 +184,12 @@ export const getTradeAmountFontSize = (amount: string): string => {
  * @returns CSS font size string
  */
 export const getWinAmountFontSize = (winAmount: number): string => {
-  const winString = winAmount.toLocaleString('en-US', { 
-    minimumFractionDigits: 2, 
-    maximumFractionDigits: 2 
+  const winString = winAmount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
   const length = winString.length;
-  
+
   if (length <= 6) return '2.75rem';
   if (length <= 8) return '2.25rem';
   if (length <= 10) return '1.875rem';
@@ -190,17 +204,17 @@ export const getWinAmountFontSize = (winAmount: number): string => {
  * @returns CSS font size string
  */
 export const getSellReceiveAmountFontSize = (receiveAmount: number): string => {
-  const receiveString = receiveAmount.toLocaleString('en-US', { 
-    minimumFractionDigits: 2, 
-    maximumFractionDigits: 2 
+  const receiveString = receiveAmount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
   const length = receiveString.length;
-  
-  if (length <= 6) return '2.25rem';    // Reduced from 2.75rem
-  if (length <= 8) return '1.875rem';    // Reduced from 2.25rem
-  if (length <= 10) return '1.5rem';     // Reduced from 1.875rem
-  if (length <= 12) return '1.25rem';    // Reduced from 1.625rem
-  return '1rem';                         // Reduced from 1.375rem
+
+  if (length <= 6) return '2.25rem'; // Reduced from 2.75rem
+  if (length <= 8) return '1.875rem'; // Reduced from 2.25rem
+  if (length <= 10) return '1.5rem'; // Reduced from 1.875rem
+  if (length <= 12) return '1.25rem'; // Reduced from 1.625rem
+  return '1rem'; // Reduced from 1.375rem
 };
 
 /**
@@ -208,10 +222,7 @@ export const getSellReceiveAmountFontSize = (receiveAmount: number): string => {
  * @returns Array of expiration options
  */
 export const getExpirationOptions = (): string[] => {
-  return [
-    'End of day',
-    '45 Minutes'
-  ];
+  return ['End of day', '45 Minutes'];
 };
 
 /**
@@ -219,7 +230,9 @@ export const getExpirationOptions = (): string[] => {
  * @param tradeData - The trade data to validate
  * @returns Object with validation result and error message
  */
-export const validateTradeExecution = (tradeData: TradeData): { isValid: boolean; error?: string } => {
+export const validateTradeExecution = (
+  tradeData: TradeData
+): { isValid: boolean; error?: string } => {
   if (!tradeData.amount || !validateTradeInput(tradeData.amount)) {
     return { isValid: false, error: 'Please enter a valid trade amount' };
   }

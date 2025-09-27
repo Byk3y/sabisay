@@ -7,7 +7,7 @@
 export type { RawMarket, MarketOutcome } from '@/lib/mock';
 
 // New discriminated union types for different market presentations
-export type UiStyle = "default" | "binary" | "chance"; // "chance" deprecated
+export type UiStyle = 'default' | 'binary' | 'chance'; // "chance" deprecated
 
 export interface BaseMarket {
   id: string;
@@ -20,26 +20,40 @@ export interface BaseMarket {
 
 export type MarketItem =
   | ({
-      kind: "market";
+      kind: 'market';
       uiStyle?: UiStyle; // default or chance
     } & BaseMarket)
-  | ({
-      kind: "group";
+  | {
+      kind: 'group';
       groupId: string;
       title: string;
       members: Array<{
         label: string;
         marketId: string; // points to a MarketItem with kind:"market"
       }>;
-    });
+    };
 
-export function isGroup(item: MarketItem): item is Extract<MarketItem, { kind: "group" }> {
-  return item.kind === "group";
+export function isGroup(
+  item: MarketItem
+): item is Extract<MarketItem, { kind: 'group' }> {
+  return item.kind === 'group';
 }
 
-
 // Define Category type locally to avoid import issues
-export type Category = "Trending" | "Politics" | "Breaking" | "New" | "Sports" | "Crypto" | "Earnings" | "Geopolitics" | "Tech" | "Culture" | "World" | "Economy" | "Naija Picks";
+export type Category =
+  | 'Trending'
+  | 'Politics'
+  | 'Breaking'
+  | 'New'
+  | 'Sports'
+  | 'Crypto'
+  | 'Earnings'
+  | 'Geopolitics'
+  | 'Tech'
+  | 'Culture'
+  | 'World'
+  | 'Economy'
+  | 'Naija Picks';
 
 /**
  * Transformed market data structure used in the market details page
@@ -81,8 +95,8 @@ export interface RelatedMarket {
 /**
  * Trading-related types
  */
-export type TradeType = "buy" | "sell";
-export type OrderType = "market" | "limit";
+export type TradeType = 'buy' | 'sell';
+export type OrderType = 'market' | 'limit';
 
 /**
  * Trade data structure for executing trades

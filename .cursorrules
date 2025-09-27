@@ -28,6 +28,12 @@ These rules guide **all code generation, refactoring, and review**.
 - **NEVER** hardcode addresses or keys in components.
 - **MUST** load addresses/fees from a single config (`lib/config.ts`, `sdk/addresses.ts`).
 
+### Supabase Configuration
+- **Project ID**: `dcpfaongosjqaaykfnrp`
+- **Project URL**: `https://dcpfaongosjqaaykfnrp.supabase.co`
+- **MUST** use Supabase MCP tools for database operations
+- **MUST** use `supabaseClient` for browser operations, `supabaseAdmin` for server operations
+
 ---
 
 ## 3) Smart Contracts

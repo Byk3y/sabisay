@@ -3,7 +3,11 @@
  * Centralized event handlers for trading interface
  */
 
-import { formatTradeAmount, parseTradeAmount, validateAmount } from './inputUtils';
+import {
+  formatTradeAmount,
+  parseTradeAmount,
+  validateAmount,
+} from './inputUtils';
 import type { TradeData } from '@/types/market';
 
 /**
@@ -147,36 +151,42 @@ export const handleSharesChange = (
  */
 export const validateTradeData = (tradeData: TradeData): boolean => {
   const { amount, type, candidate, outcome, orderType } = tradeData;
-  
+
   // Validate required fields
-  if (!amount || !type || candidate === undefined || outcome === undefined || !orderType) {
+  if (
+    !amount ||
+    !type ||
+    candidate === undefined ||
+    outcome === undefined ||
+    !orderType
+  ) {
     return false;
   }
-  
+
   // Validate amount
   if (!validateAmount(amount)) {
     return false;
   }
-  
+
   // Validate candidate
   if (candidate < 0 || candidate > 1) {
     return false;
   }
-  
+
   // Validate outcome
   if (outcome < 0) {
     return false;
   }
-  
+
   // Validate trade type
   if (type !== 'buy' && type !== 'sell') {
     return false;
   }
-  
+
   // Validate order type
   if (orderType !== 'market' && orderType !== 'limit') {
     return false;
   }
-  
+
   return true;
 };

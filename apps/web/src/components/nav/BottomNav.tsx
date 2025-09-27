@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { Home, Search, TrendingUp, Menu } from "lucide-react";
+import { Home, Search, TrendingUp, Menu } from 'lucide-react';
 
 interface BottomNavProps {
-  activeTab?: "home" | "search" | "breaking" | "more";
-  onTabChange?: (tab: "home" | "search" | "breaking" | "more") => void;
+  activeTab?: 'home' | 'search' | 'breaking' | 'more';
+  onTabChange?: (tab: 'home' | 'search' | 'breaking' | 'more') => void;
 }
 
-export function BottomNav({ activeTab = "home", onTabChange }: BottomNavProps) {
+export function BottomNav({ activeTab = 'home', onTabChange }: BottomNavProps) {
   const tabs = [
-    { id: "home" as const, label: "Home", Icon: Home },
-    { id: "search" as const, label: "Search", Icon: Search },
-    { id: "breaking" as const, label: "Breaking", Icon: TrendingUp },
-    { id: "more" as const, label: "More", Icon: Menu },
+    { id: 'home' as const, label: 'Home', Icon: Home },
+    { id: 'search' as const, label: 'Search', Icon: Search },
+    { id: 'breaking' as const, label: 'Breaking', Icon: TrendingUp },
+    { id: 'more' as const, label: 'More', Icon: Menu },
   ];
 
   return (

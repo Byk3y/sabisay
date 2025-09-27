@@ -7,7 +7,7 @@ import "../src/MarketFactory.sol";
 contract DeployScript is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address usdcToken = vm.envAddress("USDC_TOKEN");
+        address usdcToken = vm.envAddress("USDC_ADDRESS");
         address treasury = vm.envAddress("TREASURY_ADDRESS");
 
         vm.startBroadcast(deployerPrivateKey);

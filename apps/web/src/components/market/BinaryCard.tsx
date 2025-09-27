@@ -1,17 +1,21 @@
-"use client";
-import Link from "next/link";
-import type { MarketItem } from "@/types/market";
-import { CardShell, CardHeader, ActionPill } from "./_primitives";
-import { formatPool } from "@/lib/mock";
+'use client';
+import Link from 'next/link';
+import type { MarketItem } from '@/types/market';
+import { CardShell, CardHeader, ActionPill } from './_primitives';
+import { formatPool } from '@/lib/mock';
 
 // Helper function to determine color based on percentage
 function getChanceColor(percentage: number): string {
-  if (percentage < 40) return "text-red-500";
-  if (percentage < 60) return "text-amber-500";
-  return "text-green-500";
+  if (percentage < 40) return 'text-red-500';
+  if (percentage < 60) return 'text-amber-500';
+  return 'text-green-500';
 }
 
-export function BinaryCard({ market }: { market: Extract<MarketItem, {kind:"market"}> }) {
+export function BinaryCard({
+  market,
+}: {
+  market: Extract<MarketItem, { kind: 'market' }>;
+}) {
   // Expect market.uiStyle === "binary" (caller ensures)
   const yesPct =
     market.outcomes && market.outcomes.length > 0 && market.outcomes[0]
@@ -20,11 +24,11 @@ export function BinaryCard({ market }: { market: Extract<MarketItem, {kind:"mark
 
   // Icon placeholder (same as MarketCard)
   const iconSlot = market.imageUrl ? (
-    <img 
-      src={market.imageUrl} 
-      alt="Market" 
+    <img
+      src={market.imageUrl}
+      alt="Market"
       className="w-full h-full object-cover"
-      onError={(e) => {
+      onError={e => {
         e.currentTarget.style.display = 'none';
       }}
     />
@@ -58,7 +62,7 @@ export function BinaryCard({ market }: { market: Extract<MarketItem, {kind:"mark
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="4"
-                strokeDasharray={`${Math.PI * 20 * yesPct / 100} ${Math.PI * 20 * 2}`}
+                strokeDasharray={`${(Math.PI * 20 * yesPct) / 100} ${Math.PI * 20 * 2}`}
                 strokeDashoffset="0"
                 className={getChanceColor(yesPct)}
                 strokeLinecap="round"
@@ -66,11 +70,15 @@ export function BinaryCard({ market }: { market: Extract<MarketItem, {kind:"mark
             </svg>
             {/* Percentage text below semi-circle */}
             <div className="absolute inset-x-0 top-4 flex items-center justify-center">
-              <span className="text-base font-bold text-gray-900 dark:text-white">{yesPct}%</span>
+              <span className="text-base font-bold text-gray-900 dark:text-white">
+                {yesPct}%
+              </span>
             </div>
             {/* Chance text below the indicator */}
             <div className="absolute inset-x-0 top-10 flex items-center justify-center">
-              <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300">chance</span>
+              <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300">
+                chance
+              </span>
             </div>
           </div>
         </div>
@@ -89,10 +97,8 @@ export function BinaryCard({ market }: { market: Extract<MarketItem, {kind:"mark
 
         {/* Second row - Empty to match MarketCard */}
         <div className="flex items-center justify-between gap-3 py-1">
-          <div className="truncate text-gray-800 dark:text-gray-200 text-sm font-medium">
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-          </div>
+          <div className="truncate text-gray-800 dark:text-gray-200 text-sm font-medium"></div>
+          <div className="flex items-center gap-2 shrink-0"></div>
         </div>
 
         {/* Volume at bottom */}
@@ -105,4 +111,3 @@ export function BinaryCard({ market }: { market: Extract<MarketItem, {kind:"mark
     </Link>
   );
 }
-

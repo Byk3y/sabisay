@@ -46,6 +46,6 @@ export const useMarketData = (marketId: string): UseMarketDataReturn => {
     market,
     isLoading,
     setMarket,
-    setIsLoading
+    setIsLoading,
   };
 };
