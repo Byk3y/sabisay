@@ -4,7 +4,7 @@
  */
 
 // Re-export existing types from mock.ts for consistency
-export type { Market as RawMarket, MarketOutcome } from '@/lib/mock';
+export type { RawMarket, MarketOutcome } from '@/lib/mock';
 
 // New discriminated union types for different market presentations
 export type UiStyle = "default" | "chance";

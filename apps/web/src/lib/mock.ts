@@ -3,14 +3,20 @@ export interface MarketOutcome {
   oddsPct: number;
 }
 
-export interface Market {
+// DEPRECATED: Use Market interface from @/types/market instead
+// This interface is kept for backward compatibility with existing mock data
+export interface RawMarket {
   id: string;
   question: string;
   outcomes: MarketOutcome[];
   poolUsd: number;
   imageUrl?: string;
   closesAt?: string;
+  uiStyle?: "default" | "chance"; // Add uiStyle field for binary/chance markets
 }
+
+// Alias for backward compatibility - use RawMarket instead
+export type Market = RawMarket;
 
 export const mockMarkets: Market[] = [
   {
@@ -21,7 +27,8 @@ export const mockMarkets: Market[] = [
       { label: "Bola Tinubu", oddsPct: 38 }
     ],
     poolUsd: 12000000, // $12m
-    closesAt: "2027-02-25T14:00:00Z"
+    closesAt: "2027-02-25T14:00:00Z",
+    uiStyle: "chance" // Binary market with 2 outcomes
   },
   {
     id: "1",
@@ -31,7 +38,8 @@ export const mockMarkets: Market[] = [
       { label: "25 bps decrease", oddsPct: 91 }
     ],
     poolUsd: 125000000, // $125m
-    closesAt: "2024-09-15T14:00:00Z"
+    closesAt: "2024-09-15T14:00:00Z",
+    uiStyle: "chance" // Binary market with 2 outcomes
   },
   {
     id: "nyc-mayor-2025",
@@ -45,6 +53,7 @@ export const mockMarkets: Market[] = [
     ],
     poolUsd: 1450000, // $1.45m total pool
     closesAt: "2025-11-04T20:00:00Z"
+    // No uiStyle - this is a group market with 5+ outcomes
   },
   {
     id: "3",
@@ -54,7 +63,8 @@ export const mockMarkets: Market[] = [
       { label: "Unemployment / Employment 20+...", oddsPct: 90 }
     ],
     poolUsd: 178000, // $178k
-    closesAt: "2024-09-15T15:30:00Z"
+    closesAt: "2024-09-15T15:30:00Z",
+    uiStyle: "chance" // Binary market with 2 outcomes
   },
   {
     id: "4",
@@ -64,7 +74,8 @@ export const mockMarkets: Market[] = [
       { label: "Buffalo Bills", oddsPct: 18 }
     ],
     poolUsd: 2500000, // $2.5m
-    closesAt: "2026-02-08T18:30:00Z"
+    closesAt: "2026-02-08T18:30:00Z",
+    uiStyle: "chance" // Binary market with 2 outcomes
   },
   {
     id: "5",
@@ -74,7 +85,8 @@ export const mockMarkets: Market[] = [
       { label: "No", oddsPct: 65 }
     ],
     poolUsd: 45000000, // $45m
-    closesAt: "2024-12-31T23:59:59Z"
+    closesAt: "2024-12-31T23:59:59Z",
+    uiStyle: "chance" // Binary market with 2 outcomes
   },
   {
     id: "7",
@@ -84,7 +96,8 @@ export const mockMarkets: Market[] = [
       { label: "No", oddsPct: 72 }
     ],
     poolUsd: 8500000, // $8.5m
-    closesAt: "2024-12-31T23:59:59Z"
+    closesAt: "2024-12-31T23:59:59Z",
+    uiStyle: "chance" // Binary market with 2 outcomes
   },
   {
     id: "8",
@@ -94,7 +107,8 @@ export const mockMarkets: Market[] = [
       { label: "No", oddsPct: 85 }
     ],
     poolUsd: 3200000, // $3.2m
-    closesAt: "2024-12-31T23:59:59Z"
+    closesAt: "2024-12-31T23:59:59Z",
+    uiStyle: "chance" // Binary market with 2 outcomes
   }
 ];
 

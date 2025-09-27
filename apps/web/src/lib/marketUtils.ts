@@ -3,7 +3,7 @@
  * Extracted from page.tsx for better organization and reusability
  */
 
-import { mockMarkets, extraFeedItems, binaryMembers, type Market as RawMarket } from '@/lib/mock';
+import { mockMarkets, extraFeedItems, binaryMembers, type RawMarket } from '@/lib/mock';
 import type { Market, Outcome, RelatedMarket } from '@/types/market';
 
 /**
@@ -23,12 +23,24 @@ export const getMarketById = (id: string): Market | null => {
 };
 
 /**
+ * Check if a market should be classified as a binary/chance market
+ * @param rawMarket - Raw market data from mock
+ * @returns true if market has exactly 2 outcomes and should be a chance market
+ */
+export const isBinaryMarket = (rawMarket: RawMarket): boolean => {
+  return rawMarket.outcomes.length === 2;
+};
+
+/**
  * Transform raw market data to the format used in the market details page
  * @param rawMarket - Raw market data from mock
  * @returns Transformed market data
  */
 export const transformMarketData = (rawMarket: RawMarket): Market => {
-  return {
+  // Automatically detect binary markets and set uiStyle to "chance"
+  const uiStyle: "default" | "chance" | undefined = rawMarket.uiStyle || (isBinaryMarket(rawMarket) ? "chance" : undefined);
+  
+  const market: Market = {
     id: rawMarket.id,
     title: rawMarket.question,
     volume: rawMarket.poolUsd,
@@ -42,9 +54,15 @@ export const transformMarketData = (rawMarket: RawMarket): Market => {
         no: Math.round(100 - outcome.oddsPct)
       }
     })),
-    relatedMarkets: getRelatedMarkets(rawMarket.id),
-    uiStyle: 'uiStyle' in rawMarket ? (rawMarket as any).uiStyle : undefined // Add this line to preserve uiStyle
+    relatedMarkets: getRelatedMarkets(rawMarket.id)
   };
+
+  // Only add uiStyle if it's defined to avoid undefined assignment
+  if (uiStyle) {
+    market.uiStyle = uiStyle;
+  }
+
+  return market;
 };
 
 /**

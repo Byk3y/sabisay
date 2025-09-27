@@ -5,10 +5,10 @@ import { CardShell, CardHeader, ActionPill } from "./_primitives";
 import { formatPool } from "@/lib/mock";
 
 export function GroupCard({ group }: { group: Extract<MarketItem,{kind:"group"}> }) {
-  // Special case for NYC Mayor 2025 - link to legacy market instead of group page
+  // All groups now link to their main market page
   const href = group.groupId === "election-nyc-2025" 
     ? "/market/nyc-mayor-2025" 
-    : `/group/${group.groupId}`;
+    : `/market/${group.groupId}`;
     
   return (
     <Link href={href}>

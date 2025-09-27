@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Market } from "@/lib/mock";
+import { RawMarket } from "@/lib/mock";
 import { formatPool } from "@/lib/mock";
 
 interface MarketCardProps {
-  market: Market;
+  market: RawMarket;
   onYesClick?: (marketId: string, outcomeIndex: number) => void;
   onNoClick?: (marketId: string, outcomeIndex: number) => void;
 }
