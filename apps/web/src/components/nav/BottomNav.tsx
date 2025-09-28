@@ -1,14 +1,27 @@
 'use client';
 
-import { Home, Search, TrendingUp, Menu } from 'lucide-react';
+import { Home, Search, TrendingUp, Menu, BarChart3 } from 'lucide-react';
+import { useSidePanel } from '@/contexts/SidePanelContext';
+
+interface User {
+  email: string;
+  // Add other user properties as needed
+}
 
 interface BottomNavProps {
   activeTab?: 'home' | 'search' | 'breaking' | 'more';
   onTabChange?: (tab: 'home' | 'search' | 'breaking' | 'more') => void;
+  user?: User | null;
 }
 
-export function BottomNav({ activeTab = 'home', onTabChange }: BottomNavProps) {
-  const tabs = [
+export function BottomNav({ activeTab = 'home', onTabChange, user }: BottomNavProps) {
+  const { openSidePanel } = useSidePanel();
+  
+  const tabs = user ? [
+    { id: 'home' as const, label: 'Home', Icon: Home },
+    { id: 'search' as const, label: 'Search', Icon: Search },
+    { id: 'breaking' as const, label: 'Breaking', Icon: TrendingUp },
+  ] : [
     { id: 'home' as const, label: 'Home', Icon: Home },
     { id: 'search' as const, label: 'Search', Icon: Search },
     { id: 'breaking' as const, label: 'Breaking', Icon: TrendingUp },
@@ -21,7 +34,13 @@ export function BottomNav({ activeTab = 'home', onTabChange }: BottomNavProps) {
         {tabs.map(({ id, label, Icon }) => (
           <button
             key={id}
-            onClick={() => onTabChange?.(id)}
+            onClick={() => {
+              if (id === 'more') {
+                openSidePanel();
+              } else {
+                onTabChange?.(id);
+              }
+            }}
             data-active={activeTab === id}
             className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 data-[active=true]:text-blue-600 dark:data-[active=true]:text-blue-400 data-[active=true]:shadow-lg data-[active=true]:shadow-blue-600/20 transition-colors py-2"
           >
@@ -29,6 +48,16 @@ export function BottomNav({ activeTab = 'home', onTabChange }: BottomNavProps) {
             <span className="text-xs font-medium">{label}</span>
           </button>
         ))}
+
+        {/* Portfolio balance for signed-in users */}
+        {user && (
+          <div className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 py-2">
+            <div className="size-5 flex items-center justify-center">
+              <BarChart3 className="size-5" />
+            </div>
+            <span className="text-xs font-medium">$0.00</span>
+          </div>
+        )}
       </div>
     </nav>
   );

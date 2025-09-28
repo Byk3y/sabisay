@@ -30,7 +30,6 @@ function getEnv(name: string, fallback: string = ''): string {
 const serverEnv = {
   // Magic Link authentication
   MAGIC_SECRET_KEY: typeof window === 'undefined' ? requireEnvVar('MAGIC_SECRET_KEY') : '',
-  MAGIC_PUBLISHABLE_KEY: typeof window === 'undefined' ? requireEnvVar('MAGIC_PUBLISHABLE_KEY') : '',
 
   // Session management
   IRON_SESSION_PASSWORD: typeof window === 'undefined' ? requireEnvVar('IRON_SESSION_PASSWORD') : '',

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 
 interface User {
   userId: string;
@@ -14,38 +14,60 @@ interface AuthContextType {
   login: (userId: string, email: string) => void;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  refreshAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Global flag to track OAuth callback in progress
+let isOAuthCallbackInProgress = false;
+
+export function setOAuthCallbackInProgress(value: boolean) {
+  isOAuthCallbackInProgress = value;
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasChecked, setHasChecked] = useState(false);
+  const isCheckingRef = useRef(false);
 
-  // Check authentication status on mount
+  // Check authentication status on mount - only once
   useEffect(() => {
+    // Prevent multiple simultaneous auth checks
+    if (isCheckingRef.current || hasChecked) {
+      return;
+    }
+
     console.log('AuthContext: Starting auth check');
+
+    // Skip auth check if OAuth callback is in progress
+    if (isOAuthCallbackInProgress) {
+      console.log('AuthContext: OAuth callback in progress, skipping initial auth check');
+      setIsLoading(false);
+      setHasChecked(true);
+      return;
+    }
+
+    // Check both server session and Magic Link session
     checkAuth();
-
-    // Fallback timeout to prevent infinite loading
-    const timeout = setTimeout(() => {
-      if (isLoading) {
-        console.log('AuthContext: Timeout reached, stopping loading');
-        setIsLoading(false);
-      }
-    }, 3000);
-
-    return () => clearTimeout(timeout);
-  }, []);
+    checkMagicLinkSession();
+  }, [hasChecked]);
 
   const checkAuth = async () => {
+    // Prevent multiple simultaneous auth checks
+    if (isCheckingRef.current) {
+      return;
+    }
+
     try {
+      isCheckingRef.current = true;
       setIsLoading(true);
       console.log('Checking auth...');
 
       const response = await fetch('/api/auth/me', {
         method: 'GET',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -71,17 +93,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
     } finally {
       console.log('Auth check complete, setting loading to false');
+      isCheckingRef.current = false;
       setIsLoading(false);
       setHasChecked(true);
     }
   };
 
-  const login = (userId: string, email: string) => {
+  const login = async (userId: string, email: string) => {
     setUser({
       userId,
       email,
       isLoggedIn: true,
     });
+    
+    // Refresh auth context to ensure sync with server
+    await checkAuth();
+  };
+
+  // Check for existing Magic Link session
+  const checkMagicLinkSession = async () => {
+    try {
+      // Only check if we don't have a user and haven't checked yet
+      if (user || hasChecked) return;
+      
+      console.log('Checking for existing Magic Link session...');
+      
+      // Dynamically import Magic to avoid SSR issues
+      const { Magic } = await import('magic-sdk');
+      const magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY!);
+      
+      const isLoggedIn = await magic.user.isLoggedIn();
+      if (isLoggedIn) {
+        console.log('Found existing Magic Link session, getting DID token...');
+        const didToken = await magic.user.getIdToken();
+        if (didToken) {
+          // Send to API to create session
+          const response = await fetch('/api/auth/magic/login', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ didToken }),
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            console.log('Magic Link session restored:', result);
+            setUser({
+              userId: result.userId,
+              email: result.email,
+              isLoggedIn: true,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.log('No Magic Link session found or error checking:', error);
+    }
   };
 
   const logout = async () => {
@@ -95,6 +162,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshAuth = async () => {
+    console.log('AuthContext: Refreshing auth state...');
+    setHasChecked(false); // Allow re-checking
+    await checkAuth();
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -103,6 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         logout,
         checkAuth,
+        refreshAuth,
       }}
     >
       {children}
@@ -115,5 +189,11 @@ export function useAuth() {
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
+  return context;
+}
+
+// Safe version that doesn't throw
+export function useAuthSafe() {
+  const context = useContext(AuthContext);
   return context;
 }

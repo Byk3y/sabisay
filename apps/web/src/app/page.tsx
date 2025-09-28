@@ -16,6 +16,7 @@ import { BottomNav } from '@/components/nav/BottomNav';
 import { SidePanel } from '@/components/nav/SidePanel';
 import { SignUpModal } from '@/components/auth/SignUpModal';
 import { useSignUpModalContext } from '@/contexts/SignUpModalContext';
+import { SidePanelProvider, useSidePanel } from '@/contexts/SidePanelContext';
 import { mockMarkets, extraFeedItems, type Category } from '@/lib/mock';
 import { isGroup, type MarketItem } from '@/types/market';
 import { isBinaryMarketView } from '@/lib/marketUtils';
@@ -23,14 +24,15 @@ import { BinaryCard } from '@/components/market/BinaryCard';
 import { GroupCard } from '@/components/market/GroupCard';
 import { useAccount, useChainId } from 'wagmi';
 import { config } from '@/lib/config';
+import { useAuthSafe } from '@/contexts/AuthContext';
 
-export default function HomePage() {
+function HomePageContent() {
   const [activeCategory, setActiveCategory] = useState<Category>('Trending');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<
     'home' | 'search' | 'breaking' | 'more'
   >('home');
-  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+  const { isSidePanelOpen, closeSidePanel } = useSidePanel();
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortBy, setSortBy] = useState<
     'volume' | 'newest' | 'oldest' | 'closing'
@@ -47,6 +49,10 @@ export default function HomePage() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const isLocalChain = chainId === config.local.chainId;
+
+  // Auth state
+  const authContext = useAuthSafe();
+  const user = authContext?.user || null;
 
   // Close sort dropdown when clicking outside
   useEffect(() => {
@@ -160,9 +166,9 @@ export default function HomePage() {
   const handleTabChange = (tab: 'home' | 'search' | 'breaking' | 'more') => {
     setActiveTab(tab);
     if (tab === 'more') {
-      setIsSidePanelOpen(true);
+      // Side panel will be opened by the context
     } else {
-      setIsSidePanelOpen(false);
+      closeSidePanel();
     }
   };
 
@@ -174,7 +180,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0b1220] text-gray-900 dark:text-white transition-colors">
+    <div className="min-h-screen bg-white dark:bg-[#0b1220] text-gray-900 dark:text-white transition-colors" suppressHydrationWarning>
       {/* Top Navigation */}
       <TopNavClient />
 
@@ -457,13 +463,13 @@ export default function HomePage() {
 
       {/* Bottom Navigation - Hidden on desktop */}
       <div className="lg:hidden">
-        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} user={user} />
       </div>
 
       {/* Side Panel */}
       <SidePanel
         isOpen={isSidePanelOpen}
-        onClose={() => setIsSidePanelOpen(false)}
+        onClose={closeSidePanel}
       />
 
       {/* Sign Up Modal */}
@@ -480,5 +486,13 @@ export default function HomePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <SidePanelProvider>
+      <HomePageContent />
+    </SidePanelProvider>
   );
 }

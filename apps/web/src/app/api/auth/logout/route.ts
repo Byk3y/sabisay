@@ -1,16 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getSession } from '@/lib/session';
+import { destroySession } from '@/lib/session';
 
 export async function POST() {
   try {
-    const session = await getSession();
-    
-    // Clear session data
-    delete session.userId;
-    delete session.email;
-    session.isLoggedIn = false;
-    
-    await session.save();
+    // Properly destroy the session
+    await destroySession();
 
     return NextResponse.json({ ok: true });
   } catch (error) {

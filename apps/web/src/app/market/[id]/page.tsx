@@ -18,6 +18,7 @@ import { SidePanel } from '@/components/nav/SidePanel';
 import { useMarketData } from '@/hooks/useMarketData';
 import { useMarketUI } from '@/hooks/useMarketUI';
 import { useTradingState } from '@/hooks/useTradingState';
+import { SidePanelProvider, useSidePanel } from '@/contexts/SidePanelContext';
 import {
   generateChanceSeries,
   generateMultiSeries,
@@ -25,7 +26,7 @@ import {
 } from '@/lib/mockSeries';
 import type { TradeData, Category } from '@/types/market';
 
-export default function MarketDetailsPage() {
+function MarketDetailsPageContent() {
   const params = useParams();
   const { mounted } = useTheme();
   const marketId = params.id as string;
@@ -81,7 +82,7 @@ export default function MarketDetailsPage() {
   } = useTradingState();
 
   // Side panel state
-  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+  const { isSidePanelOpen, openSidePanel, closeSidePanel } = useSidePanel();
 
   // Chart state
   const [timeRange, setTimeRange] = useState<TimeRange>('1D');
@@ -130,11 +131,11 @@ export default function MarketDetailsPage() {
   };
 
   const handleSidePanelOpen = () => {
-    setIsSidePanelOpen(true);
+    openSidePanel();
   };
 
   const handleSidePanelClose = () => {
-    setIsSidePanelOpen(false);
+    closeSidePanel();
   };
 
   // Cleanup effect to restore body scroll on unmount
@@ -407,5 +408,13 @@ export default function MarketDetailsPage() {
         <SidePanel isOpen={isSidePanelOpen} onClose={handleSidePanelClose} />
       )}
     </div>
+  );
+}
+
+export default function MarketDetailsPage() {
+  return (
+    <SidePanelProvider>
+      <MarketDetailsPageContent />
+    </SidePanelProvider>
   );
 }

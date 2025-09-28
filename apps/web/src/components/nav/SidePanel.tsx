@@ -17,6 +17,7 @@ import {
 import { FaTwitter, FaDiscord, FaInstagram, FaTiktok } from 'react-icons/fa';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useSignUpModalContext } from '@/contexts/SignUpModalContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidePanelProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ interface SidePanelProps {
 export function SidePanel({ isOpen, onClose }: SidePanelProps) {
   const { theme, toggleTheme, mounted } = useTheme();
   const { openModal: openSignUpModal } = useSignUpModalContext();
+  const { user, logout } = useAuth();
 
   const navigationItems = [
     { label: 'Elections', icon: Home },
@@ -108,26 +110,43 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
               </div>
             </div>
 
-            {/* Login and Sign Up */}
+            {/* Authentication Section */}
             <div className="mt-6 space-y-3">
-              <button
-                onClick={() => {
-                  openSignUpModal('signin');
-                  onClose();
-                }}
-                className="w-full py-2 px-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-md transition-colors"
-              >
-                Log in
-              </button>
-              <button
-                onClick={() => {
-                  openSignUpModal('signup');
-                  onClose();
-                }}
-                className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
-              >
-                Sign up
-              </button>
+              {user ? (
+                /* Logged-in user - Show logout */
+                <button
+                  onClick={() => {
+                    logout();
+                    onClose();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-md transition-colors"
+                >
+                  <LogOut className="size-4" />
+                  Log out
+                </button>
+              ) : (
+                /* Logged-out user - Show login and signup */
+                <>
+                  <button
+                    onClick={() => {
+                      openSignUpModal('signin');
+                      onClose();
+                    }}
+                    className="w-full py-2 px-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-md transition-colors"
+                  >
+                    Log in
+                  </button>
+                  <button
+                    onClick={() => {
+                      openSignUpModal('signup');
+                      onClose();
+                    }}
+                    className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
+                  >
+                    Sign up
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
