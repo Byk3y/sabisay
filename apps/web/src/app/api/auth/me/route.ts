@@ -1,24 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { supabaseAdmin } from '@/lib/supabase-server';
-import { generalRateLimit } from '@/lib/rate-limit';
+import { generalRateLimit, createRateLimitResponse } from '@/lib/rate-limit';
 
 export async function GET(request: NextRequest) {
   try {
     // Apply rate limiting
     const rateLimitResult = generalRateLimit(request);
     if (!rateLimitResult.allowed) {
-      return NextResponse.json(
-        { error: 'Too many requests. Please try again later.' },
-        {
-          status: 429,
-          headers: {
-            'X-RateLimit-Limit': '60',
-            'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime / 1000).toString(),
-          }
-        }
-      );
+      return createRateLimitResponse(rateLimitResult, {
+        windowMs: 60 * 1000,
+        maxRequests: 60,
+      });
     }
 
     const session = await getSession();
@@ -30,7 +23,7 @@ export async function GET(request: NextRequest) {
     // Fetch user data from Supabase
     const { data: user, error } = await supabaseAdmin
       .from('users')
-      .select('id, email')
+      .select('id, email, username')
       .eq('id', session.userId)
       .single();
 
@@ -47,6 +40,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       userId: user.id,
       email: user.email || session.email || '',
+      username: user.username || '',
       isLoggedIn: true,
     });
   } catch (error) {

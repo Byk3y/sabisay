@@ -5,13 +5,14 @@ import { createContext, useContext, useEffect, useState, useRef } from 'react';
 interface User {
   userId: string;
   email: string;
+  username: string;
   isLoggedIn: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (userId: string, email: string) => void;
+  login: (userId: string, email: string, username: string) => void;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   refreshAuth: () => Promise<void>;
@@ -43,7 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Skip auth check if OAuth callback is in progress
     if (isOAuthCallbackInProgress) {
-      console.log('AuthContext: OAuth callback in progress, skipping initial auth check');
+      console.log(
+        'AuthContext: OAuth callback in progress, skipping initial auth check'
+      );
       setIsLoading(false);
       setHasChecked(true);
       return;
@@ -82,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser({
           userId: userData.userId,
           email: userData.email,
+          username: userData.username || '',
           isLoggedIn: userData.isLoggedIn,
         });
       } else {
@@ -99,13 +103,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = async (userId: string, email: string) => {
+  const login = async (userId: string, email: string, username: string) => {
     setUser({
       userId,
       email,
+      username,
       isLoggedIn: true,
     });
-    
+
     // Refresh auth context to ensure sync with server
     await checkAuth();
   };
@@ -115,13 +120,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Only check if we don't have a user and haven't checked yet
       if (user || hasChecked) return;
-      
+
       console.log('Checking for existing Magic Link session...');
-      
+
       // Dynamically import Magic to avoid SSR issues
-      const { Magic } = await import('magic-sdk');
-      const magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY!);
-      
+      const { createMagicClient } = await import('@/lib/magic');
+      const magic = createMagicClient();
+
       const isLoggedIn = await magic.user.isLoggedIn();
       if (isLoggedIn) {
         console.log('Found existing Magic Link session, getting DID token...');
@@ -134,13 +139,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ didToken }),
           });
-          
+
           if (response.ok) {
             const result = await response.json();
             console.log('Magic Link session restored:', result);
             setUser({
               userId: result.userId,
               email: result.email,
+              username: result.username || '',
               isLoggedIn: true,
             });
           }

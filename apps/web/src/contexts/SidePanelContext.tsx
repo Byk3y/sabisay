@@ -9,7 +9,9 @@ interface SidePanelContextType {
   closeSidePanel: () => void;
 }
 
-const SidePanelContext = createContext<SidePanelContextType | undefined>(undefined);
+const SidePanelContext = createContext<SidePanelContextType | undefined>(
+  undefined
+);
 
 export function SidePanelProvider({ children }: { children: ReactNode }) {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
@@ -38,3 +40,5 @@ export function useSidePanel() {
   }
   return context;
 }
+
+

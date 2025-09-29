@@ -4,15 +4,14 @@ import {
   Home,
   Search,
   TrendingUp,
-  Settings,
   HelpCircle,
   LogOut,
-  User,
   Bell,
   Shield,
   ChevronDown,
   Sun,
   Moon,
+  User,
 } from 'lucide-react';
 import { FaTwitter, FaDiscord, FaInstagram, FaTiktok } from 'react-icons/fa';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -34,6 +33,7 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
     { label: 'Dashboards', icon: Search },
     { label: 'Leaderboard', icon: TrendingUp },
     { label: 'Activity', icon: Bell },
+    { label: 'Profile', icon: User },
     { label: 'Resources', icon: HelpCircle, hasDropdown: true },
     { label: 'Rewards', icon: Shield, hasDropdown: true },
   ];
@@ -113,7 +113,7 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
             {/* Authentication Section */}
             <div className="mt-6 space-y-3">
               {user ? (
-                /* Logged-in user - Show logout */
+                /* Logged-in user - Show logout only */
                 <button
                   onClick={() => {
                     logout();

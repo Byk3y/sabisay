@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { Magic } from 'magic-sdk';
-import { OAuthExtension } from '@magic-ext/oauth2';
+import { createMagicClientWithOAuth } from '@/lib/magic';
 import { useRouter } from 'next/navigation';
 import { useAuth, setOAuthCallbackInProgress } from '@/contexts/AuthContext';
 
 export default function AuthCallback() {
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  );
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const ran = useRef(false);
@@ -16,10 +17,10 @@ export default function AuthCallback() {
   useEffect(() => {
     if (ran.current) return;
     ran.current = true;
-    
+
     // Set OAuth callback in progress flag
     setOAuthCallbackInProgress(true);
-    
+
     (async () => {
       try {
         console.log('Auth callback page loaded, processing OAuth result...');
@@ -34,7 +35,9 @@ export default function AuthCallback() {
         });
 
         if (authCheck.ok) {
-          console.log('User already authenticated, refreshing auth context and redirecting to home...');
+          console.log(
+            'User already authenticated, refreshing auth context and redirecting to home...'
+          );
           await refreshAuth();
           setStatus('success');
           setTimeout(() => {
@@ -44,17 +47,15 @@ export default function AuthCallback() {
         }
 
         // Initialize Magic client
-        const magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY!, {
-          extensions: [new OAuthExtension()],
-        });
+        const magic = createMagicClientWithOAuth();
 
         // Get the result from the redirect
-        const result = await magic.oauth2.getRedirectResult({});
+        const result = await (magic.oauth2 as any)?.getRedirectResult({});
         const didToken = result?.magic?.idToken;
-        
+
         if (didToken) {
           console.log('OAuth redirect successful, sending to API...');
-          
+
           // Send DID token to our API
           const response = await fetch('/api/auth/magic/login', {
             method: 'POST',
@@ -66,7 +67,9 @@ export default function AuthCallback() {
           });
 
           if (response.ok) {
-            console.log('Login successful, refreshing auth context and redirecting to home...');
+            console.log(
+              'Login successful, refreshing auth context and redirecting to home...'
+            );
             await refreshAuth();
             setStatus('success');
             // Redirect to home page after successful login
@@ -76,10 +79,15 @@ export default function AuthCallback() {
           } else {
             const errorData = await response.json();
             console.error('Login failed:', errorData);
-            
+
             // Handle the "User is already logged in" error gracefully
-            if (errorData.error && errorData.error.includes('already logged in')) {
-              console.log('User already logged in, refreshing auth context and redirecting to home...');
+            if (
+              errorData.error &&
+              errorData.error.includes('already logged in')
+            ) {
+              console.log(
+                'User already logged in, refreshing auth context and redirecting to home...'
+              );
               await refreshAuth();
               setStatus('success');
               setTimeout(() => {
@@ -97,11 +105,16 @@ export default function AuthCallback() {
         }
       } catch (err) {
         console.error('OAuth callback error:', err);
-        
+
         // Check if the error is about user already being logged in
         const errorMessage = err instanceof Error ? err.message : String(err);
-        if (errorMessage.includes('already logged in') || errorMessage.includes('Skipped remaining OAuth verification steps')) {
-          console.log('User already logged in, refreshing auth context and treating as success...');
+        if (
+          errorMessage.includes('already logged in') ||
+          errorMessage.includes('Skipped remaining OAuth verification steps')
+        ) {
+          console.log(
+            'User already logged in, refreshing auth context and treating as success...'
+          );
           await refreshAuth();
           setStatus('success');
           setTimeout(() => {
@@ -127,10 +140,18 @@ export default function AuthCallback() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0b1220]" suppressHydrationWarning>
+      <div
+        className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0b1220]"
+        suppressHydrationWarning
+      >
         <div className="text-center" suppressHydrationWarning>
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" suppressHydrationWarning></div>
-          <p className="text-gray-600 dark:text-gray-400">Completing authentication...</p>
+          <div
+            className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"
+            suppressHydrationWarning
+          ></div>
+          <p className="text-gray-600 dark:text-gray-400">
+            Completing authentication...
+          </p>
         </div>
       </div>
     );
@@ -138,9 +159,17 @@ export default function AuthCallback() {
 
   if (status === 'error') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0b1220]" suppressHydrationWarning>
-        <div className="text-center max-w-md mx-auto p-6" suppressHydrationWarning>
-          <div className="text-red-500 text-6xl mb-4" suppressHydrationWarning>⚠️</div>
+      <div
+        className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0b1220]"
+        suppressHydrationWarning
+      >
+        <div
+          className="text-center max-w-md mx-auto p-6"
+          suppressHydrationWarning
+        >
+          <div className="text-red-500 text-6xl mb-4" suppressHydrationWarning>
+            ⚠️
+          </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Authentication Failed
           </h1>
@@ -160,9 +189,14 @@ export default function AuthCallback() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0b1220]" suppressHydrationWarning>
+    <div
+      className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0b1220]"
+      suppressHydrationWarning
+    >
       <div className="text-center" suppressHydrationWarning>
-        <div className="text-green-500 text-6xl mb-4" suppressHydrationWarning>✅</div>
+        <div className="text-green-500 text-6xl mb-4" suppressHydrationWarning>
+          ✅
+        </div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           Authentication Successful!
         </h1>

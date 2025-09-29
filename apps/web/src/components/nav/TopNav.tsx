@@ -1,54 +1,45 @@
 'use client';
 
-import { Flag, Search, Menu, ChevronDown, LogOut, Bell } from 'lucide-react';
+import {
+  Flag,
+  Search,
+  Menu,
+  ChevronDown,
+  Bell,
+  LogOut,
+  User,
+} from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useSignUpModalContext } from '@/contexts/SignUpModalContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSidePanel } from '@/contexts/SidePanelContext';
-
-// Generate unique gradient colors for each user
-function generateUserGradient(userId: string): string {
-  // Simple hash function to convert string to number
-  let hash = 0;
-  for (let i = 0; i < userId.length; i++) {
-    const char = userId.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  
-  // Generate 3 colors using the hash as seed
-  const hue1 = Math.abs(hash) % 360;
-  const hue2 = (hue1 + 120) % 360; // 120 degrees apart for good contrast
-  const hue3 = (hue1 + 240) % 360; // 240 degrees apart
-  
-  // Use different saturation and lightness for variety
-  const sat1 = 60 + (Math.abs(hash >> 8) % 40); // 60-100%
-  const sat2 = 50 + (Math.abs(hash >> 16) % 30); // 50-80%
-  const sat3 = 70 + (Math.abs(hash >> 24) % 30); // 70-100%
-  
-  const light1 = 45 + (Math.abs(hash >> 4) % 20); // 45-65%
-  const light2 = 35 + (Math.abs(hash >> 12) % 25); // 35-60%
-  const light3 = 55 + (Math.abs(hash >> 20) % 15); // 55-70%
-  
-  return `linear-gradient(135deg, 
-    hsl(${hue1}, ${sat1}%, ${light1}%) 0%, 
-    hsl(${hue2}, ${sat2}%, ${light2}%) 50%, 
-    hsl(${hue3}, ${sat3}%, ${light3}%) 100%)`;
-}
+import { generateAddressGradient, truncateAddress } from '@/lib/utils';
 
 export function TopNav() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { theme, toggleTheme, mounted } = useTheme();
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { theme, toggleTheme } = useTheme();
   const { openModal: openSignUpModal } = useSignUpModalContext();
-  const { user, logout, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const { openSidePanel } = useSidePanel();
+  const { logout } = useAuth();
 
   // Prevent hydration mismatch by only rendering conditional content on client
   useEffect(() => {
     setIsClient(true);
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Close dropdown when clicking outside
@@ -72,11 +63,20 @@ export function TopNav() {
   }, [isDropdownOpen]);
 
   return (
-    <header className="sticky top-0 z-[100] bg-white/80 dark:bg-[#0b1220]/80 backdrop-blur" suppressHydrationWarning>
-      <div className="mx-auto max-w-7xl px-4 md:px-0 h-14 flex items-center justify-between" suppressHydrationWarning>
+    <header
+      className="sticky top-0 z-[100] bg-white/80 dark:bg-[#0b1220]/80 backdrop-blur"
+      suppressHydrationWarning
+    >
+      <div
+        className="mx-auto max-w-7xl px-4 md:px-0 h-14 flex items-center justify-between"
+        suppressHydrationWarning
+      >
         {/* Left side - Logo and Search (for all users) */}
         <div className="flex items-center gap-2" suppressHydrationWarning>
-          <div className="size-8 rounded bg-blue-500/20 dark:bg-blue-500/20 grid place-items-center" suppressHydrationWarning>
+          <div
+            className="size-8 rounded bg-blue-500/20 dark:bg-blue-500/20 grid place-items-center"
+            suppressHydrationWarning
+          >
             <span className="text-blue-600 dark:text-white font-bold text-lg">
               S
             </span>
@@ -100,7 +100,10 @@ export function TopNav() {
         </div>
 
         {/* Right side - Navigation */}
-        <div className="flex items-center justify-end gap-3" suppressHydrationWarning>
+        <div
+          className="flex items-center justify-end gap-3"
+          suppressHydrationWarning
+        >
           {!isClient ? (
             /* Loading state during hydration */
             <div className="flex items-center gap-2">
@@ -111,14 +114,22 @@ export function TopNav() {
             <div className="flex items-center gap-2">
               {/* Portfolio */}
               <div className="hidden md:flex flex-col items-center mr-6">
-                <span className="text-[10px] font-bold text-gray-300 dark:text-gray-400 uppercase tracking-wider -mb-1">Portfolio</span>
-                <span className="text-lg font-bold text-green-600 dark:text-green-400">$0.00</span>
+                <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider -mb-1">
+                  Portfolio
+                </span>
+                <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                  $0.00
+                </span>
               </div>
 
               {/* Cash */}
               <div className="hidden md:flex flex-col items-center mr-4">
-                <span className="text-[10px] font-bold text-gray-300 dark:text-gray-400 uppercase tracking-wider -mb-1">Cash</span>
-                <span className="text-lg font-bold text-green-600 dark:text-green-400">$0.00</span>
+                <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider -mb-1">
+                  Cash
+                </span>
+                <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                  $0.00
+                </span>
               </div>
 
               {/* Deposit Button */}
@@ -135,22 +146,176 @@ export function TopNav() {
               <div className="hidden md:block h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
 
               {/* User Avatar with Dropdown */}
-              <button 
-                onClick={openSidePanel}
-                className="flex items-center gap-1 hover:opacity-80 transition-opacity"
+              <div
+                className="relative"
+                onMouseEnter={() => {
+                  if (hoverTimeoutRef.current) {
+                    clearTimeout(hoverTimeoutRef.current);
+                    hoverTimeoutRef.current = null;
+                  }
+                  setIsHovering(true);
+                }}
+                onMouseLeave={() => {
+                  hoverTimeoutRef.current = setTimeout(() => {
+                    setIsHovering(false);
+                  }, 150);
+                }}
               >
-                <div 
-                  className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: user?.userId ? generateUserGradient(user.userId) : '#3B82F6'
-                  }}
+                <button
+                  onClick={openSidePanel}
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                 >
-                  <span className="text-white text-sm font-medium drop-shadow-sm">
-                    {user?.email?.charAt(0)?.toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <ChevronDown className="hidden md:block size-4 text-gray-400 dark:text-gray-500" />
-              </button>
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: user?.username
+                        ? generateAddressGradient(user.username)
+                        : '#3B82F6',
+                    }}
+                  />
+                  <ChevronDown
+                    className={`hidden md:block size-4 text-gray-400 dark:text-gray-500 transition-transform duration-200 ${
+                      isHovering ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+
+                {/* Desktop Dropdown Menu - Signed In User */}
+                {isHovering && user && (
+                  <div
+                    className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50"
+                    onMouseEnter={() => {
+                      if (hoverTimeoutRef.current) {
+                        clearTimeout(hoverTimeoutRef.current);
+                        hoverTimeoutRef.current = null;
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      hoverTimeoutRef.current = setTimeout(() => {
+                        setIsHovering(false);
+                      }, 150);
+                    }}
+                  >
+                    {/* User Info Section */}
+                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                          style={{
+                            background: user?.username
+                              ? generateAddressGradient(user.username)
+                              : '#3B82F6',
+                          }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {user?.username
+                              ? truncateAddress(user.username, 10, 4)
+                              : 'Connecting...'}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {user?.username
+                              ? truncateAddress(user.username, 4, 4)
+                              : 'Loading...'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Navigation Section */}
+                    <div className="px-4 py-2">
+                      <button className="w-full text-left text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors mb-2">
+                        Profile
+                      </button>
+                      <button className="w-full text-left text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors mb-2">
+                        Elections
+                      </button>
+                      <button className="w-full text-left text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors mb-2">
+                        Sports
+                      </button>
+                      <button className="w-full text-left text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors mb-2">
+                        Rewards
+                      </button>
+                      <button className="w-full text-left text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors mb-2">
+                        Documentation
+                      </button>
+                      <button className="w-full text-left text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        Terms of Use
+                      </button>
+                    </div>
+
+                    {/* Separator */}
+                    <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+
+                    {/* Dark Mode Toggle Section */}
+                    <div className="px-4 py-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          Dark mode
+                        </span>
+                        <button
+                          onClick={() => {
+                            toggleTheme();
+                            setIsHovering(false);
+                          }}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ease-in-out ${
+                            theme === 'dark'
+                              ? 'bg-blue-500/30 backdrop-blur-md border border-blue-400/30'
+                              : 'bg-gray-200/30 backdrop-blur-md border border-gray-300/30'
+                          }`}
+                          style={{
+                            background:
+                              theme === 'dark'
+                                ? 'rgba(59, 130, 246, 0.2)'
+                                : 'rgba(156, 163, 175, 0.2)',
+                            backdropFilter: 'blur(10px)',
+                            WebkitBackdropFilter: 'blur(10px)',
+                            border:
+                              theme === 'dark'
+                                ? '1px solid rgba(59, 130, 246, 0.3)'
+                                : '1px solid rgba(156, 163, 175, 0.3)',
+                          }}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full transition-all duration-300 ease-in-out ${
+                              theme === 'dark'
+                                ? 'translate-x-5'
+                                : 'translate-x-0.5'
+                            }`}
+                            style={{
+                              background:
+                                theme === 'dark'
+                                  ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))'
+                                  : 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))',
+                              backdropFilter: 'blur(10px)',
+                              WebkitBackdropFilter: 'blur(10px)',
+                              boxShadow:
+                                theme === 'dark'
+                                  ? '0 2px 8px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                                  : '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                            }}
+                          />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Separator */}
+                    <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+
+                    {/* Logout Button */}
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsHovering(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <LogOut className="size-4" />
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ) : isClient ? (
             /* Signed-out user layout */

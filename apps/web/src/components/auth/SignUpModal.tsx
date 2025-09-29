@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useConnect } from 'wagmi';
 import { metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Magic } from 'magic-sdk';
-import { OAuthExtension } from '@magic-ext/oauth2';
+import { createMagicClientWithOAuth, createMagicClient } from '@/lib/magic';
 import { WalletBrandIcon } from './WalletBrandIcon';
 
 interface SignUpModalProps {
@@ -27,7 +26,24 @@ export function SignUpModal({
   const [error, setError] = useState<string | null>(null);
   const { theme } = useTheme();
   const { connect } = useConnect();
-  const { login, refreshAuth } = useAuth();
+  const { login, refreshAuth, user } = useAuth();
+
+  // Auto-close modal when user is successfully authenticated
+  useEffect(() => {
+    if (user?.isLoggedIn && isOpen) {
+      console.log('User authenticated, closing modal...');
+      onClose();
+    }
+  }, [user?.isLoggedIn, isOpen, onClose]);
+
+  // Reset loading states when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setIsGoogleLoading(false);
+      setIsEmailLoading(false);
+      setError(null);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -40,7 +56,10 @@ export function SignUpModal({
     try {
       setIsGoogleLoading(true);
       console.log('Starting Google OAuth flow...');
-      console.log('Magic publishable key:', process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY);
+      console.log(
+        'Magic publishable key:',
+        process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY
+      );
 
       // Check if Magic key is available
       if (!process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY) {
@@ -48,25 +67,23 @@ export function SignUpModal({
       }
 
       // Initialize Magic client with OAuth2 extension
-      const magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY!, {
-        extensions: [new OAuthExtension()],
-      });
+      const magic = createMagicClientWithOAuth();
 
       console.log('Magic client initialized, starting OAuth popup...');
 
       // Start Google OAuth flow with popup
-      const result = await magic.oauth2.loginWithPopup({
+      const result = await (magic.oauth2 as any)?.loginWithPopup({
         provider: 'google',
       });
 
       console.log('OAuth popup result:', result);
-      
+
       // Process the OAuth result directly
       const didToken = (result as any)?.magic?.idToken;
-      
+
       if (didToken) {
         console.log('OAuth popup successful, sending to API...');
-        
+
         // Send DID token to our API
         const response = await fetch('/api/auth/magic/login', {
           method: 'POST',
@@ -80,11 +97,11 @@ export function SignUpModal({
         if (response.ok) {
           const result = await response.json();
           console.log('Login successful:', result);
-          await login(result.userId, result.email);
-          
+          await login(result.userId, result.email, result.username || '');
+
           // Close modal immediately
           onClose();
-          
+
           // Refresh auth context to ensure sync
           await refreshAuth();
         } else {
@@ -98,17 +115,20 @@ export function SignUpModal({
       }
     } catch (error) {
       console.error('Google sign up error:', error);
-      
+
       // Handle "already logged in" case
-      if (error instanceof Error && error.message?.includes('already logged in')) {
-        console.log('User already logged in with Magic Link, getting current session...');
+      if (
+        error instanceof Error &&
+        error.message?.includes('already logged in')
+      ) {
+        console.log(
+          'User already logged in with Magic Link, getting current session...'
+        );
         setIsGoogleLoading(true); // Show loading state
         try {
           // Create new Magic instance for getting current token
-          const magicInstance = new Magic(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY!, {
-            extensions: [new OAuthExtension()],
-          });
-          
+          const magicInstance = createMagicClientWithOAuth();
+
           // Get current DID token
           const didToken = await magicInstance.user.getIdToken();
           if (didToken) {
@@ -122,11 +142,11 @@ export function SignUpModal({
               },
               body: JSON.stringify({ didToken }),
             });
-            
+
             if (response.ok) {
               const result = await response.json();
               console.log('Session created successfully:', result);
-              await login(result.userId, result.email);
+              await login(result.userId, result.email, result.username || '');
               onClose();
               return;
             } else {
@@ -134,7 +154,9 @@ export function SignUpModal({
               setError('Failed to restore your session. Please try again.');
             }
           } else {
-            setError('Unable to get your authentication token. Please try again.');
+            setError(
+              'Unable to get your authentication token. Please try again.'
+            );
           }
         } catch (sessionError) {
           console.error('Failed to get current session:', sessionError);
@@ -143,9 +165,13 @@ export function SignUpModal({
           setIsGoogleLoading(false);
         }
       }
-      
+
       // Only show error if it's not the "already logged in" case
-      if (!(error instanceof Error && error.message?.includes('already logged in'))) {
+      if (
+        !(
+          error instanceof Error && error.message?.includes('already logged in')
+        )
+      ) {
         setError('Google sign up failed. Please try again.');
       }
     } finally {
@@ -160,7 +186,7 @@ export function SignUpModal({
       setIsEmailLoading(true);
 
       // Initialize Magic client
-      const magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY!);
+      const magic = createMagicClient();
 
       // Login with email OTP
       const didToken = await magic.auth.loginWithEmailOTP({ email });
@@ -176,7 +202,7 @@ export function SignUpModal({
 
       if (response.ok) {
         const result = await response.json();
-        login(result.userId, result.email);
+        login(result.userId, result.email, result.username || '');
         onClose();
       } else {
         const errorData = await response.json();
@@ -287,7 +313,9 @@ export function SignUpModal({
           {error && (
             <div className="px-8 mb-4">
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-                <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm">
+                  {error}
+                </p>
                 <button
                   onClick={() => setError(null)}
                   className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xs mt-1"
@@ -430,7 +458,9 @@ export function SignUpModal({
           {error && (
             <div className="px-8 mb-4">
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-                <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm">
+                  {error}
+                </p>
                 <button
                   onClick={() => setError(null)}
                   className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xs mt-1"

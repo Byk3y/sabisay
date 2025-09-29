@@ -36,12 +36,18 @@ export function generateCSRFToken(): string {
 }
 
 // Verify CSRF token
-export function verifyCSRFToken(sessionToken: string, requestToken: string): boolean {
+export function verifyCSRFToken(
+  sessionToken: string,
+  requestToken: string
+): boolean {
   return Boolean(sessionToken && requestToken && sessionToken === requestToken);
 }
 
 // Create secure session with CSRF protection
-export async function createSecureSession(userId: string, email: string): Promise<void> {
+export async function createSecureSession(
+  userId: string,
+  email: string
+): Promise<void> {
   const session = await getSession();
 
   session.userId = userId;

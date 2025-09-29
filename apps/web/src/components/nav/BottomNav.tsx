@@ -4,8 +4,10 @@ import { Home, Search, TrendingUp, Menu, BarChart3 } from 'lucide-react';
 import { useSidePanel } from '@/contexts/SidePanelContext';
 
 interface User {
+  userId: string;
   email: string;
-  // Add other user properties as needed
+  username: string;
+  isLoggedIn: boolean;
 }
 
 interface BottomNavProps {
@@ -14,19 +16,25 @@ interface BottomNavProps {
   user?: User | null;
 }
 
-export function BottomNav({ activeTab = 'home', onTabChange, user }: BottomNavProps) {
+export function BottomNav({
+  activeTab = 'home',
+  onTabChange,
+  user,
+}: BottomNavProps) {
   const { openSidePanel } = useSidePanel();
-  
-  const tabs = user ? [
-    { id: 'home' as const, label: 'Home', Icon: Home },
-    { id: 'search' as const, label: 'Search', Icon: Search },
-    { id: 'breaking' as const, label: 'Breaking', Icon: TrendingUp },
-  ] : [
-    { id: 'home' as const, label: 'Home', Icon: Home },
-    { id: 'search' as const, label: 'Search', Icon: Search },
-    { id: 'breaking' as const, label: 'Breaking', Icon: TrendingUp },
-    { id: 'more' as const, label: 'More', Icon: Menu },
-  ];
+
+  const tabs = user
+    ? [
+        { id: 'home' as const, label: 'Home', Icon: Home },
+        { id: 'search' as const, label: 'Search', Icon: Search },
+        { id: 'breaking' as const, label: 'Breaking', Icon: TrendingUp },
+      ]
+    : [
+        { id: 'home' as const, label: 'Home', Icon: Home },
+        { id: 'search' as const, label: 'Search', Icon: Search },
+        { id: 'breaking' as const, label: 'Breaking', Icon: TrendingUp },
+        { id: 'more' as const, label: 'More', Icon: Menu },
+      ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-[#0b1220]/90 backdrop-blur">

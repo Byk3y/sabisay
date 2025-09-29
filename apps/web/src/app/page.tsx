@@ -48,7 +48,7 @@ function HomePageContent() {
   // Wallet and chain state
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
-  const isLocalChain = chainId === config.local.chainId;
+  const isPolygonAmoy = chainId === 80002;
 
   // Auth state
   const authContext = useAuthSafe();
@@ -180,7 +180,10 @@ function HomePageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0b1220] text-gray-900 dark:text-white transition-colors" suppressHydrationWarning>
+    <div
+      className="min-h-screen bg-white dark:bg-[#0b1220] text-gray-900 dark:text-white transition-colors"
+      suppressHydrationWarning
+    >
       {/* Top Navigation */}
       <TopNavClient />
 
@@ -463,14 +466,15 @@ function HomePageContent() {
 
       {/* Bottom Navigation - Hidden on desktop */}
       <div className="lg:hidden">
-        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} user={user} />
+        <BottomNav
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          user={user}
+        />
       </div>
 
       {/* Side Panel */}
-      <SidePanel
-        isOpen={isSidePanelOpen}
-        onClose={closeSidePanel}
-      />
+      <SidePanel isOpen={isSidePanelOpen} onClose={closeSidePanel} />
 
       {/* Sign Up Modal */}
       <SignUpModal

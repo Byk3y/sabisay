@@ -22,6 +22,7 @@ These variables are used by the server and API routes only. They are validated a
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | `lib/env.ts`, database operations | None (required) |
 | `BICONOMY_API_KEY` | Biconomy API key for gasless transactions | `lib/env.ts`, transaction handling | None (required) |
 | `ALCHEMY_AMOY_RPC_URL` | Alchemy RPC URL for Polygon Amoy | `lib/env.ts`, `next.config.js` | None (required) |
+| `RATE_LIMIT_REDIS_URL` | Redis URL for rate limiting (optional) | `lib/rate-limit.ts` | None (uses in-memory store) |
 
 ## Optional Server Variables
 

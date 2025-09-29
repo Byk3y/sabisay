@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Magic } from 'magic-sdk';
+import { createMagicClient } from '@/lib/magic';
 
 // Only available in development
 if (process.env.NODE_ENV === 'production') {
@@ -24,8 +24,8 @@ export default function MagicCheckPage() {
 
     try {
       // Initialize Magic client
-      const magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY!);
-      
+      const magic = createMagicClient();
+
       // Login with email OTP
       const didToken = await magic.auth.loginWithEmailOTP({ email });
       console.log('DID Token received:', didToken ? 'Yes' : 'No');
@@ -50,14 +50,13 @@ export default function MagicCheckPage() {
       setResult({
         login: loginResult,
         me: meResult,
-        success: loginResponse.ok && meResponse.ok
+        success: loginResponse.ok && meResponse.ok,
       });
-
     } catch (error) {
       console.error('Magic login error:', error);
       setResult({
         error: error instanceof Error ? error.message : 'Unknown error',
-        success: false
+        success: false,
       });
     } finally {
       setLoading(false);
@@ -70,17 +69,20 @@ export default function MagicCheckPage() {
         <h1 className="text-2xl font-bold text-gray-900 mb-6">
           Magic Auth Test
         </h1>
-        
+
         <div className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email Address
             </label>
             <input
               type="email"
               id="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Enter your email"
             />
@@ -99,11 +101,13 @@ export default function MagicCheckPage() {
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 Test Results
               </h3>
-              <div className={`p-4 rounded-md ${
-                result.success 
-                  ? 'bg-green-50 border border-green-200' 
-                  : 'bg-red-50 border border-red-200'
-              }`}>
+              <div
+                className={`p-4 rounded-md ${
+                  result.success
+                    ? 'bg-green-50 border border-green-200'
+                    : 'bg-red-50 border border-red-200'
+                }`}
+              >
                 <pre className="text-sm overflow-auto">
                   {JSON.stringify(result, null, 2)}
                 </pre>
@@ -115,5 +119,3 @@ export default function MagicCheckPage() {
     </div>
   );
 }
-
-

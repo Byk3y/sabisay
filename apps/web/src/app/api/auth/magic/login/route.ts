@@ -3,7 +3,7 @@ import { Magic } from '@magic-sdk/admin';
 import { createSecureSession } from '@/lib/session';
 import { env } from '@/lib/env';
 import { supabaseAdmin } from '@/lib/supabase-server';
-import { authRateLimit } from '@/lib/rate-limit';
+import { authRateLimit, createRateLimitResponse } from '@/lib/rate-limit';
 
 // Initialize Magic Admin
 const magic = new Magic(env.MAGIC_SECRET_KEY);
@@ -16,23 +16,16 @@ export async function POST(request: NextRequest) {
     try {
       const rateLimitResult = authRateLimit(request);
       if (!rateLimitResult.allowed) {
-        return NextResponse.json(
-          { error: 'Too many login attempts. Please try again later.' },
-          {
-            status: 429,
-            headers: {
-              'X-RateLimit-Limit': '5',
-              'X-RateLimit-Remaining': '0',
-              'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime / 1000).toString(),
-            }
-          }
-        );
+        return createRateLimitResponse(rateLimitResult, {
+          windowMs: 15 * 60 * 1000,
+          maxRequests: 5,
+        });
       }
     } catch (rateLimitError) {
       console.error('Rate limiting error:', rateLimitError);
       // Continue without rate limiting if it fails
     }
-    
+
     // Get DID token from Authorization header or request body
     let didToken: string;
 
@@ -55,8 +48,11 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Verifying DID token with Magic Admin...');
-    console.log('Magic secret key configured:', env.MAGIC_SECRET_KEY ? 'Yes' : 'No');
-    
+    console.log(
+      'Magic secret key configured:',
+      env.MAGIC_SECRET_KEY ? 'Yes' : 'No'
+    );
+
     // Verify the DID token with Magic Admin
     const metadata = await magic.users.getMetadataByToken(didToken);
     console.log('Magic metadata:', metadata);
@@ -68,6 +64,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get wallet address from Magic metadata
+    let walletAddress: string;
+    try {
+      // The publicAddress should be available in the metadata
+      const publicAddress = metadata.publicAddress;
+      if (!publicAddress) {
+        throw new Error('No public address found in metadata');
+      }
+      walletAddress = publicAddress;
+      console.log('Wallet address retrieved:', walletAddress);
+    } catch (walletError) {
+      console.error('Failed to get wallet address:', walletError);
+      return NextResponse.json(
+        { error: 'Unable to retrieve wallet address' },
+        { status: 500 }
+      );
+    }
+
     // Extract Magic data
     const issuer = metadata.issuer; // DID (subject)
     const email = metadata.email ?? null;
@@ -76,7 +90,7 @@ export async function POST(request: NextRequest) {
     // Lookup existing identity
     const { data: identity } = await supabaseAdmin
       .from('identities')
-      .select('id,user_id,provider,subject,users(email)')
+      .select('id,user_id,provider,subject,users(email,username)')
       .eq('provider', provider)
       .eq('subject', issuer)
       .maybeSingle();
@@ -84,10 +98,13 @@ export async function POST(request: NextRequest) {
     let userId: string;
 
     if (!identity) {
-      // Create new user and identity
+      // Create new user and identity with wallet address as username
       const { data: newUser, error: uErr } = await supabaseAdmin
         .from('users')
-        .insert({ email })
+        .insert({
+          email,
+          username: walletAddress,
+        })
         .select('id')
         .single();
 
@@ -110,18 +127,68 @@ export async function POST(request: NextRequest) {
       // Use existing user
       userId = identity.user_id;
 
+      // Update user data if needed
+      const updateData: any = {};
+
       // Backfill email if missing
       if (email && !identity.users?.[0]?.email) {
+        updateData.email = email;
+      }
+
+      // Set username to wallet address if not already set or if it's different
+      if (
+        !identity.users?.[0]?.username ||
+        identity.users[0].username !== walletAddress
+      ) {
+        updateData.username = walletAddress;
+      }
+
+      // Only update if there are changes
+      if (Object.keys(updateData).length > 0) {
         const { error: updateErr } = await supabaseAdmin
           .from('users')
-          .update({ email })
+          .update(updateData)
           .eq('id', userId);
 
         if (updateErr) {
-          console.error('Email update error:', updateErr);
+          console.error('User update error:', updateErr);
           // Don't throw - this is not critical
         }
       }
+    }
+
+    // Ensure wallet is recorded in wallets table
+    try {
+      const chainId = parseInt(env.NEXT_PUBLIC_CHAIN_ID || '80002', 10);
+
+      // Check if wallet already exists for this user
+      const { data: existingWallet } = await supabaseAdmin
+        .from('wallets')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('eoa_address', walletAddress)
+        .maybeSingle();
+
+      if (!existingWallet) {
+        // Insert wallet record
+        const { error: walletError } = await supabaseAdmin
+          .from('wallets')
+          .insert({
+            user_id: userId,
+            chain_id: chainId,
+            eoa_address: walletAddress,
+          });
+
+        if (walletError) {
+          console.error('Wallet creation error:', walletError);
+          // Don't throw - this is not critical for auth
+        } else {
+          console.log('Wallet recorded in wallets table:', walletAddress);
+        }
+      }
+    } catch (walletError) {
+      console.error('Wallet recording error:', walletError);
+      // Don't throw - this is not critical for auth
     }
 
     // Create secure session with CSRF protection
@@ -132,16 +199,20 @@ export async function POST(request: NextRequest) {
       ok: true,
       userId,
       email: email || '',
+      username: walletAddress,
     });
   } catch (error) {
     console.error('Magic login error:', error);
     console.error('Error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
-      name: error instanceof Error ? error.name : undefined
+      name: error instanceof Error ? error.name : undefined,
     });
     return NextResponse.json(
-      { error: 'Authentication failed', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Authentication failed',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

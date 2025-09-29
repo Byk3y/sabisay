@@ -28,7 +28,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="bg-white dark:bg-[#0b1220] text-gray-900 dark:text-white antialiased transition-colors" suppressHydrationWarning>
+      <body
+        className="bg-white dark:bg-[#0b1220] text-gray-900 dark:text-white antialiased transition-colors"
+        suppressHydrationWarning
+      >
         <Providers>
           <ThemeProvider>
             <SignUpModalProvider>{children}</SignUpModalProvider>
