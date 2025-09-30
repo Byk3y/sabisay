@@ -13,6 +13,7 @@ export interface RawMarket {
   imageUrl?: string;
   closesAt?: string;
   uiStyle?: 'default' | 'binary' | 'chance'; // Add uiStyle field for binary/chance markets
+  slug?: string;
 }
 
 // Alias for backward compatibility - use RawMarket instead
@@ -21,6 +22,7 @@ export type Market = RawMarket;
 export const mockMarkets: Market[] = [
   {
     id: '6',
+    slug: 'nigerian-presidential-election-2027',
     question: 'Nigerian Presidential Election 2027',
     outcomes: [
       { label: 'Peter Obi', oddsPct: 45 },
@@ -32,6 +34,7 @@ export const mockMarkets: Market[] = [
   },
   {
     id: '1',
+    slug: 'fed-decision-september-2024',
     question: 'Fed decision in September?',
     outcomes: [
       { label: '50+ bps decrease', oddsPct: 7 },
@@ -43,6 +46,7 @@ export const mockMarkets: Market[] = [
   },
   {
     id: 'nyc-mayor-2025',
+    slug: 'nyc-mayor-2025',
     question: 'NYC Mayor 2025',
     outcomes: [
       { label: 'Zohran Mamdani', oddsPct: 38 },
@@ -57,6 +61,7 @@ export const mockMarkets: Market[] = [
   },
   {
     id: '3',
+    slug: 'powell-september-press-conference',
     question: 'What will Powell say during September Press Conference?',
     outcomes: [
       { label: 'Inflation 40+ times', oddsPct: 83 },
@@ -68,6 +73,7 @@ export const mockMarkets: Market[] = [
   },
   {
     id: '4',
+    slug: 'super-bowl-champion-2026',
     question: 'Super Bowl Champion 2026',
     outcomes: [
       { label: 'Kansas City Chiefs', oddsPct: 25 },
@@ -79,6 +85,7 @@ export const mockMarkets: Market[] = [
   },
   {
     id: '5',
+    slug: 'bitcoin-100k-2024',
     question: 'Bitcoin price above $100k by end of 2024?',
     outcomes: [
       { label: 'Yes', oddsPct: 35 },
@@ -90,6 +97,7 @@ export const mockMarkets: Market[] = [
   },
   {
     id: '7',
+    slug: 'tesla-stock-300-q4-2024',
     question: 'Tesla stock above $300 by Q4 2024?',
     outcomes: [
       { label: 'Yes', oddsPct: 28 },
@@ -101,6 +109,7 @@ export const mockMarkets: Market[] = [
   },
   {
     id: '8',
+    slug: 'nigerian-naira-below-1000-2024',
     question: 'Nigerian Naira to USD exchange rate below 1000 by year end?',
     outcomes: [
       { label: 'Yes', oddsPct: 15 },
@@ -161,6 +170,7 @@ export const extraFeedItems: MarketItem[] = [
   {
     kind: 'market',
     id: 'chance-001',
+    slug: 'eth-above-3500-march-31',
     question: 'Will ETH be above $3,500 on Mar 31?',
     poolUsd: 1250000,
     closesAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 20).toISOString(),

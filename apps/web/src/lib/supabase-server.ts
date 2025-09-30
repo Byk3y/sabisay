@@ -26,11 +26,11 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { env } from './env';
+import { serverEnv } from './env.server';
 
 // Validate required environment variables
-const supabaseUrl = env.SUPABASE_URL;
-const supabaseServiceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = serverEnv.SUPABASE_URL;
+const supabaseServiceRoleKey = serverEnv.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl) {
   throw new Error('Missing SUPABASE_URL environment variable');

@@ -16,6 +16,7 @@ export interface BaseMarket {
   imageUrl?: string;
   closesAt?: string;
   outcomes?: Array<{ label: string; oddsPct: number }>;
+  slug?: string;
 }
 
 export type MarketItem =
@@ -63,10 +64,12 @@ export interface Market {
   id: string;
   title: string;
   volume: number;
-  endDate: Date;
+  endDate: Date | undefined; // Allow undefined for safety
   outcomes: Outcome[];
   relatedMarkets: RelatedMarket[];
   uiStyle?: UiStyle; // Add this field to preserve uiStyle
+  slug?: string;
+  imageUrl?: string;
 }
 
 /**

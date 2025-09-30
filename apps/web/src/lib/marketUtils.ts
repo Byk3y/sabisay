@@ -10,6 +10,7 @@ import {
   type RawMarket,
 } from '@/lib/mock';
 import type { Market, Outcome, RelatedMarket, UiStyle } from '@/types/market';
+import { generateMarketSlug } from './slugUtils';
 
 /**
  * Get market by ID from mock data
@@ -92,6 +93,8 @@ export const transformMarketData = (rawMarket: RawMarket): Market => {
       },
     })),
     relatedMarkets: getRelatedMarkets(rawMarket.id),
+    slug: rawMarket.slug || generateMarketSlug(rawMarket),
+    ...(rawMarket.imageUrl && { imageUrl: rawMarket.imageUrl }),
   };
 
   // Only add uiStyle if it's defined to avoid undefined assignment
@@ -274,4 +277,65 @@ export const getTrendingMarkets = (limit: number = 10): Market[] => {
     .sort((a, b) => b.poolUsd - a.poolUsd)
     .slice(0, limit)
     .map(transformMarketData);
+};
+
+/**
+ * Get market by market slug
+ * @param marketSlug - The market slug
+ * @returns Market object or null if not found
+ */
+export const getMarketBySlug = (marketSlug: string): Market | null => {
+  // Search in all mock data arrays
+  const allMarkets = [...mockMarkets, ...extraFeedItems, ...binaryMembers];
+
+  // Find market by matching slug
+  const market = allMarkets.find(m => {
+    if (!('id' in m)) return false;
+    
+    const rawMarket = m as RawMarket;
+    const marketSlugValue = rawMarket.slug || generateMarketSlug(rawMarket);
+    
+    return marketSlugValue === marketSlug;
+  });
+
+  if (!market) return null;
+
+  return transformMarketData(market as RawMarket);
+};
+
+/**
+ * Ensure slugs are populated for mock data
+ * This function adds slugs to market data where they're missing
+ */
+export const ensureSlugsForMockData = (): void => {
+  const allMarkets = [...mockMarkets, ...extraFeedItems, ...binaryMembers];
+  
+  allMarkets.forEach(market => {
+    if ('id' in market) {
+      const rawMarket = market as RawMarket;
+      if (!rawMarket.slug) {
+        (rawMarket as any).slug = generateMarketSlug(rawMarket);
+      }
+    }
+  });
+};
+
+/**
+ * Get all market slugs from mock data
+ * @returns Array of all market slugs
+ */
+export const getAllMarketSlugs = (): string[] => {
+  ensureSlugsForMockData();
+  const allMarkets = [...mockMarkets, ...extraFeedItems, ...binaryMembers];
+  const marketSlugs: string[] = [];
+  
+  allMarkets.forEach(market => {
+    if ('id' in market) {
+      const rawMarket = market as RawMarket;
+      const marketSlug = rawMarket.slug || generateMarketSlug(rawMarket);
+      marketSlugs.push(marketSlug);
+    }
+  });
+  
+  return marketSlugs;
 };

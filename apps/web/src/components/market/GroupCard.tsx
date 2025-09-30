@@ -3,17 +3,17 @@ import Link from 'next/link';
 import type { MarketItem } from '@/types/market';
 import { CardShell, CardHeader, ActionPill } from './_primitives';
 import { formatPool } from '@/lib/mock';
+import { buildEventUrl } from '@/lib/slugUtils';
 
 export function GroupCard({
   group,
 }: {
   group: Extract<MarketItem, { kind: 'group' }>;
 }) {
-  // All groups now link to their main market page
-  const href =
-    group.groupId === 'election-nyc-2025'
-      ? '/market/nyc-mayor-2025'
-      : `/market/${group.groupId}`;
+  // All groups now link to their main market page using event URLs
+  const href = group.groupId === 'election-nyc-2025'
+    ? buildEventUrl('nyc-mayor-2025')
+    : buildEventUrl(group.groupId);
 
   return (
     <Link href={href}>

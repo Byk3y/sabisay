@@ -19,11 +19,11 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { env } from './env';
+import { clientEnv } from './env.client';
 
 // Validate required environment variables
-const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = clientEnv.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl) {
   throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');

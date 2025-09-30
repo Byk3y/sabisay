@@ -2,137 +2,32 @@
  * Environment variable validation and type safety
  *
  * This module provides runtime validation for environment variables
- * and exports a typed `env` object for use throughout the application.
+ * and exports typed objects for use throughout the application.
  *
- * Server-only variables are validated on import and will throw clear
- * error messages if missing. Public variables have sensible defaults.
+ * IMPORTANT: This file now delegates to separate server/client modules
+ * to ensure proper security boundaries.
  */
 
-// Helper function for required environment variables
-function requireEnvVar(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(
-      `Missing required environment variable: ${name}\n` +
-        `Please check your .env.local file or environment configuration.`
-    );
-  }
-  return value;
-}
+import { clientEnv } from './env.client';
 
-// Helper function for optional environment variables with fallback
-function getEnv(name: string, fallback: string = ''): string {
-  // In client-side, process.env might not have all variables loaded
-  // Try both process.env and window.location for client-side variables
-  if (typeof window !== 'undefined') {
-    // Client-side: try process.env first, then fallback
-    return process.env[name] || fallback;
-  } else {
-    // Server-side: use process.env
-    return process.env[name] || fallback;
-  }
-}
-
-// Server-only environment variables (required unless noted)
-// Only validate these on the server side to avoid client-side errors
-const serverEnv = {
-  // Magic Link authentication
-  MAGIC_SECRET_KEY:
-    typeof window === 'undefined' ? requireEnvVar('MAGIC_SECRET_KEY') : '',
-
-  // Session management
-  IRON_SESSION_PASSWORD:
-    typeof window === 'undefined' ? requireEnvVar('IRON_SESSION_PASSWORD') : '',
-
-  // Supabase configuration
-  SUPABASE_URL:
-    typeof window === 'undefined' ? requireEnvVar('SUPABASE_URL') : '',
-  SUPABASE_SERVICE_ROLE_KEY:
-    typeof window === 'undefined'
-      ? requireEnvVar('SUPABASE_SERVICE_ROLE_KEY')
-      : '',
-
-  // Biconomy for gasless transactions
-  BICONOMY_API_KEY:
-    typeof window === 'undefined' ? requireEnvVar('BICONOMY_API_KEY') : '',
-
-  // RPC configuration
-  ALCHEMY_AMOY_RPC_URL:
-    typeof window === 'undefined' ? requireEnvVar('ALCHEMY_AMOY_RPC_URL') : '',
-
-  // Optional server variables (only required for specific operations)
-  TREASURY_ADDRESS: getEnv('TREASURY_ADDRESS'),
-  PRIVATE_KEY: getEnv('PRIVATE_KEY'),
-  USDC_ADDRESS: getEnv('USDC_ADDRESS'),
-} as const;
-
-// Public environment variables (exposed to browser)
-const publicEnv = {
-  // Chain configuration
-  NEXT_PUBLIC_CHAIN_ID: getEnv('NEXT_PUBLIC_CHAIN_ID', '80002'),
-  NEXT_PUBLIC_RPC_URL: getEnv(
-    'NEXT_PUBLIC_RPC_URL',
-    getEnv('ALCHEMY_AMOY_RPC_URL', 'https://rpc-amoy.polygon.technology')
-  ),
-
-  // WalletConnect configuration
-  NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: getEnv(
-    'NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID'
-  ),
-
-  // Contract addresses
-  NEXT_PUBLIC_USDC_ADDRESS: getEnv('NEXT_PUBLIC_USDC_ADDRESS'),
-  NEXT_PUBLIC_FACTORY_ADDRESS: getEnv('NEXT_PUBLIC_FACTORY_ADDRESS'),
-
-  // Supabase configuration (public)
-  NEXT_PUBLIC_SUPABASE_URL: getEnv('NEXT_PUBLIC_SUPABASE_URL'),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
-
-  // Magic configuration (public)
-  NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY: getEnv(
-    'NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY',
-    ''
-  ),
-} as const;
-
-// Combined environment object
+// Combined environment object (for backward compatibility)
+// Only includes client-safe variables to prevent accidental server secret exposure
 export const env = {
-  ...serverEnv,
-  ...publicEnv,
+  ...clientEnv,
 } as const;
 
-// Debug environment variables in development (commented out to reduce console noise)
-// if (process.env.NODE_ENV === 'development') {
-//   console.log('Environment variables loaded:');
-//   console.log('NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY:', env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY ? 'Set' : 'Not set');
-//   console.log('NEXT_PUBLIC_CHAIN_ID:', env.NEXT_PUBLIC_CHAIN_ID);
-//   console.log('NEXT_PUBLIC_RPC_URL:', env.NEXT_PUBLIC_RPC_URL);
-// }
+// Re-export client environment for specific use cases
+export { clientEnv } from './env.client';
 
 // Type definitions for better IDE support
-export type ServerEnv = typeof serverEnv;
-export type PublicEnv = typeof publicEnv;
+export type { ClientEnv } from './env.client';
 export type Env = typeof env;
 
-// Helper function for one-off environment checks
-export function requireEnv(name: string): string {
-  return requireEnvVar(name);
-}
-
-// Validation function to check all required variables at startup
-export function validateEnv(): void {
-  try {
-    // This will throw if any required variables are missing
-    const _ = env;
-    console.log('✅ Environment variables validated successfully');
-  } catch (error) {
-    console.error('❌ Environment validation failed:');
-    console.error(error);
-    process.exit(1);
-  }
-}
-
-// Auto-validate on import in production
-if (process.env.NODE_ENV === 'production') {
-  validateEnv();
+// Debug environment variables in development (client-safe only)
+if (process.env.NODE_ENV === 'development') {
+  console.log('=== ENV DEBUG: Client environment variables loaded ===');
+  console.log('NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY:', env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY ? 'Set' : 'Not set');
+  console.log('NEXT_PUBLIC_CHAIN_ID:', env.NEXT_PUBLIC_CHAIN_ID);
+  console.log('NEXT_PUBLIC_RPC_URL:', env.NEXT_PUBLIC_RPC_URL);
+  console.log('===============================================');
 }

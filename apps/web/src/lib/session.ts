@@ -1,6 +1,6 @@
 import { IronSession, getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';
-import { env } from './env';
+import { serverEnv } from './env.server';
 import { randomBytes } from 'crypto';
 
 // Session data interface
@@ -14,7 +14,7 @@ export interface SessionData {
 
 // Session configuration
 const sessionConfig = {
-  password: env.IRON_SESSION_PASSWORD,
+  password: serverEnv.IRON_SESSION_PASSWORD,
   cookieName: 'pakomarket-session',
   cookieOptions: {
     secure: process.env.NODE_ENV === 'production',

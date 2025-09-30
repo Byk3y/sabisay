@@ -8,6 +8,7 @@ interface User {
   email: string;
   username: string;
   isLoggedIn: boolean;
+  isAdmin?: boolean;
 }
 
 interface BottomNavProps {

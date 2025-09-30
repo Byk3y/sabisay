@@ -14,41 +14,37 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Get session
     const session = await getSession();
 
     if (!session.isLoggedIn || !session.userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    // Fetch user data from Supabase
+    // Query Supabase to check admin status
     const { data: user, error } = await supabaseAdmin
       .from('users')
-      .select('id, email, username, is_admin')
+      .select('is_admin')
       .eq('id', session.userId)
       .single();
 
     if (error) {
-      console.error('User fetch error:', error);
-      // Fall back to session data
-      return NextResponse.json({
-        userId: session.userId,
-        email: session.email || '',
-        isAdmin: false, // Default to false if can't fetch from DB
-        isLoggedIn: true,
-      });
+      console.error('Admin check error:', error);
+      return NextResponse.json({ error: 'Failed to verify admin status' }, { status: 500 });
     }
 
-    return NextResponse.json({
-      userId: user.id,
-      email: user.email || session.email || '',
-      username: user.username || '',
-      isAdmin: user.is_admin === true,
-      isLoggedIn: true,
+    if (!user.is_admin) {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
+    return NextResponse.json({ 
+      ok: true, 
+      userId: session.userId 
     });
   } catch (error) {
-    console.error('Session check error:', error);
+    console.error('Admin ping error:', error);
     return NextResponse.json(
-      { error: 'Session check failed' },
+      { error: 'Admin check failed' },
       { status: 500 }
     );
   }

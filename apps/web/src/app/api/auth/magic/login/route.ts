@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Magic } from '@magic-sdk/admin';
 import { createSecureSession } from '@/lib/session';
 import { env } from '@/lib/env';
+import { serverEnv } from '@/lib/env.server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { authRateLimit, createRateLimitResponse } from '@/lib/rate-limit';
 
 // Initialize Magic Admin
-const magic = new Magic(env.MAGIC_SECRET_KEY);
+const magic = new Magic(serverEnv.MAGIC_SECRET_KEY);
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
     console.log('Verifying DID token with Magic Admin...');
     console.log(
       'Magic secret key configured:',
-      env.MAGIC_SECRET_KEY ? 'Yes' : 'No'
+      serverEnv.MAGIC_SECRET_KEY ? 'Yes' : 'No'
     );
 
     // Verify the DID token with Magic Admin

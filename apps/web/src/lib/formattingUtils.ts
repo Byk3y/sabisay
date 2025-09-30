@@ -34,8 +34,20 @@ export const formatCurrencyNoSymbol = (amount: number): string => {
  * @param date - The date to format
  * @returns Formatted date string (e.g., "Dec 25, 2024")
  */
-export const formatDate = (date: Date): string => {
-  return date.toLocaleDateString('en-US', {
+export const formatDate = (date: Date | undefined | null): string => {
+  if (!date) {
+    return 'TBD';
+  }
+  
+  // Ensure it's a Date object
+  const dateObj = date instanceof Date ? date : new Date(date);
+  
+  // Check if the date is valid
+  if (isNaN(dateObj.getTime())) {
+    return 'TBD';
+  }
+  
+  return dateObj.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

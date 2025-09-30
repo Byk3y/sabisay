@@ -1,11 +1,11 @@
 // PakoMarket Configuration
-import { env } from './env';
+import { clientEnv } from './env.client';
 
 export const config = {
   // Contract Addresses
   contracts: {
-    USDC: env.NEXT_PUBLIC_USDC_ADDRESS || '',
-    FACTORY: env.NEXT_PUBLIC_FACTORY_ADDRESS || '',
+    USDC: clientEnv.NEXT_PUBLIC_USDC_ADDRESS || '',
+    FACTORY: clientEnv.NEXT_PUBLIC_FACTORY_ADDRESS || '',
   },
 
   // App Configuration

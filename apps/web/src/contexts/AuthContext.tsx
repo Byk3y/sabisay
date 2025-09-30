@@ -7,6 +7,7 @@ interface User {
   email: string;
   username: string;
   isLoggedIn: boolean;
+  isAdmin?: boolean;
 }
 
 interface AuthContextType {
@@ -87,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: userData.email,
           username: userData.username || '',
           isLoggedIn: userData.isLoggedIn,
+          isAdmin: userData.isAdmin || false,
         });
       } else {
         console.log('Auth failed, setting user to null');
@@ -109,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       username,
       isLoggedIn: true,
+      isAdmin: false, // Will be updated by checkAuth
     });
 
     // Refresh auth context to ensure sync with server
@@ -148,6 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               email: result.email,
               username: result.username || '',
               isLoggedIn: true,
+              isAdmin: false, // Will be updated by checkAuth
             });
           }
         }

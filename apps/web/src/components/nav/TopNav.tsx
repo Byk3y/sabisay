@@ -236,6 +236,14 @@ export function TopNav() {
                       <button className="w-full text-left text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors mb-2">
                         Rewards
                       </button>
+                      {user?.isAdmin && (
+                        <a
+                          href="/admin"
+                          className="w-full text-left text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors mb-2 block"
+                        >
+                          Admin
+                        </a>
+                      )}
                       <button className="w-full text-left text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors mb-2">
                         Documentation
                       </button>

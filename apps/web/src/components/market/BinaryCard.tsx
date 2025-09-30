@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { MarketItem } from '@/types/market';
 import { CardShell, CardHeader, ActionPill } from './_primitives';
 import { formatPool } from '@/lib/mock';
+import { buildEventUrl, generateMarketSlug } from '@/lib/slugUtils';
 
 // Helper function to determine color based on percentage
 function getChanceColor(percentage: number): string {
@@ -34,8 +35,12 @@ export function BinaryCard({
     />
   ) : null;
 
+  // Generate event URL using proper slug generation
+  const marketSlug = market.slug || generateMarketSlug(market);
+  const eventUrl = buildEventUrl(marketSlug);
+
   return (
-    <Link href={`/market/${market.id}`}>
+    <Link href={eventUrl}>
       <CardShell>
         {/* Header with icon, title, and chance indicator in top-right */}
         <div className="flex items-center gap-3 mb-2">

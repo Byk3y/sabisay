@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { RawMarket } from '@/lib/mock';
 import { formatPool } from '@/lib/mock';
+import { buildEventUrl, generateMarketSlug } from '@/lib/slugUtils';
 
 interface MarketCardProps {
   market: RawMarket;
@@ -11,8 +12,12 @@ interface MarketCardProps {
 }
 
 export function MarketCard({ market, onYesClick, onNoClick }: MarketCardProps) {
+  // Generate event URL using proper slug generation
+  const marketSlug = market.slug || generateMarketSlug(market);
+  const eventUrl = buildEventUrl(marketSlug);
+
   return (
-    <Link href={`/market/${market.id}`}>
+    <Link href={eventUrl}>
       <article className="rounded-xl border border-gray-300 dark:border-gray-600/20 bg-white dark:bg-gray-800/50 backdrop-blur-sm shadow-md hover:shadow-lg dark:hover:bg-gray-800/70 transition-all duration-200 ring-1 ring-gray-100 dark:ring-gray-700/50 cursor-pointer">
         <div className="p-4">
           {/* Image and title on the same line */}

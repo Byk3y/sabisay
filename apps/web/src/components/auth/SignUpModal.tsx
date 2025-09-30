@@ -7,6 +7,7 @@ import { metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { createMagicClientWithOAuth, createMagicClient } from '@/lib/magic';
+import { clientEnv } from '@/lib/env.client';
 import { WalletBrandIcon } from './WalletBrandIcon';
 
 interface SignUpModalProps {
@@ -58,11 +59,11 @@ export function SignUpModal({
       console.log('Starting Google OAuth flow...');
       console.log(
         'Magic publishable key:',
-        process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY
+        clientEnv.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY
       );
 
       // Check if Magic key is available
-      if (!process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY) {
+      if (!clientEnv.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY) {
         throw new Error('Magic publishable key is not configured');
       }
 

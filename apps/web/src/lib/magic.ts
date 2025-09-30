@@ -5,12 +5,12 @@
 
 import { Magic } from 'magic-sdk';
 import { OAuthExtension } from '@magic-ext/oauth2';
-import { env } from './env';
+import { clientEnv } from './env.client';
 
 // Polygon network configuration
 const POLYGON_NETWORK = {
-  rpcUrl: env.NEXT_PUBLIC_RPC_URL,
-  chainId: parseInt(env.NEXT_PUBLIC_CHAIN_ID),
+  rpcUrl: clientEnv.NEXT_PUBLIC_RPC_URL,
+  chainId: parseInt(clientEnv.NEXT_PUBLIC_CHAIN_ID),
 };
 
 /**

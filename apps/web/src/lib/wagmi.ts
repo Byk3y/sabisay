@@ -1,9 +1,9 @@
 import { createConfig, http } from 'wagmi';
 import { polygonAmoy } from 'wagmi/chains';
 import { injected, metaMask } from 'wagmi/connectors';
-import { env } from './env';
+import { clientEnv } from './env.client';
 
-const rpcUrl = env.NEXT_PUBLIC_RPC_URL;
+const rpcUrl = clientEnv.NEXT_PUBLIC_RPC_URL;
 
 // Wagmi configuration
 export const wagmiConfig = createConfig({

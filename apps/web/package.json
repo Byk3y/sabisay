@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/validate-env.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -11,7 +12,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "clean": "rm -rf .next dist"
+    "clean": "rm -rf .next dist",
+    "validate-env": "node scripts/validate-env.js"
   },
   "dependencies": {
     "@magic-ext/oauth2": "^12.0.0",
@@ -26,6 +28,7 @@
     "@types/ioredis": "^5.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "dotenv": "^16.6.1",
     "encoding": "^0.1.13",
     "ioredis": "^5.8.0",
     "iron-session": "^8.0.4",
@@ -41,6 +44,7 @@
     "tailwindcss-animate": "^1.0.7",
     "viem": "^2.0.0",
     "wagmi": "^2.0.0",
+    "zod": "^4.1.11",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
