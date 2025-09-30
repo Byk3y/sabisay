@@ -29,7 +29,7 @@ export function MarketPreview({
   }
 
   // Transform data for MarketCard
-  const marketData = {
+  const marketData: any = {
     kind: 'market' as const,
     id: 'preview',
     question: question || '',
@@ -39,9 +39,15 @@ export function MarketPreview({
       oddsPct: o.oddsPct || 50,
     })),
     slug: 'preview',
-    imageUrl,
-    closesAt: closeTime,
   };
+
+  // Conditionally add optional properties
+  if (imageUrl) {
+    marketData.imageUrl = imageUrl;
+  }
+  if (closeTime) {
+    marketData.closesAt = closeTime;
+  }
 
   return (
     <div>

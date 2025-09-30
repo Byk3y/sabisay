@@ -195,12 +195,22 @@ export async function POST(request: NextRequest) {
     // Create secure session with CSRF protection
     await createSecureSession(userId, email || '');
 
+    // Fetch user admin status for response
+    const { data: userData, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('is_admin')
+      .eq('id', userId)
+      .single();
+
+    const isAdmin = userError ? false : userData.is_admin === true;
+
     // Return success
     return NextResponse.json({
       ok: true,
       userId,
       email: email || '',
       username: walletAddress,
+      isAdmin,
     });
   } catch (error) {
     console.error('Magic login error:', error);

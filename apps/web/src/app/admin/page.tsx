@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 export default async function AdminIndexRedirect() {
   // Get session directly
   const session = await getSession();
-  
+
   if (!session.isLoggedIn || !session.userId) {
     redirect('/');
   }

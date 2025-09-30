@@ -6,7 +6,7 @@ import { NewEventForm } from './NewEventForm';
 export default async function NewEventPage() {
   // Get session and verify admin
   const session = await getSession();
-  
+
   if (!session.isLoggedIn || !session.userId) {
     redirect('/');
   }
@@ -34,7 +34,7 @@ export default async function NewEventPage() {
               Create a new prediction market event
             </p>
           </div>
-          
+
           <div className="p-6">
             <NewEventForm />
           </div>

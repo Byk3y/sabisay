@@ -15,7 +15,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (userId: string, email: string, username: string) => void;
   logout: () => Promise<void>;
-  checkAuth: () => Promise<void>;
+  checkAuth: () => Promise<boolean>;
   refreshAuth: () => Promise<void>;
 }
 
@@ -53,15 +53,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Check both server session and Magic Link session
-    checkAuth();
-    checkMagicLinkSession();
+    // Check authentication with proper sequencing to avoid race conditions
+    const performAuthCheck = async () => {
+      try {
+        // First check for existing server session
+        const serverAuthSuccess = await checkAuth();
+
+        // If server auth didn't find a user, then check Magic Link session
+        if (!serverAuthSuccess) {
+          await checkMagicLinkSession();
+        }
+      } catch (error) {
+        console.error('Auth check sequence failed:', error);
+      }
+    };
+
+    performAuthCheck();
   }, [hasChecked]);
 
-  const checkAuth = async () => {
+  const checkAuth = async (): Promise<boolean> => {
     // Prevent multiple simultaneous auth checks
     if (isCheckingRef.current) {
-      return;
+      return false;
     }
 
     try {
@@ -90,13 +103,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           isLoggedIn: userData.isLoggedIn,
           isAdmin: userData.isAdmin || false,
         });
+        return true; // Successfully authenticated
       } else {
         console.log('Auth failed, setting user to null');
         setUser(null);
+        return false; // Authentication failed
       }
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
+      return false; // Authentication failed
     } finally {
       console.log('Auth check complete, setting loading to false');
       isCheckingRef.current = false;
@@ -146,12 +162,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (response.ok) {
             const result = await response.json();
             console.log('Magic Link session restored:', result);
-            setUser({
-              userId: result.userId,
-              email: result.email,
-              username: result.username || '',
-              isLoggedIn: true,
-              isAdmin: false, // Will be updated by checkAuth
+
+            // Only set user if we don't already have one (prevent override)
+            setUser(prevUser => {
+              if (prevUser) {
+                console.log(
+                  'User already exists, not overriding with Magic Link data'
+                );
+                return prevUser;
+              }
+
+              return {
+                userId: result.userId,
+                email: result.email,
+                username: result.username || '',
+                isLoggedIn: true,
+                isAdmin: result.isAdmin || false, // Use admin status from API response
+              };
             });
           }
         }

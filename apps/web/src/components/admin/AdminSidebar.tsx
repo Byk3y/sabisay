@@ -2,7 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutList, Settings, ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react';
+import {
+  LayoutList,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  type LucideIcon,
+} from 'lucide-react';
 import { useState } from 'react';
 
 interface NavItem {
@@ -30,7 +36,10 @@ interface AdminSidebarProps {
   onToggleCollapse?: () => void;
 }
 
-export function AdminSidebar({ collapsed = false, onToggleCollapse }: AdminSidebarProps) {
+export function AdminSidebar({
+  collapsed = false,
+  onToggleCollapse,
+}: AdminSidebarProps) {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
@@ -52,7 +61,9 @@ export function AdminSidebar({ collapsed = false, onToggleCollapse }: AdminSideb
         {!collapsed && (
           <div className="flex items-center gap-2">
             <div className="size-8 rounded bg-blue-500/20 dark:bg-blue-500/20 grid place-items-center">
-              <span className="text-blue-600 dark:text-white font-bold text-lg">P</span>
+              <span className="text-blue-600 dark:text-white font-bold text-lg">
+                P
+              </span>
             </div>
             <span className="font-semibold text-sabi-text-primary dark:text-sabi-text-primary-dark">
               Admin
@@ -74,7 +85,7 @@ export function AdminSidebar({ collapsed = false, onToggleCollapse }: AdminSideb
 
       {/* Navigation Items */}
       <div className="py-4 px-2">
-        {navItems.map((item) => {
+        {navItems.map(item => {
           const Icon = item.icon;
           const active = isActive(item.href);
 

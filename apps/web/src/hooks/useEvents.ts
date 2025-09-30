@@ -57,21 +57,23 @@ export function useEvents() {
         console.log('useEvents: Starting fetch...');
         setLoading(true);
         setError(null);
-        
+
         // Fetch events from the database
         const response = await fetch('/api/events');
         console.log('useEvents: Response status:', response.status);
-        
+
         if (!response.ok) {
           throw new Error(`Failed to fetch events: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('useEvents: Response data:', data);
-        
+
         if (data.success && data.data) {
           // Convert database events to MarketItem format
-          const convertedEvents = data.data.map(convertDatabaseEventToMarketItem);
+          const convertedEvents = data.data.map(
+            convertDatabaseEventToMarketItem
+          );
           console.log('useEvents: Converted events:', convertedEvents);
           setEvents(convertedEvents);
         } else {

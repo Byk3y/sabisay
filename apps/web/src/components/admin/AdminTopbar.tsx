@@ -16,9 +16,7 @@ function getBreadcrumbs(pathname: string): Breadcrumb[] {
 
   if (segments[0] !== 'admin') return [];
 
-  const breadcrumbs: Breadcrumb[] = [
-    { label: 'Admin', href: '/admin' },
-  ];
+  const breadcrumbs: Breadcrumb[] = [{ label: 'Admin', href: '/admin' }];
 
   if (segments[1] === 'events') {
     breadcrumbs.push({ label: 'Events', href: '/admin/events' });
@@ -51,7 +49,10 @@ export function AdminTopbar({ onMobileMenuToggle, actions }: AdminTopbarProps) {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };

@@ -32,7 +32,10 @@ export function DataTable<T>({
     return (
       <div className="animate-pulse">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex items-center gap-4 py-4 border-b border-sabi-border dark:border-sabi-border-dark">
+          <div
+            key={i}
+            className="flex items-center gap-4 py-4 border-b border-sabi-border dark:border-sabi-border-dark"
+          >
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/6" />
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/6" />
@@ -58,7 +61,7 @@ export function DataTable<T>({
       <table className="min-w-full divide-y divide-sabi-border dark:divide-sabi-border-dark">
         <thead className="bg-gray-50 dark:bg-gray-700/50">
           <tr>
-            {columns.map((column) => (
+            {columns.map(column => (
               <th
                 key={column.key}
                 className="px-6 py-3 text-left text-xs font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark uppercase tracking-wider"
@@ -83,12 +86,12 @@ export function DataTable<T>({
           </tr>
         </thead>
         <tbody className="bg-sabi-card dark:bg-sabi-card-dark divide-y divide-sabi-border dark:divide-sabi-border-dark">
-          {data.map((item) => (
+          {data.map(item => (
             <tr
               key={getRowKey(item)}
               className="hover:bg-sabi-bg dark:hover:bg-sabi-bg-dark transition-colors"
             >
-              {columns.map((column) => (
+              {columns.map(column => (
                 <td
                   key={column.key}
                   className="px-6 py-4 whitespace-nowrap text-sm text-sabi-text-primary dark:text-sabi-text-primary-dark"

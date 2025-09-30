@@ -21,7 +21,8 @@ export async function GET(
     // Fetch event from database
     const { data: event, error: eventError } = await supabaseAdmin
       .from('events')
-      .select(`
+      .select(
+        `
         id,
         slug,
         title,
@@ -40,16 +41,20 @@ export async function GET(
           idx,
           color
         )
-      `)
+      `
+      )
       .eq('slug', slug)
       .eq('status', 'live')
       .single();
 
     if (eventError || !event) {
-      return NextResponse.json({
-        success: false,
-        error: 'Event not found',
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Event not found',
+        },
+        { status: 404 }
+      );
     }
 
     // Transform the data
@@ -80,7 +85,6 @@ export async function GET(
       success: true,
       data: eventData,
     });
-
   } catch (error) {
     console.error('Get event error:', error);
     return NextResponse.json(

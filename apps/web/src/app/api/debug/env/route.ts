@@ -11,8 +11,12 @@ export async function GET() {
     PRIVATE_KEY: {
       type: typeof serverEnv.PRIVATE_KEY,
       length: serverEnv.PRIVATE_KEY ? serverEnv.PRIVATE_KEY.length : 0,
-      value: serverEnv.PRIVATE_KEY ? serverEnv.PRIVATE_KEY.substring(0, 10) + '...' : 'undefined',
-      startsWith0x: serverEnv.PRIVATE_KEY ? serverEnv.PRIVATE_KEY.startsWith('0x') : false,
+      value: serverEnv.PRIVATE_KEY
+        ? serverEnv.PRIVATE_KEY.substring(0, 10) + '...'
+        : 'undefined',
+      startsWith0x: serverEnv.PRIVATE_KEY
+        ? serverEnv.PRIVATE_KEY.startsWith('0x')
+        : false,
     },
     ALCHEMY_AMOY_RPC_URL: serverEnv.ALCHEMY_AMOY_RPC_URL,
     NEXT_PUBLIC_RPC_URL: env.NEXT_PUBLIC_RPC_URL,

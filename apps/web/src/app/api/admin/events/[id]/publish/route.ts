@@ -15,13 +15,13 @@ const FACTORY_ABI = [
       { name: 'endTimeUTC', type: 'uint64' },
       { name: 'rulesCid', type: 'string' },
       { name: 'initialYes', type: 'uint256' },
-      { name: 'initialNo', type: 'uint256' }
+      { name: 'initialNo', type: 'uint256' },
     ],
     name: 'createMarket',
     outputs: [{ name: 'market', type: 'address' }],
     stateMutability: 'nonpayable',
-    type: 'function'
-  }
+    type: 'function',
+  },
 ] as const;
 
 // ABI for ERC20 approve
@@ -29,30 +29,30 @@ const ERC20_ABI = [
   {
     inputs: [
       { name: 'spender', type: 'address' },
-      { name: 'amount', type: 'uint256' }
+      { name: 'amount', type: 'uint256' },
     ],
     name: 'approve',
     outputs: [{ name: '', type: 'bool' }],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [{ name: 'owner', type: 'address' }],
     name: 'balanceOf',
     outputs: [{ name: '', type: 'uint256' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
       { name: 'owner', type: 'address' },
-      { name: 'spender', type: 'address' }
+      { name: 'spender', type: 'address' },
     ],
     name: 'allowance',
     outputs: [{ name: '', type: 'uint256' }],
     stateMutability: 'view',
-    type: 'function'
-  }
+    type: 'function',
+  },
 ] as const;
 
 export async function PUT(
@@ -74,7 +74,10 @@ export async function PUT(
       .single();
 
     if (userError || !user?.is_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
     }
 
     const eventId = params.id;
@@ -92,27 +95,45 @@ export async function PUT(
 
     // Preflight validation
     if (!event.title || !event.question || !event.type) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
     }
 
     // Validate outcomes
     const outcomes = event.outcomes as Array<{ label: string }>;
     if (!outcomes || outcomes.length < 2) {
-      return NextResponse.json({ error: 'Minimum 2 outcomes required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Minimum 2 outcomes required' },
+        { status: 400 }
+      );
     }
 
     if (event.type === 'binary' && outcomes.length !== 2) {
-      return NextResponse.json({ error: 'Binary markets must have exactly 2 outcomes' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Binary markets must have exactly 2 outcomes' },
+        { status: 400 }
+      );
     }
 
-    if (event.type === 'multi' && (outcomes.length < 2 || outcomes.length > 8)) {
-      return NextResponse.json({ error: 'Multi-choice markets must have 2-8 outcomes' }, { status: 400 });
+    if (
+      event.type === 'multi' &&
+      (outcomes.length < 2 || outcomes.length > 8)
+    ) {
+      return NextResponse.json(
+        { error: 'Multi-choice markets must have 2-8 outcomes' },
+        { status: 400 }
+      );
     }
 
     // Validate close time
     const closeTime = new Date(event.close_time);
     if (closeTime <= new Date()) {
-      return NextResponse.json({ error: 'Close time must be in the future' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Close time must be in the future' },
+        { status: 400 }
+      );
     }
 
     // Check for image (optional but warn if missing)
@@ -125,7 +146,10 @@ export async function PUT(
     const usdcAddress = clientEnv.NEXT_PUBLIC_USDC_ADDRESS;
 
     if (!factoryAddress || !usdcAddress) {
-      return NextResponse.json({ error: 'Contract addresses not configured' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Contract addresses not configured' },
+        { status: 500 }
+      );
     }
 
     // Create viem clients
@@ -154,10 +178,13 @@ export async function PUT(
     });
 
     if (balance < totalRequired) {
-      return NextResponse.json({
-        error: 'Insufficient USDC balance',
-        details: `Required: ${totalRequired / BigInt(1e6)} USDC, Available: ${balance / BigInt(1e6)} USDC`
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Insufficient USDC balance',
+          details: `Required: ${totalRequired / BigInt(1e6)} USDC, Available: ${balance / BigInt(1e6)} USDC`,
+        },
+        { status: 400 }
+      );
     }
 
     // Check USDC allowance
@@ -195,7 +222,9 @@ export async function PUT(
     });
 
     // Wait for transaction and get receipt
-    const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+    const receipt = await publicClient.waitForTransactionReceipt({
+      hash: txHash,
+    });
 
     // Extract market address from event logs
     // The MarketCreated event should contain the market address
@@ -213,7 +242,10 @@ export async function PUT(
 
     if (updateError) {
       console.error('Failed to update event:', updateError);
-      return NextResponse.json({ error: 'Failed to update event status' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Failed to update event status' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
@@ -221,11 +253,13 @@ export async function PUT(
       marketAddress,
       txHash,
     });
-
   } catch (error) {
     console.error('Publish error:', error);
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

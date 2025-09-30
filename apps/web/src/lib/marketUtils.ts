@@ -292,10 +292,10 @@ export const getMarketBySlug = (marketSlug: string): Market | null => {
   // Find market by matching slug
   const market = allMarkets.find(m => {
     if (!('id' in m)) return false;
-    
+
     const rawMarket = m as RawMarket;
     const marketSlugValue = rawMarket.slug || generateMarketSlug(rawMarket);
-    
+
     return marketSlugValue === marketSlug;
   });
 
@@ -310,7 +310,7 @@ export const getMarketBySlug = (marketSlug: string): Market | null => {
  */
 export const ensureSlugsForMockData = (): void => {
   const allMarkets = [...mockMarkets, ...extraFeedItems, ...binaryMembers];
-  
+
   allMarkets.forEach(market => {
     if ('id' in market) {
       const rawMarket = market as RawMarket;
@@ -329,7 +329,7 @@ export const getAllMarketSlugs = (): string[] => {
   ensureSlugsForMockData();
   const allMarkets = [...mockMarkets, ...extraFeedItems, ...binaryMembers];
   const marketSlugs: string[] = [];
-  
+
   allMarkets.forEach(market => {
     if ('id' in market) {
       const rawMarket = market as RawMarket;
@@ -337,6 +337,6 @@ export const getAllMarketSlugs = (): string[] => {
       marketSlugs.push(marketSlug);
     }
   });
-  
+
   return marketSlugs;
 };

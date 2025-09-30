@@ -38,15 +38,15 @@ export const formatDate = (date: Date | undefined | null): string => {
   if (!date) {
     return 'TBD';
   }
-  
+
   // Ensure it's a Date object
   const dateObj = date instanceof Date ? date : new Date(date);
-  
+
   // Check if the date is valid
   if (isNaN(dateObj.getTime())) {
     return 'TBD';
   }
-  
+
   return dateObj.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',

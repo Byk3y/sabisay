@@ -13,10 +13,33 @@ interface OutcomesEditorProps {
   onChange: (outcomes: Outcome[]) => void;
 }
 
-export function OutcomesEditor({ type, outcomes, onChange }: OutcomesEditorProps) {
-  const handleUpdateOutcome = (index: number, field: keyof Outcome, value: string) => {
+export function OutcomesEditor({
+  type,
+  outcomes,
+  onChange,
+}: OutcomesEditorProps) {
+  const handleUpdateOutcome = (
+    index: number,
+    field: keyof Outcome,
+    value: string
+  ) => {
     const newOutcomes = [...outcomes];
-    newOutcomes[index] = { ...newOutcomes[index], [field]: value };
+    const current = newOutcomes[index];
+    if (!current) return;
+
+    if (field === 'label') {
+      const updated: Outcome = { label: value };
+      if (current.color) {
+        updated.color = current.color;
+      }
+      newOutcomes[index] = updated;
+    } else if (field === 'color') {
+      const updated: Outcome = { label: current.label };
+      if (value) {
+        updated.color = value;
+      }
+      newOutcomes[index] = updated;
+    }
     onChange(newOutcomes);
   };
 

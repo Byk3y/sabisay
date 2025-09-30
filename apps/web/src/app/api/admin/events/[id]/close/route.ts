@@ -21,7 +21,10 @@ export async function POST(
       .single();
 
     if (userError || !user?.is_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
     }
 
     const eventId = params.id;
@@ -45,14 +48,16 @@ export async function POST(
 
     if (updateError) {
       console.error('Failed to close event:', updateError);
-      return NextResponse.json({ error: 'Failed to close event' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Failed to close event' },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Event closed successfully' 
+    return NextResponse.json({
+      success: true,
+      message: 'Event closed successfully',
     });
-
   } catch (error) {
     console.error('Close event error:', error);
     return NextResponse.json(

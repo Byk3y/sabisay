@@ -116,14 +116,14 @@ const store = createStore();
 
 export function getClientKey(request: NextRequest): string {
   const ip = getClientIP(request);
-  
+
   // Try to get session ID from cookies
   const sessionId = request.cookies.get('session')?.value;
-  
+
   if (sessionId) {
     return `${ip}:${sessionId}`;
   }
-  
+
   return ip;
 }
 
@@ -150,9 +150,7 @@ export function getClientIP(request: NextRequest): string {
 }
 
 export function rateLimit(config: RateLimitConfig) {
-  return (
-    request: NextRequest
-  ): RateLimitResult => {
+  return (request: NextRequest): RateLimitResult => {
     const clientKey = getClientKey(request);
     const now = Date.now();
     const key = `rate_limit:${clientKey}`;
@@ -201,7 +199,7 @@ export function createRateLimitResponse(
   config: RateLimitConfig
 ): Response {
   const retryAfter = Math.ceil((result.resetTime - Date.now()) / 1000);
-  
+
   return new Response(
     JSON.stringify({
       error: 'Too Many Requests',

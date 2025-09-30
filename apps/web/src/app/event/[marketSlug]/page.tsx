@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: { marketSlug: string };
 }): Promise<Metadata> {
   const { marketSlug } = params;
-  
+
   // Try to fetch from database first
   const { data: event } = await supabaseAdmin
     .from('events')
@@ -64,7 +64,9 @@ export async function generateMetadata({
 }
 
 // Generate static params for pre-rendering
-export async function generateStaticParams(): Promise<Array<{ marketSlug: string }>> {
+export async function generateStaticParams(): Promise<
+  Array<{ marketSlug: string }>
+> {
   // Get slugs from database
   const { data: events } = await supabaseAdmin
     .from('events')
@@ -72,9 +74,9 @@ export async function generateStaticParams(): Promise<Array<{ marketSlug: string
     .eq('status', 'live');
 
   const dbSlugs = events?.map(event => ({ marketSlug: event.slug })) || [];
-  
+
   // Also include mock data slugs
-  const mockSlugs = getAllMarketSlugs().map((marketSlug) => ({
+  const mockSlugs = getAllMarketSlugs().map(marketSlug => ({
     marketSlug,
   }));
 

@@ -34,7 +34,12 @@ export function buildEventUrl(marketSlug: string): string {
  * @param market - Market object
  * @returns A market slug
  */
-export function generateMarketSlug(market: { slug?: string; question?: string; title?: string; id?: string }): string {
+export function generateMarketSlug(market: {
+  slug?: string;
+  question?: string;
+  title?: string;
+  id?: string;
+}): string {
   // Use existing slug if available
   if (market.slug) {
     return market.slug;

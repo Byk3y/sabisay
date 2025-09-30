@@ -30,23 +30,34 @@ async function fetchEventBySlug(slug: string): Promise<Market | null> {
     if (!response.ok) {
       return null;
     }
-    
+
     const data = await response.json();
     if (data.success && data.data) {
       const event = data.data;
-      
+
       // Transform database event to Market format
-      const outcomes = event.event_outcomes && event.event_outcomes.length > 0
-        ? event.event_outcomes.map((outcome: any) => ({
-            label: outcome.label,
-            oddsPct: 50, // Default odds since we don't have real pricing yet
-            probability: 50,
-            price: { yes: 50, no: 50 }, // Default pricing
-          }))
-        : [
-            { label: 'Yes', oddsPct: 50, probability: 50, price: { yes: 50, no: 50 } },
-            { label: 'No', oddsPct: 50, probability: 50, price: { yes: 50, no: 50 } }
-          ];
+      const outcomes =
+        event.event_outcomes && event.event_outcomes.length > 0
+          ? event.event_outcomes.map((outcome: any) => ({
+              label: outcome.label,
+              oddsPct: 50, // Default odds since we don't have real pricing yet
+              probability: 50,
+              price: { yes: 50, no: 50 }, // Default pricing
+            }))
+          : [
+              {
+                label: 'Yes',
+                oddsPct: 50,
+                probability: 50,
+                price: { yes: 50, no: 50 },
+              },
+              {
+                label: 'No',
+                oddsPct: 50,
+                probability: 50,
+                price: { yes: 50, no: 50 },
+              },
+            ];
 
       const market: Market = {
         id: event.id.toString(),
@@ -68,7 +79,7 @@ async function fetchEventBySlug(slug: string): Promise<Market | null> {
 
       return market;
     }
-    
+
     return null;
   } catch (error) {
     console.error('Error fetching event from database:', error);
@@ -94,7 +105,7 @@ function EventDetailsPageContent({
         // Try to fetch from database first
         console.log(`🔍 Loading market: ${marketSlug}`);
         const dbMarket = await fetchEventBySlug(marketSlug);
-        
+
         if (dbMarket) {
           console.log('✅ Found market in database:', dbMarket.title);
           setMarket(dbMarket);
@@ -102,12 +113,14 @@ function EventDetailsPageContent({
           // Fallback to mock data
           console.log('📦 Market not found in database, trying mock data...');
           const mockMarket = getMarketBySlug(marketSlug);
-          
+
           if (mockMarket) {
             console.log('✅ Found market in mock data:', mockMarket.title);
             setMarket(mockMarket);
           } else {
-            console.error(`❌ Market not found in database or mock data: ${marketSlug}`);
+            console.error(
+              `❌ Market not found in database or mock data: ${marketSlug}`
+            );
           }
         }
         setIsLoading(false);
@@ -168,7 +181,8 @@ function EventDetailsPageContent({
       return generateChanceSeries(market.id, timeRange, currentChance);
     } else {
       // For multi-outcome markets, generate multiple series
-      const labels = market.outcomes?.map((outcome: { name: string }) => outcome.name) || [];
+      const labels =
+        market.outcomes?.map((outcome: { name: string }) => outcome.name) || [];
       return generateMultiSeries(market.id, timeRange, labels);
     }
   }, [market, timeRange]);

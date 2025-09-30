@@ -91,6 +91,9 @@ export async function GET() {
     });
   } catch (error) {
     console.error('USDC debug error:', error);
-    return NextResponse.json({ error: 'Failed to check USDC status' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to check USDC status' },
+      { status: 500 }
+    );
   }
 }

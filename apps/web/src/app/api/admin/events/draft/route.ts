@@ -8,9 +8,14 @@ const draftEventSchema = z.object({
   title: z.string().min(1).max(200),
   question: z.string().min(1).max(500),
   type: z.enum(['binary', 'multi']),
-  outcomes: z.array(z.object({
-    label: z.string().min(1).max(100),
-  })).min(2).max(8),
+  outcomes: z
+    .array(
+      z.object({
+        label: z.string().min(1).max(100),
+      })
+    )
+    .min(2)
+    .max(8),
   closeTime: z.string().datetime(),
   description: z.string().optional(),
   rules: z.string().optional(),
@@ -36,7 +41,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (userError || !user?.is_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
     }
 
     // Parse and validate request body
@@ -85,14 +93,19 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('Database error:', insertError);
-      return NextResponse.json({ error: 'Failed to create draft' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Failed to create draft' },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({
-      id: event.id,
-      slug: event.slug
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        id: event.id,
+        slug: event.slug,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

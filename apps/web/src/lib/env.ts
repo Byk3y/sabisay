@@ -26,7 +26,10 @@ export type Env = typeof env;
 // Debug environment variables in development (client-safe only)
 if (process.env.NODE_ENV === 'development') {
   console.log('=== ENV DEBUG: Client environment variables loaded ===');
-  console.log('NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY:', env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY ? 'Set' : 'Not set');
+  console.log(
+    'NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY:',
+    env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY ? 'Set' : 'Not set'
+  );
   console.log('NEXT_PUBLIC_CHAIN_ID:', env.NEXT_PUBLIC_CHAIN_ID);
   console.log('NEXT_PUBLIC_RPC_URL:', env.NEXT_PUBLIC_RPC_URL);
   console.log('===============================================');

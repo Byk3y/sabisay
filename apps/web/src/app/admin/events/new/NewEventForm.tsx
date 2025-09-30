@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { toSlug } from '@/lib/slugUtils';
 import { ComposerLayout } from '@/components/admin/composer/ComposerLayout';
@@ -168,7 +168,9 @@ export function NewEventForm() {
       toast.success('Draft saved successfully');
     } catch (error) {
       console.error('Save draft error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to save draft');
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to save draft'
+      );
     } finally {
       setIsSaving(false);
     }
@@ -279,7 +281,7 @@ export function NewEventForm() {
                     type="radio"
                     value="binary"
                     checked={type === 'binary'}
-                    onChange={e => handleTypeChange('binary')}
+                    onChange={() => handleTypeChange('binary')}
                     className="text-sabi-accent focus:ring-sabi-accent"
                   />
                   <span className="text-sm text-sabi-text-primary dark:text-sabi-text-primary-dark">
@@ -291,7 +293,7 @@ export function NewEventForm() {
                     type="radio"
                     value="multi"
                     checked={type === 'multi'}
-                    onChange={e => handleTypeChange('multi')}
+                    onChange={() => handleTypeChange('multi')}
                     className="text-sabi-accent focus:ring-sabi-accent"
                   />
                   <span className="text-sm text-sabi-text-primary dark:text-sabi-text-primary-dark">
@@ -301,7 +303,11 @@ export function NewEventForm() {
               </div>
             </div>
 
-            <OutcomesEditor type={type} outcomes={outcomes} onChange={setOutcomes} />
+            <OutcomesEditor
+              type={type}
+              outcomes={outcomes}
+              onChange={setOutcomes}
+            />
           </SectionAccordion>
 
           {/* Timing Section */}

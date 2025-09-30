@@ -37,7 +37,9 @@ export function EventsListClient() {
   const [selectedStatuses, setSelectedStatuses] = useState<EventStatus[]>([]);
   const [createdFrom, setCreatedFrom] = useState('');
   const [createdTo, setCreatedTo] = useState('');
-  const [sortBy, setSortBy] = useState<'created_at' | 'close_time' | 'status' | 'title'>('created_at');
+  const [sortBy, setSortBy] = useState<
+    'created_at' | 'close_time' | 'status' | 'title'
+  >('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Fetch events
@@ -75,7 +77,9 @@ export function EventsListClient() {
 
   // Handle action
   const handleAction = async (eventId: string, action: 'publish' | 'close') => {
-    const toastId = toast.loading(`${action === 'publish' ? 'Publishing' : 'Closing'} event...`);
+    const toastId = toast.loading(
+      `${action === 'publish' ? 'Publishing' : 'Closing'} event...`
+    );
 
     try {
       const response = await fetch(`/api/admin/events/${eventId}/${action}`, {
@@ -87,14 +91,18 @@ export function EventsListClient() {
         throw new Error(`Failed to ${action} event`);
       }
 
-      toast.success(`Event ${action === 'publish' ? 'published' : 'closed'} successfully`, {
-        id: toastId,
-      });
+      toast.success(
+        `Event ${action === 'publish' ? 'published' : 'closed'} successfully`,
+        {
+          id: toastId,
+        }
+      );
 
       // Refresh the list
       await fetchEvents();
     } catch (err) {
-      const message = err instanceof Error ? err.message : `Failed to ${action} event`;
+      const message =
+        err instanceof Error ? err.message : `Failed to ${action} event`;
       toast.error(message, { id: toastId });
     }
   };
@@ -126,7 +134,7 @@ export function EventsListClient() {
       key: 'title',
       label: 'Title',
       sortable: true,
-      render: (event) => (
+      render: event => (
         <div>
           <Link
             href={`/event/${event.slug}`}
@@ -143,38 +151,38 @@ export function EventsListClient() {
     {
       key: 'type',
       label: 'Type',
-      render: (event) => (
-        <span className="text-sm capitalize">
-          {event.type}
-        </span>
-      ),
+      render: event => <span className="text-sm capitalize">{event.type}</span>,
     },
     {
       key: 'status',
       label: 'Status',
       sortable: true,
-      render: (event) => <StatusBadge status={event.status} />,
+      render: event => <StatusBadge status={event.status} />,
     },
     {
       key: 'close_time',
       label: 'Close Time',
       sortable: true,
-      render: (event) => (
-        <span className="text-sm">{formatDate(new Date(event.close_time))}</span>
+      render: event => (
+        <span className="text-sm">
+          {formatDate(new Date(event.close_time))}
+        </span>
       ),
     },
     {
       key: 'created_at',
       label: 'Created',
       sortable: true,
-      render: (event) => (
-        <span className="text-sm">{formatDate(new Date(event.created_at))}</span>
+      render: event => (
+        <span className="text-sm">
+          {formatDate(new Date(event.created_at))}
+        </span>
       ),
     },
     {
       key: 'market_address',
       label: 'Market Address',
-      render: (event) =>
+      render: event =>
         event.market_address ? (
           <a
             href={getExplorerLink(event.market_address)}
@@ -185,13 +193,15 @@ export function EventsListClient() {
             {truncateAddress(event.market_address)}
           </a>
         ) : (
-          <span className="text-sm text-sabi-text-muted dark:text-sabi-text-muted-dark">-</span>
+          <span className="text-sm text-sabi-text-muted dark:text-sabi-text-muted-dark">
+            -
+          </span>
         ),
     },
     {
       key: 'actions',
       label: 'Actions',
-      render: (event) => (
+      render: event => (
         <div className="flex items-center gap-2">
           <Link
             href={`/event/${event.slug}`}
@@ -243,7 +253,7 @@ export function EventsListClient() {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search events..."
               className="w-full px-3 py-2 border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
             />
@@ -257,8 +267,11 @@ export function EventsListClient() {
             <select
               multiple
               value={selectedStatuses}
-              onChange={(e) => {
-                const values = Array.from(e.target.selectedOptions, option => option.value as EventStatus);
+              onChange={e => {
+                const values = Array.from(
+                  e.target.selectedOptions,
+                  option => option.value as EventStatus
+                );
                 setSelectedStatuses(values);
               }}
               className="w-full px-3 py-2 border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
@@ -279,7 +292,7 @@ export function EventsListClient() {
             <input
               type="date"
               value={createdFrom}
-              onChange={(e) => setCreatedFrom(e.target.value)}
+              onChange={e => setCreatedFrom(e.target.value)}
               className="w-full px-3 py-2 border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
             />
           </div>
@@ -291,7 +304,7 @@ export function EventsListClient() {
             <input
               type="date"
               value={createdTo}
-              onChange={(e) => setCreatedTo(e.target.value)}
+              onChange={e => setCreatedTo(e.target.value)}
               className="w-full px-3 py-2 border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
             />
           </div>
@@ -305,7 +318,15 @@ export function EventsListClient() {
             </label>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={e =>
+                setSortBy(
+                  e.target.value as
+                    | 'created_at'
+                    | 'close_time'
+                    | 'status'
+                    | 'title'
+                )
+              }
               className="px-3 py-1 border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
             >
               {SORT_OPTIONS.map(option => (
@@ -322,7 +343,7 @@ export function EventsListClient() {
             </label>
             <select
               value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+              onChange={e => setSortOrder(e.target.value as 'asc' | 'desc')}
               className="px-3 py-1 border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
             >
               <option value="desc">Descending</option>
@@ -355,7 +376,7 @@ export function EventsListClient() {
             data={events}
             loading={loading}
             emptyMessage="No events found"
-            getRowKey={(event) => event.id}
+            getRowKey={event => event.id}
           />
         </div>
 
@@ -377,7 +398,7 @@ export function EventsListClient() {
               </p>
             </div>
           ) : (
-            events.map((event) => (
+            events.map(event => (
               <div key={event.id} className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
@@ -395,7 +416,9 @@ export function EventsListClient() {
                     </div>
                     <div className="mt-2 text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
                       <div>Close: {formatDate(new Date(event.close_time))}</div>
-                      <div>Created: {formatDate(new Date(event.created_at))}</div>
+                      <div>
+                        Created: {formatDate(new Date(event.created_at))}
+                      </div>
                       {event.market_address && (
                         <div>
                           Market:{' '}
@@ -452,7 +475,8 @@ export function EventsListClient() {
           <div className="px-6 py-4 border-t border-sabi-border dark:border-sabi-border-dark">
             <div className="flex items-center justify-between">
               <div className="text-sm text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
-                Showing {((page - 1) * pageSize) + 1} to {Math.min(page * pageSize, total)} of {total} results
+                Showing {(page - 1) * pageSize + 1} to{' '}
+                {Math.min(page * pageSize, total)} of {total} results
               </div>
               <div className="flex items-center gap-2">
                 <button

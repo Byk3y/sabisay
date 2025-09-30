@@ -1,6 +1,6 @@
 /**
  * Server-only environment variables
- * 
+ *
  * This module provides validated server-only environment variables.
  * It MUST NOT be imported on the client side for security.
  */
@@ -9,7 +9,9 @@ import { z } from 'zod';
 
 // Safety guard: prevent client-side access
 if (typeof window !== 'undefined') {
-  throw new Error('env.server.ts imported on the client — this is not allowed.');
+  throw new Error(
+    'env.server.ts imported on the client — this is not allowed.'
+  );
 }
 
 const ServerSchema = z.object({
@@ -23,8 +25,14 @@ const ServerSchema = z.object({
   PINATA_API_KEY: z.string().optional(),
   PINATA_SECRET_KEY: z.string().optional(),
   BICONOMY_API_KEY: z.string().optional(),
-  TREASURY_ADDRESS: z.string().regex(/^0x[0-9a-fA-F]{40}$/).optional(),
-  USDC_ADDRESS: z.string().regex(/^0x[0-9a-fA-F]{40}$/).optional(),
+  TREASURY_ADDRESS: z
+    .string()
+    .regex(/^0x[0-9a-fA-F]{40}$/)
+    .optional(),
+  USDC_ADDRESS: z
+    .string()
+    .regex(/^0x[0-9a-fA-F]{40}$/)
+    .optional(),
 });
 
 export const serverEnv = ServerSchema.parse({

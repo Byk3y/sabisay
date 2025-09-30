@@ -11,9 +11,10 @@ export function GroupCard({
   group: Extract<MarketItem, { kind: 'group' }>;
 }) {
   // All groups now link to their main market page using event URLs
-  const href = group.groupId === 'election-nyc-2025'
-    ? buildEventUrl('nyc-mayor-2025')
-    : buildEventUrl(group.groupId);
+  const href =
+    group.groupId === 'election-nyc-2025'
+      ? buildEventUrl('nyc-mayor-2025')
+      : buildEventUrl(group.groupId);
 
   return (
     <Link href={href}>

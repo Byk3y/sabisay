@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (userError || !user?.is_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
     }
 
     // Parse query parameters
@@ -36,17 +39,17 @@ export async function GET(request: NextRequest) {
     if (statusParam.length > 0) params.status = statusParam;
     if (createdFromParam) params.createdFrom = createdFromParam;
     if (createdToParam) params.createdTo = createdToParam;
-    params.sort = (searchParams.get('sort') as EventsListParams['sort']) || 'created_at';
-    params.order = (searchParams.get('order') as EventsListParams['order']) || 'desc';
+    params.sort =
+      (searchParams.get('sort') as EventsListParams['sort']) || 'created_at';
+    params.order =
+      (searchParams.get('order') as EventsListParams['order']) || 'desc';
     params.page = pageParam < 1 ? 1 : pageParam;
 
     const pageSize = 20;
     const offset = (params.page! - 1) * pageSize;
 
     // Build query
-    let query = supabaseAdmin
-      .from('events')
-      .select(`
+    let query = supabaseAdmin.from('events').select(`
         id,
         slug,
         title,
@@ -61,7 +64,9 @@ export async function GET(request: NextRequest) {
 
     // Apply filters
     if (params.q) {
-      query = query.or(`title.ilike.%${params.q}%,question.ilike.%${params.q}%,slug.ilike.%${params.q}%`);
+      query = query.or(
+        `title.ilike.%${params.q}%,question.ilike.%${params.q}%,slug.ilike.%${params.q}%`
+      );
     }
 
     if (params.status && params.status.length > 0) {
@@ -103,7 +108,6 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(response);
-
   } catch (error) {
     console.error('Admin events list error:', error);
     return NextResponse.json(

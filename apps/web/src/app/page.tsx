@@ -8,7 +8,7 @@ async function getEvents(): Promise<MarketItem[]> {
   try {
     console.log('🏠 HomePage: Server component starting... v2');
     console.log('🚀 getEvents: Starting to fetch real events...');
-    
+
     const { data: events, error } = await supabaseAdmin
       .from('events')
       .select('*, event_outcomes(*)')
@@ -26,19 +26,20 @@ async function getEvents(): Promise<MarketItem[]> {
     }
 
     console.log('✅ getEvents: Fetched', events.length, 'events from database');
-    
+
     // Transform database events to MarketItem format that matches mock structure
     const transformedEvents = events.map((event: any) => {
       // Create outcomes array in the same format as mock data
-      const outcomes = event.event_outcomes && event.event_outcomes.length > 0
-        ? event.event_outcomes.map((outcome: any) => ({
-            label: outcome.label,
-            oddsPct: 50, // Default odds since we don't have real pricing yet
-          }))
-        : [
-            { label: 'Yes', oddsPct: 50 },
-            { label: 'No', oddsPct: 50 }
-          ];
+      const outcomes =
+        event.event_outcomes && event.event_outcomes.length > 0
+          ? event.event_outcomes.map((outcome: any) => ({
+              label: outcome.label,
+              oddsPct: 50, // Default odds since we don't have real pricing yet
+            }))
+          : [
+              { label: 'Yes', oddsPct: 50 },
+              { label: 'No', oddsPct: 50 },
+            ];
 
       return {
         kind: 'market' as const,
@@ -48,9 +49,12 @@ async function getEvents(): Promise<MarketItem[]> {
         outcomes: outcomes,
         poolUsd: 1000000, // Default pool size - will be replaced with real data later
         closesAt: event.close_time,
-        uiStyle: event.type === 'binary' ? 'binary' as const : 'default' as const,
+        uiStyle:
+          event.type === 'binary' ? ('binary' as const) : ('default' as const),
         // Additional fields for compatibility
-        imageUrl: event.image_cid ? `https://gateway.pinata.cloud/ipfs/${event.image_cid}` : '',
+        imageUrl: event.image_cid
+          ? `https://gateway.pinata.cloud/ipfs/${event.image_cid}`
+          : '',
         // Database-specific fields for detailed view
         chainId: event.chain_id,
         marketAddress: event.market_address,
@@ -60,8 +64,17 @@ async function getEvents(): Promise<MarketItem[]> {
       };
     });
 
-    console.log('🔄 getEvents: Transformed', transformedEvents.length, 'events');
-    console.log('📋 getEvents: Event IDs:', transformedEvents.map((e: MarketItem) => e.kind === 'market' ? e.id : 'group'));
+    console.log(
+      '🔄 getEvents: Transformed',
+      transformedEvents.length,
+      'events'
+    );
+    console.log(
+      '📋 getEvents: Event IDs:',
+      transformedEvents.map((e: MarketItem) =>
+        e.kind === 'market' ? e.id : 'group'
+      )
+    );
     return transformedEvents;
   } catch (error) {
     console.error('❌ getEvents: Unexpected error:', error);
@@ -73,7 +86,11 @@ export default async function HomePage() {
   // Fetch events server-side using direct Supabase query
   const realEvents = await getEvents();
 
-  console.log('🏠 HomePage: Passing', realEvents.length, 'real events to client component');
+  console.log(
+    '🏠 HomePage: Passing',
+    realEvents.length,
+    'real events to client component'
+  );
 
   return (
     <SidePanelProvider>

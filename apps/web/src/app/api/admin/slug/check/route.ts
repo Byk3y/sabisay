@@ -18,7 +18,10 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (userError || !user?.is_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
     }
 
     // Get slug from query params
@@ -26,7 +29,10 @@ export async function GET(request: NextRequest) {
     const slug = searchParams.get('slug');
 
     if (!slug) {
-      return NextResponse.json({ error: 'Slug parameter required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Slug parameter required' },
+        { status: 400 }
+      );
     }
 
     // Check if slug exists
@@ -37,9 +43,8 @@ export async function GET(request: NextRequest) {
       .single();
 
     return NextResponse.json({
-      available: !existing
+      available: !existing,
     });
-
   } catch (error) {
     console.error('Slug check error:', error);
     return NextResponse.json(
