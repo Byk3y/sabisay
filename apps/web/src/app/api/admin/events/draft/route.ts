@@ -1,0 +1,110 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { getSession } from '@/lib/session';
+import { supabaseAdmin } from '@/lib/supabase-server';
+import { toSlug } from '@/lib/slugUtils';
+
+const draftEventSchema = z.object({
+  title: z.string().min(1).max(200),
+  question: z.string().min(1).max(500),
+  type: z.enum(['binary', 'multi']),
+  outcomes: z.array(z.object({
+    label: z.string().min(1).max(100),
+  })).min(2).max(8),
+  closeTime: z.string().datetime(),
+  description: z.string().optional(),
+  rules: z.string().optional(),
+  resolutionCriteria: z.string().optional(),
+  feeBps: z.number().int().min(0).max(10000).optional(),
+  imageUrl: z.string().url().optional(),
+  tags: z.array(z.string()).optional(),
+});
+
+export async function POST(request: NextRequest) {
+  try {
+    // Get session and verify admin
+    const session = await getSession();
+    if (!session.isLoggedIn || !session.userId) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    // Check admin status
+    const { data: user, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('is_admin')
+      .eq('id', session.userId)
+      .single();
+
+    if (userError || !user?.is_admin) {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
+    // Parse and validate request body
+    const body = await request.json();
+    const validated = draftEventSchema.parse(body);
+
+    // Generate slug from title
+    const baseSlug = toSlug(validated.title);
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Ensure slug uniqueness
+    while (true) {
+      const { data: existing } = await supabaseAdmin
+        .from('events')
+        .select('id')
+        .eq('slug', slug)
+        .single();
+
+      if (!existing) break;
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    // Insert draft event
+    const { data: event, error: insertError } = await supabaseAdmin
+      .from('events')
+      .insert({
+        title: validated.title,
+        question: validated.question,
+        type: validated.type,
+        outcomes: validated.outcomes,
+        close_time: validated.closeTime,
+        description: validated.description || null,
+        rules: validated.rules || null,
+        resolution_criteria: validated.resolutionCriteria || null,
+        fee_bps: validated.feeBps ?? 200,
+        image_url: validated.imageUrl || null,
+        tags: validated.tags || null,
+        slug,
+        status: 'draft',
+        creator_user_id: session.userId,
+      })
+      .select('id, slug')
+      .single();
+
+    if (insertError) {
+      console.error('Database error:', insertError);
+      return NextResponse.json({ error: 'Failed to create draft' }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      id: event.id,
+      slug: event.slug
+    }, { status: 201 });
+
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Validation error', details: error.errors },
+        { status: 400 }
+      );
+    }
+
+    console.error('Draft creation error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
