@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 body {
-  @apply bg-finance-bg text-finance-text-primary antialiased;
+  @apply bg-sabi-bg dark:bg-sabi-bg-dark text-sabi-text-primary dark:text-sabi-text-primary-dark antialiased;
 }
