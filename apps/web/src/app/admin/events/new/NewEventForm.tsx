@@ -1,318 +1,391 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 import { toSlug } from '@/lib/slugUtils';
+import { ComposerLayout } from '@/components/admin/composer/ComposerLayout';
+import { SectionAccordion } from '@/components/admin/composer/SectionAccordion';
+import {
+  OutcomesEditor,
+  type Outcome,
+} from '@/components/admin/composer/OutcomesEditor';
+import { MarketPreview } from '@/components/admin/composer/MarketPreview';
+import { SlugPreview } from '@/components/admin/composer/SlugPreview';
 
-interface Outcome {
-  label: string;
-  color?: string | undefined;
-}
+type SlugStatus = 'idle' | 'checking' | 'valid' | 'taken';
 
 export function NewEventForm() {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
   // Form state
   const [title, setTitle] = useState('');
   const [question, setQuestion] = useState('');
   const [type, setType] = useState<'binary' | 'multi'>('binary');
   const [closeTime, setCloseTime] = useState('');
+  const [description, setDescription] = useState('');
   const [outcomes, setOutcomes] = useState<Outcome[]>([
     { label: 'Yes', color: '#10B981' },
-    { label: 'No', color: '#EF4444' }
+    { label: 'No', color: '#EF4444' },
   ]);
-  const [description, setDescription] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  // Generate slug preview
-  const slugPreview = title ? toSlug(title) : '';
+  // UI state
+  const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle');
+  const [generatedSlug, setGeneratedSlug] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  // Handle outcome changes
-  const updateOutcome = (index: number, field: keyof Outcome, value: string) => {
-    const newOutcomes = [...outcomes];
-    const currentOutcome = newOutcomes[index];
-    if (field === 'label') {
-      newOutcomes[index] = { label: value, color: currentOutcome?.color };
-    } else if (field === 'color') {
-      newOutcomes[index] = { label: currentOutcome?.label || '', color: value };
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+  // Generate slug from title
+  useEffect(() => {
+    if (title) {
+      const slug = toSlug(title);
+      setGeneratedSlug(slug);
+    } else {
+      setGeneratedSlug('');
+      setSlugStatus('idle');
     }
-    setOutcomes(newOutcomes);
+  }, [title]);
+
+  // Debounced slug check
+  useEffect(() => {
+    if (!generatedSlug) {
+      setSlugStatus('idle');
+      return;
+    }
+
+    setSlugStatus('checking');
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `/api/admin/slug/check?slug=${encodeURIComponent(generatedSlug)}`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setSlugStatus(data.available ? 'valid' : 'taken');
+        } else {
+          setSlugStatus('idle');
+        }
+      } catch (error) {
+        console.error('Slug check error:', error);
+        setSlugStatus('idle');
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [generatedSlug]);
+
+  // Client-side validation
+  useEffect(() => {
+    const errors: string[] = [];
+
+    if (title && (title.length < 3 || title.length > 100)) {
+      errors.push('Title must be 3-100 characters');
+    }
+
+    if (question && (question.length < 10 || question.length > 500)) {
+      errors.push('Question must be 10-500 characters');
+    }
+
+    if (outcomes.length < 2) {
+      errors.push('At least 2 outcomes required');
+    }
+
+    if (outcomes.some(o => !o.label.trim())) {
+      errors.push('All outcomes must have labels');
+    }
+
+    if (closeTime) {
+      const closeDate = new Date(closeTime);
+      if (closeDate <= new Date()) {
+        errors.push('Close time must be in the future');
+      }
+    }
+
+    setValidationErrors(errors);
+  }, [title, question, outcomes, closeTime]);
+
+  // Handle type change
+  const handleTypeChange = (newType: 'binary' | 'multi') => {
+    setType(newType);
+    if (newType === 'binary') {
+      setOutcomes([
+        { label: 'Yes', color: '#10B981' },
+        { label: 'No', color: '#EF4444' },
+      ]);
+    } else if (outcomes.length === 2) {
+      // Keep existing outcomes but allow editing
+      setOutcomes([...outcomes]);
+    }
   };
 
-  const addOutcome = () => {
-    if (outcomes.length < 8) {
-      setOutcomes([...outcomes, { label: '', color: '#6B7280' }]);
+  // Save draft
+  const handleSaveDraft = async () => {
+    // Basic validation
+    if (!title.trim()) {
+      toast.error('Title is required');
+      return;
     }
-  };
-
-  const removeOutcome = (index: number) => {
-    if (outcomes.length > 2) {
-      setOutcomes(outcomes.filter((_, i) => i !== index));
+    if (!question.trim()) {
+      toast.error('Question is required');
+      return;
     }
-  };
+    if (!closeTime) {
+      toast.error('Close time is required');
+      return;
+    }
+    if (validationErrors.length > 0) {
+      toast.error(validationErrors[0]);
+      return;
+    }
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+    setIsSaving(true);
 
     try {
-      // Validate form
-      if (!title.trim()) {
-        throw new Error('Title is required');
-      }
-      if (!question.trim()) {
-        throw new Error('Question is required');
-      }
-      if (!closeTime) {
-        throw new Error('Close time is required');
-      }
-      if (new Date(closeTime) <= new Date()) {
-        throw new Error('Close time must be in the future');
-      }
-      if (outcomes.length < 2) {
-        throw new Error('At least 2 outcomes are required');
-      }
-      if (outcomes.some(o => !o.label.trim())) {
-        throw new Error('All outcomes must have labels');
-      }
-
-      // Convert image to base64 if provided
-      let imageBase64: string | undefined;
-      if (imageFile) {
-        imageBase64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(imageFile);
-        });
-      }
-
-      // Prepare request body
-      const body = {
-        title: title.trim(),
-        question: question.trim(),
-        type,
-        closeTime: new Date(closeTime).toISOString(),
-        outcomes: outcomes.map(o => ({
-          label: o.label.trim(),
-          color: o.color,
-        })),
-        description: description.trim() || undefined,
-        imageBase64,
-      };
-
-      // Submit to API
-      const response = await fetch('/api/admin/events', {
+      const response = await fetch('/api/admin/events/draft', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          title: title.trim(),
+          question: question.trim(),
+          type,
+          outcomes: outcomes.map(o => ({ label: o.label.trim() })),
+          closeTime: new Date(closeTime).toISOString(),
+          description: description.trim() || undefined,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create event');
+        throw new Error(data.error || 'Failed to save draft');
       }
 
-      if (data.success && data.data?.slug) {
-        // Redirect to the new event page
-        router.push(`/event/${data.data.slug}`);
-      } else {
-        throw new Error('Invalid response from server');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setLastSaved(new Date());
+      toast.success('Draft saved successfully');
+    } catch (error) {
+      console.error('Save draft error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to save draft');
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   };
 
+  // Handle discard
+  const handleDiscard = () => {
+    if (
+      confirm(
+        'Are you sure you want to discard your changes? This cannot be undone.'
+      )
+    ) {
+      setTitle('');
+      setQuestion('');
+      setType('binary');
+      setCloseTime('');
+      setDescription('');
+      setOutcomes([
+        { label: 'Yes', color: '#10B981' },
+        { label: 'No', color: '#EF4444' },
+      ]);
+      setLastSaved(null);
+      toast.info('Changes discarded');
+    }
+  };
+
+  // Get local timezone hint
+  const getTimezoneHint = () => {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return `Your timezone: ${tz}`;
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        </div>
-      )}
-
-      {/* Title */}
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Title *
-        </label>
-        <input
-          type="text"
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-          placeholder="Event title"
-          required
-        />
-        {slugPreview && (
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Slug: <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">{slugPreview}</code>
-          </p>
-        )}
-      </div>
-
-      {/* Question */}
-      <div>
-        <label htmlFor="question" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Question *
-        </label>
-        <textarea
-          id="question"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          rows={3}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-          placeholder="What will happen?"
-          required
-        />
-      </div>
-
-      {/* Type */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          Type *
-        </label>
-        <div className="flex space-x-4">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              value="binary"
-              checked={type === 'binary'}
-              onChange={(e) => setType(e.target.value as 'binary')}
-              className="mr-2"
-            />
-            Binary (Yes/No)
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              value="multi"
-              checked={type === 'multi'}
-              onChange={(e) => setType(e.target.value as 'multi')}
-              className="mr-2"
-            />
-            Multi-choice
-          </label>
-        </div>
-      </div>
-
-      {/* Outcomes */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          Outcomes * ({outcomes.length}/8)
-        </label>
-        <div className="space-y-3">
-          {outcomes.map((outcome, index) => (
-            <div key={index} className="flex items-center space-x-3">
+    <ComposerLayout
+      left={
+        <>
+          {/* Basics Section */}
+          <SectionAccordion title="Basics" defaultOpen>
+            <div>
+              <label
+                htmlFor="title"
+                className="block text-sm font-medium text-sabi-text-primary dark:text-sabi-text-primary-dark mb-1"
+              >
+                Title *
+              </label>
               <input
                 type="text"
-                value={outcome.label}
-                onChange={(e) => updateOutcome(index, 'label', e.target.value)}
-                className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder={`Outcome ${index + 1}`}
+                id="title"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Will Bitcoin hit $100k by 2025?"
+                className="w-full px-3 py-2 text-sm border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
                 required
               />
-              <input
-                type="color"
-                value={outcome.color || '#6B7280'}
-                onChange={(e) => updateOutcome(index, 'color', e.target.value)}
-                className="w-12 h-10 rounded border-gray-300 dark:border-gray-600"
-              />
-              {outcomes.length > 2 && (
-                <button
-                  type="button"
-                  onClick={() => removeOutcome(index)}
-                  className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                >
-                  Remove
-                </button>
-              )}
+              <p className="mt-1 text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
+                3-100 characters
+              </p>
             </div>
-          ))}
-          {outcomes.length < 8 && type === 'multi' && (
-            <button
-              type="button"
-              onClick={addOutcome}
-              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
+
+            <div>
+              <label
+                htmlFor="question"
+                className="block text-sm font-medium text-sabi-text-primary dark:text-sabi-text-primary-dark mb-1"
+              >
+                Question *
+              </label>
+              <textarea
+                id="question"
+                value={question}
+                onChange={e => setQuestion(e.target.value)}
+                placeholder="Will Bitcoin reach $100,000 by December 31, 2025?"
+                rows={3}
+                className="w-full px-3 py-2 text-sm border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark resize-none"
+                required
+              />
+              <p className="mt-1 text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
+                10-500 characters
+              </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-sabi-text-primary dark:text-sabi-text-primary-dark mb-1"
+              >
+                Description (Optional)
+              </label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Additional context about this market..."
+                rows={4}
+                className="w-full px-3 py-2 text-sm border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark resize-none"
+              />
+            </div>
+          </SectionAccordion>
+
+          {/* Market Type Section */}
+          <SectionAccordion title="Market Type" defaultOpen>
+            <div>
+              <label className="block text-sm font-medium text-sabi-text-primary dark:text-sabi-text-primary-dark mb-2">
+                Type *
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    value="binary"
+                    checked={type === 'binary'}
+                    onChange={e => handleTypeChange('binary')}
+                    className="text-sabi-accent focus:ring-sabi-accent"
+                  />
+                  <span className="text-sm text-sabi-text-primary dark:text-sabi-text-primary-dark">
+                    Binary (Yes/No)
+                  </span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    value="multi"
+                    checked={type === 'multi'}
+                    onChange={e => handleTypeChange('multi')}
+                    className="text-sabi-accent focus:ring-sabi-accent"
+                  />
+                  <span className="text-sm text-sabi-text-primary dark:text-sabi-text-primary-dark">
+                    Multi-choice
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <OutcomesEditor type={type} outcomes={outcomes} onChange={setOutcomes} />
+          </SectionAccordion>
+
+          {/* Timing Section */}
+          <SectionAccordion title="Timing" defaultOpen>
+            <div>
+              <label
+                htmlFor="closeTime"
+                className="block text-sm font-medium text-sabi-text-primary dark:text-sabi-text-primary-dark mb-1"
+              >
+                Close Time *
+              </label>
+              <input
+                type="datetime-local"
+                id="closeTime"
+                value={closeTime}
+                onChange={e => setCloseTime(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
+                required
+              />
+              <p className="mt-1 text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
+                {getTimezoneHint()}
+              </p>
+            </div>
+          </SectionAccordion>
+        </>
+      }
+      right={
+        <>
+          {/* Market Preview */}
+          <MarketPreview
+            title={title}
+            question={question}
+            outcomes={outcomes}
+            closeTime={closeTime}
+          />
+
+          {/* Slug Preview */}
+          <SlugPreview slug={generatedSlug} status={slugStatus} />
+
+          {/* Validation Hints */}
+          {validationErrors.length > 0 && (
+            <div
+              className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4"
+              role="alert"
+              aria-live="polite"
             >
-              + Add Outcome
-            </button>
+              <h4 className="text-sm font-semibold text-yellow-800 dark:text-yellow-400 mb-2">
+                Validation Issues
+              </h4>
+              <ul className="text-xs text-yellow-700 dark:text-yellow-300 space-y-1">
+                {validationErrors.map((error, i) => (
+                  <li key={i}>• {error}</li>
+                ))}
+              </ul>
+            </div>
           )}
-        </div>
-      </div>
 
-      {/* Close Time */}
-      <div>
-        <label htmlFor="closeTime" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Close Time *
-        </label>
-        <input
-          type="datetime-local"
-          id="closeTime"
-          value={closeTime}
-          onChange={(e) => setCloseTime(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-          required
-        />
-      </div>
-
-      {/* Description */}
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Description (Optional)
-        </label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={4}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-          placeholder="Additional details about this event..."
-        />
-      </div>
-
-      {/* Image */}
-      <div>
-        <label htmlFor="image" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Image (Optional)
-        </label>
-        <input
-          type="file"
-          id="image"
-          accept="image/*"
-          onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-          className="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300"
-        />
-      </div>
-
-      {/* Submit Button */}
-      <div className="flex justify-end space-x-3">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? 'Creating...' : 'Create Event'}
-        </button>
-      </div>
-    </form>
+          {/* Last Saved Indicator */}
+          {lastSaved && (
+            <div className="text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark text-center">
+              Last saved: {lastSaved.toLocaleTimeString()}
+            </div>
+          )}
+        </>
+      }
+      actions={
+        <>
+          <button
+            type="button"
+            onClick={handleDiscard}
+            className="px-4 py-2 text-sm font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark hover:text-sabi-text-primary dark:hover:text-sabi-text-primary-dark border border-sabi-border dark:border-sabi-border-dark rounded-md hover:bg-sabi-bg dark:hover:bg-sabi-bg-dark transition-colors"
+          >
+            Discard
+          </button>
+          <button
+            type="button"
+            onClick={handleSaveDraft}
+            disabled={isSaving || validationErrors.length > 0}
+            className="px-4 py-2 text-sm font-medium text-white bg-sabi-accent hover:bg-sabi-accent/90 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSaving ? 'Saving...' : 'Save Draft'}
+          </button>
+        </>
+      }
+    />
   );
 }
