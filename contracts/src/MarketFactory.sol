@@ -100,10 +100,9 @@ contract MarketFactory is AccessControl, ReentrancyGuard, Pausable {
         markets[marketCount] = market;
         isMarket[market] = true;
 
-        // Transfer liquidity from factory to market and seed it
+        // Transfer liquidity directly from user to market and seed it
         uint256 totalLiquidity = initialYes + initialNo;
-        IERC20(usdcToken).safeTransferFrom(msg.sender, address(this), totalLiquidity);
-        IERC20(usdcToken).forceApprove(market, totalLiquidity);
+        IERC20(usdcToken).safeTransferFrom(msg.sender, market, totalLiquidity);
         Market(market).seedLiquidity(initialYes, initialNo);
 
         emit MarketCreated(marketCount, market, endTimeUTC, feeBps, rulesCid, initialYes, initialNo);

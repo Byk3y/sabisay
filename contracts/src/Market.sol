@@ -174,8 +174,10 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
         reserveYes = yesAmount;
         reserveNo = noAmount;
 
-        // Transfer USDC from factory to this market
-        IERC20(stable).safeTransferFrom(msg.sender, address(this), yesAmount + noAmount);
+        // USDC has already been transferred to this market by the factory
+        // Just verify the balance is correct
+        uint256 expectedBalance = yesAmount + noAmount;
+        require(IERC20(stable).balanceOf(address(this)) >= expectedBalance, "Insufficient USDC balance");
 
         emit LiquiditySeeded(yesAmount, noAmount);
     }
