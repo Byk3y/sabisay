@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Toaster } from 'sonner';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminTopbar } from './AdminTopbar';
 
@@ -15,6 +16,7 @@ export function AdminLayout({ children, actions }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-sabi-bg dark:bg-sabi-bg-dark">
+      <Toaster position="top-right" richColors />
       {/* Sidebar - Desktop */}
       <div className="hidden lg:block">
         <AdminSidebar

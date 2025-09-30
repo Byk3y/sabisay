@@ -6,7 +6,7 @@ import { EventsListClient } from './EventsListClient';
 export default async function AdminEventsPage() {
   // Get session and verify admin
   const session = await getSession();
-  
+
   if (!session.isLoggedIn || !session.userId) {
     redirect('/');
   }
@@ -23,19 +23,17 @@ export default async function AdminEventsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Events Management
-          </h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Manage prediction market events
-          </p>
-        </div>
-        
-        <EventsListClient />
+    <div className="max-w-7xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-sabi-text-primary dark:text-sabi-text-primary-dark">
+          Events Management
+        </h1>
+        <p className="mt-1 text-sm text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
+          Manage prediction market events
+        </p>
       </div>
-    </main>
+
+      <EventsListClient />
+    </div>
   );
 }

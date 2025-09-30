@@ -1,18 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { EventsListParams, EventsListResponse, EventListItem, EventStatus } from '@/types/admin';
+import Link from 'next/link';
+import { toast } from 'sonner';
+import { EventsListResponse, EventListItem, EventStatus } from '@/types/admin';
 import { truncateAddress } from '@/lib/utils';
 import { formatDate } from '@/lib/formattingUtils';
+import { DataTable, Column } from '@/components/admin/DataTable';
+import { StatusBadge } from '@/components/admin/StatusBadge';
 
-const STATUS_OPTIONS: { value: EventStatus; label: string; color: string }[] = [
-  { value: 'draft', label: 'Draft', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' },
-  { value: 'pending', label: 'Pending', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' },
-  { value: 'onchain', label: 'On Chain', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' },
-  { value: 'live', label: 'Live', color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' },
-  { value: 'closed', label: 'Closed', color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' },
-  { value: 'resolved', label: 'Resolved', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400' },
+const STATUS_OPTIONS: { value: EventStatus; label: string }[] = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'onchain', label: 'On Chain' },
+  { value: 'live', label: 'Live' },
+  { value: 'closed', label: 'Closed' },
+  { value: 'resolved', label: 'Resolved' },
 ];
 
 const SORT_OPTIONS = [
@@ -23,10 +26,8 @@ const SORT_OPTIONS = [
 ];
 
 export function EventsListClient() {
-  const router = useRouter();
   const [events, setEvents] = useState<EventListItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const pageSize = 20;
@@ -43,7 +44,6 @@ export function EventsListClient() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      setError(null);
 
       const params = new URLSearchParams();
       if (searchQuery) params.append('q', searchQuery);
@@ -66,7 +66,8 @@ export function EventsListClient() {
       setEvents(data.items);
       setTotal(data.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const message = err instanceof Error ? err.message : 'An error occurred';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -74,6 +75,8 @@ export function EventsListClient() {
 
   // Handle action
   const handleAction = async (eventId: string, action: 'publish' | 'close') => {
+    const toastId = toast.loading(`${action === 'publish' ? 'Publishing' : 'Closing'} event...`);
+
     try {
       const response = await fetch(`/api/admin/events/${eventId}/${action}`, {
         method: 'POST',
@@ -84,10 +87,15 @@ export function EventsListClient() {
         throw new Error(`Failed to ${action} event`);
       }
 
+      toast.success(`Event ${action === 'publish' ? 'published' : 'closed'} successfully`, {
+        id: toastId,
+      });
+
       // Refresh the list
       await fetchEvents();
     } catch (err) {
-      setError(err instanceof Error ? err.message : `Failed to ${action} event`);
+      const message = err instanceof Error ? err.message : `Failed to ${action} event`;
+      toast.error(message, { id: toastId });
     }
   };
 
@@ -106,46 +114,130 @@ export function EventsListClient() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery, selectedStatuses, createdFrom, createdTo]);
 
-  const getStatusBadge = (status: EventStatus) => {
-    const statusOption = STATUS_OPTIONS.find(s => s.value === status);
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusOption?.color || 'bg-gray-100 text-gray-800'}`}>
-        {statusOption?.label || status}
-      </span>
-    );
-  };
-
   const getExplorerLink = (address: string) => {
     return `https://amoy.polygonscan.com/address/${address}`;
   };
 
   const totalPages = Math.ceil(total / pageSize);
 
-  if (loading && events.length === 0) {
-    return (
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            ))}
+  // Define table columns
+  const columns: Column<EventListItem>[] = [
+    {
+      key: 'title',
+      label: 'Title',
+      sortable: true,
+      render: (event) => (
+        <div>
+          <Link
+            href={`/event/${event.slug}`}
+            className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+          >
+            {event.title}
+          </Link>
+          <div className="text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
+            {event.slug}
           </div>
         </div>
-      </div>
-    );
-  }
+      ),
+    },
+    {
+      key: 'type',
+      label: 'Type',
+      render: (event) => (
+        <span className="text-sm capitalize">
+          {event.type}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      sortable: true,
+      render: (event) => <StatusBadge status={event.status} />,
+    },
+    {
+      key: 'close_time',
+      label: 'Close Time',
+      sortable: true,
+      render: (event) => (
+        <span className="text-sm">{formatDate(new Date(event.close_time))}</span>
+      ),
+    },
+    {
+      key: 'created_at',
+      label: 'Created',
+      sortable: true,
+      render: (event) => (
+        <span className="text-sm">{formatDate(new Date(event.created_at))}</span>
+      ),
+    },
+    {
+      key: 'market_address',
+      label: 'Market Address',
+      render: (event) =>
+        event.market_address ? (
+          <a
+            href={getExplorerLink(event.market_address)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+          >
+            {truncateAddress(event.market_address)}
+          </a>
+        ) : (
+          <span className="text-sm text-sabi-text-muted dark:text-sabi-text-muted-dark">-</span>
+        ),
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      render: (event) => (
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/event/${event.slug}`}
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+          >
+            View
+          </Link>
+          <Link
+            href={`/admin/events/${event.id}`}
+            className="text-sabi-text-secondary dark:text-sabi-text-secondary-dark hover:text-sabi-text-primary dark:hover:text-sabi-text-primary-dark"
+          >
+            Edit
+          </Link>
+          {event.status === 'draft' && event.market_address && (
+            <button
+              onClick={() => handleAction(event.id, 'publish')}
+              className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
+            >
+              Publish
+            </button>
+          )}
+          {event.status === 'live' && (
+            <button
+              onClick={() => handleAction(event.id, 'close')}
+              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+            >
+              Close
+            </button>
+          )}
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Filters</h2>
-        
+      {/* Filters - Sticky */}
+      <div className="sticky top-14 z-10 bg-sabi-card dark:bg-sabi-card-dark shadow-sm rounded-xl border border-sabi-border dark:border-sabi-border-dark p-6">
+        <h2 className="text-lg font-medium text-sabi-text-primary dark:text-sabi-text-primary-dark mb-4">
+          Filters
+        </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Search */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark mb-1">
               Search
             </label>
             <input
@@ -153,13 +245,13 @@ export function EventsListClient() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search events..."
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2 border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
             />
           </div>
 
           {/* Status Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark mb-1">
               Status
             </label>
             <select
@@ -169,7 +261,7 @@ export function EventsListClient() {
                 const values = Array.from(e.target.selectedOptions, option => option.value as EventStatus);
                 setSelectedStatuses(values);
               }}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2 border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
             >
               {STATUS_OPTIONS.map(option => (
                 <option key={option.value} value={option.value}>
@@ -181,26 +273,26 @@ export function EventsListClient() {
 
           {/* Date Range */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark mb-1">
               Created From
             </label>
             <input
               type="date"
               value={createdFrom}
               onChange={(e) => setCreatedFrom(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2 border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark mb-1">
               Created To
             </label>
             <input
               type="date"
               value={createdTo}
               onChange={(e) => setCreatedTo(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2 border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
             />
           </div>
         </div>
@@ -208,11 +300,13 @@ export function EventsListClient() {
         {/* Sort Controls */}
         <div className="mt-4 flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</label>
+            <label className="text-sm font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
+              Sort by:
+            </label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="px-3 py-1 border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
             >
               {SORT_OPTIONS.map(option => (
                 <option key={option.value} value={option.value}>
@@ -221,13 +315,15 @@ export function EventsListClient() {
               ))}
             </select>
           </div>
-          
+
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Order:</label>
+            <label className="text-sm font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
+              Order:
+            </label>
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="px-3 py-1 border border-sabi-border dark:border-sabi-border-dark rounded-md shadow-sm focus:ring-2 focus:ring-sabi-accent focus:border-sabi-accent bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
             >
               <option value="desc">Descending</option>
               <option value="asc">Ascending</option>
@@ -236,245 +332,143 @@ export function EventsListClient() {
         </div>
       </div>
 
-      {/* Error State */}
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        </div>
-      )}
-
       {/* Results */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-sabi-card dark:bg-sabi-card-dark shadow-sm rounded-xl border border-sabi-border dark:border-sabi-border-dark">
+        <div className="px-6 py-4 border-b border-sabi-border dark:border-sabi-border-dark">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+            <h2 className="text-lg font-medium text-sabi-text-primary dark:text-sabi-text-primary-dark">
               Events ({total})
             </h2>
-            <a
+            <Link
               href="/admin/events/new"
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-sabi-accent hover:bg-sabi-accent/90 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sabi-accent transition-colors"
             >
               Create New Event
-            </a>
+            </Link>
           </div>
         </div>
 
         {/* Desktop Table */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Title
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Close Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Market Address
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {events.map((event) => (
-                <tr key={event.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <a
-                        href={`/event/${event.slug}`}
-                        className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                      >
-                        {event.title}
-                      </a>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {event.slug}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-900 dark:text-white capitalize">
-                      {event.type}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(event.status)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {formatDate(new Date(event.close_time))}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {formatDate(new Date(event.created_at))}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {event.market_address ? (
-                      <a
-                        href={getExplorerLink(event.market_address)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                      >
-                        {truncateAddress(event.market_address)}
-                      </a>
-                    ) : (
-                      <span className="text-sm text-gray-500 dark:text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center gap-2">
-                      <a
-                        href={`/event/${event.slug}`}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                      >
-                        View
-                      </a>
-                      <a
-                        href={`/admin/events/${event.id}`}
-                        className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                      >
-                        Edit
-                      </a>
-                      {event.status === 'draft' && event.market_address && (
-                        <button
-                          onClick={() => handleAction(event.id, 'publish')}
-                          className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
-                        >
-                          Publish
-                        </button>
-                      )}
-                      {event.status === 'live' && (
-                        <button
-                          onClick={() => handleAction(event.id, 'close')}
-                          className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                        >
-                          Close
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="hidden md:block">
+          <DataTable
+            columns={columns}
+            data={events}
+            loading={loading}
+            emptyMessage="No events found"
+            getRowKey={(event) => event.id}
+          />
         </div>
 
         {/* Mobile Cards */}
-        <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
-          {events.map((event) => (
-            <div key={event.id} className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <a
-                    href={`/event/${event.slug}`}
-                    className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 block truncate"
-                  >
-                    {event.title}
-                  </a>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                      {event.type}
-                    </span>
-                    {getStatusBadge(event.status)}
+        <div className="md:hidden divide-y divide-sabi-border dark:divide-sabi-border-dark">
+          {loading ? (
+            <div className="p-4 animate-pulse space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : events.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
+                No events found
+              </p>
+            </div>
+          ) : (
+            events.map((event) => (
+              <div key={event.id} className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <Link
+                      href={`/event/${event.slug}`}
+                      className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 block truncate"
+                    >
+                      {event.title}
+                    </Link>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark capitalize">
+                        {event.type}
+                      </span>
+                      <StatusBadge status={event.status} size="sm" />
+                    </div>
+                    <div className="mt-2 text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
+                      <div>Close: {formatDate(new Date(event.close_time))}</div>
+                      <div>Created: {formatDate(new Date(event.created_at))}</div>
+                      {event.market_address && (
+                        <div>
+                          Market:{' '}
+                          <a
+                            href={getExplorerLink(event.market_address)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                          >
+                            {truncateAddress(event.market_address)}
+                          </a>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                    <div>Close: {formatDate(new Date(event.close_time))}</div>
-                    <div>Created: {formatDate(new Date(event.created_at))}</div>
-                    {event.market_address && (
-                      <div>
-                        Market:{' '}
-                        <a
-                          href={getExplorerLink(event.market_address)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                        >
-                          {truncateAddress(event.market_address)}
-                        </a>
-                      </div>
+                  <div className="flex flex-col gap-1 ml-4">
+                    <Link
+                      href={`/event/${event.slug}`}
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                    >
+                      View
+                    </Link>
+                    <Link
+                      href={`/admin/events/${event.id}`}
+                      className="text-xs text-sabi-text-secondary dark:text-sabi-text-secondary-dark hover:text-sabi-text-primary dark:hover:text-sabi-text-primary-dark"
+                    >
+                      Edit
+                    </Link>
+                    {event.status === 'draft' && event.market_address && (
+                      <button
+                        onClick={() => handleAction(event.id, 'publish')}
+                        className="text-xs text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
+                      >
+                        Publish
+                      </button>
+                    )}
+                    {event.status === 'live' && (
+                      <button
+                        onClick={() => handleAction(event.id, 'close')}
+                        className="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                      >
+                        Close
+                      </button>
                     )}
                   </div>
                 </div>
-                <div className="flex flex-col gap-1 ml-4">
-                  <a
-                    href={`/event/${event.slug}`}
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                  >
-                    View
-                  </a>
-                  <a
-                    href={`/admin/events/${event.id}`}
-                    className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                  >
-                    Edit
-                  </a>
-                  {event.status === 'draft' && event.market_address && (
-                    <button
-                      onClick={() => handleAction(event.id, 'publish')}
-                      className="text-xs text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
-                    >
-                      Publish
-                    </button>
-                  )}
-                  {event.status === 'live' && (
-                    <button
-                      onClick={() => handleAction(event.id, 'close')}
-                      className="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                    >
-                      Close
-                    </button>
-                  )}
-                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
-
-        {/* Empty State */}
-        {events.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">No events found</p>
-            <a
-              href="/admin/events/new"
-              className="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Create New Event
-            </a>
-          </div>
-        )}
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-4 border-t border-sabi-border dark:border-sabi-border-dark">
             <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-700 dark:text-gray-300">
+              <div className="text-sm text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
                 Showing {((page - 1) * pageSize) + 1} to {Math.min(page * pageSize, total)} of {total} results
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPage(page - 1)}
                   disabled={page === 1}
-                  className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 text-sm border border-sabi-border dark:border-sabi-border-dark rounded-md hover:bg-sabi-bg dark:hover:bg-sabi-bg-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Previous
                 </button>
-                <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
+                <span className="px-3 py-1 text-sm text-sabi-text-primary dark:text-sabi-text-primary-dark">
                   Page {page} of {totalPages}
                 </span>
                 <button
                   onClick={() => setPage(page + 1)}
                   disabled={page === totalPages}
-                  className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 text-sm border border-sabi-border dark:border-sabi-border-dark rounded-md hover:bg-sabi-bg dark:hover:bg-sabi-bg-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Next
                 </button>
