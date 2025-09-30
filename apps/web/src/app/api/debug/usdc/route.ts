@@ -4,13 +4,6 @@ import { polygonAmoy } from 'viem/chains';
 import { env } from '@/lib/env';
 import { serverEnv } from '@/lib/env.server';
 
-// Production guard - disable debug endpoints in production
-if (process.env.NODE_ENV === 'production') {
-  export async function GET() {
-    return new NextResponse('Not Found', { status: 404 });
-  }
-}
-
 // USDC ABI (minimal for balance and allowance)
 const USDC_ABI = [
   {
@@ -40,6 +33,11 @@ const USDC_ABI = [
 ] as const;
 
 export async function GET() {
+  // Production guard - disable debug endpoints in production
+  if (process.env.NODE_ENV === 'production') {
+    return new NextResponse('Not Found', { status: 404 });
+  }
+
   try {
     const publicClient = createPublicClient({
       chain: polygonAmoy,

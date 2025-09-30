@@ -24,36 +24,26 @@ interface DatabaseEvent {
 
 // Convert database event to MarketItem format
 function convertDatabaseEventToMarketItem(event: DatabaseEvent): MarketItem {
-  return {
+  const item: MarketItem = {
     kind: 'market',
     id: event.id,
-    slug: event.slug,
-    title: event.title,
     question: event.question,
-    type: event.type as 'binary' | 'multi',
-    closesAt: event.closeTime,
-    imageCid: event.imageCid,
-    chainId: event.chainId,
-    marketAddress: event.marketAddress,
-    txHash: event.txHash,
-    status: event.status,
-    createdAt: event.createdAt,
-    // Convert outcomes to the expected format
-    outcomes: event.outcomes.map(outcome => ({
-      id: outcome.id,
-      label: outcome.label,
-      idx: outcome.idx,
-      color: outcome.color || '#10B981', // Default color
-    })),
-    // Add mock data for fields that don't exist in database yet
     poolUsd: 1000000, // Default pool size
-    volume24h: 50000, // Default volume
-    yesPrice: 0.5, // Default price
-    noPrice: 0.5, // Default price
-    yesShares: 500000, // Default shares
-    noShares: 500000, // Default shares
-    // Add any other required fields with defaults
+    slug: event.slug,
+    closesAt: event.closeTime,
+    // Convert outcomes to the expected format
+    outcomes: event.outcomes.map((outcome, index) => ({
+      label: outcome.label,
+      oddsPct: 50, // Default equal probability for now
+    })),
   };
+
+  // Only add imageUrl if it exists
+  if (event.imageCid) {
+    item.imageUrl = `https://gateway.pinata.cloud/ipfs/${event.imageCid}`;
+  }
+
+  return item;
 }
 
 export function useEvents() {

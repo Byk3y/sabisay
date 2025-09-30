@@ -223,15 +223,16 @@ export const isMarketTradeable = (endDate: Date): boolean => {
 export const getMarketStats = (market: Market) => {
   const totalVolume = calculateMarketVolume(market.outcomes);
   const liquidity = calculateMarketLiquidity(market.outcomes);
-  const status = getMarketStatus(market.endDate);
-  const timeRemaining = getTimeRemaining(market.endDate);
+  const endDate = market.endDate || new Date();
+  const status = getMarketStatus(endDate);
+  const timeRemaining = getTimeRemaining(endDate);
 
   return {
     totalVolume,
     liquidity,
     status,
     timeRemaining,
-    isTradeable: isMarketTradeable(market.endDate),
+    isTradeable: isMarketTradeable(endDate),
     outcomeCount: market.outcomes.length,
   };
 };

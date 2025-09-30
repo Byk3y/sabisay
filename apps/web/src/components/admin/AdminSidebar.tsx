@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutList, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutList, Settings, ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 
 interface NavItem {
   label: string;
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   badge?: string | number;
 }
 

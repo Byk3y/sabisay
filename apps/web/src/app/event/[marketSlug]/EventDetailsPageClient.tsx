@@ -48,25 +48,25 @@ async function fetchEventBySlug(slug: string): Promise<Market | null> {
             { label: 'No', oddsPct: 50, probability: 50, price: { yes: 50, no: 50 } }
           ];
 
-      return {
+      const market: Market = {
         id: event.id.toString(),
-        slug: event.slug,
-        question: event.question,
         title: event.title,
         outcomes: outcomes,
         volume: 1000000, // Default volume
-        poolUsd: 1000000,
         endDate: new Date(event.close_time), // Convert to Date object for MarketHeader
-        closesAt: event.close_time, // Keep for backward compatibility
-        uiStyle: event.type === 'binary' ? 'binary' as const : undefined,
-        imageUrl: event.image_cid ? `https://gateway.pinata.cloud/ipfs/${event.image_cid}` : undefined,
-        // Additional fields for compatibility
-        chainId: event.chain_id,
-        marketAddress: event.market_address,
-        txHash: event.tx_hash,
-        status: event.status,
-        createdAt: event.created_at,
+        relatedMarkets: [],
+        slug: event.slug,
       };
+
+      // Only add optional fields if they exist
+      if (event.type === 'binary') {
+        market.uiStyle = 'binary';
+      }
+      if (event.image_cid) {
+        market.imageUrl = `https://gateway.pinata.cloud/ipfs/${event.image_cid}`;
+      }
+
+      return market;
     }
     
     return null;

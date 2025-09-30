@@ -24,23 +24,24 @@ export async function GET(request: NextRequest) {
 
     // Parse query parameters
     const { searchParams } = new URL(request.url);
-    const params: EventsListParams = {
-      q: searchParams.get('q') || undefined,
-      status: searchParams.getAll('status[]'),
-      createdFrom: searchParams.get('createdFrom') || undefined,
-      createdTo: searchParams.get('createdTo') || undefined,
-      sort: (searchParams.get('sort') as EventsListParams['sort']) || 'created_at',
-      order: (searchParams.get('order') as EventsListParams['order']) || 'desc',
-      page: parseInt(searchParams.get('page') || '1'),
-    };
+    const qParam = searchParams.get('q');
+    const createdFromParam = searchParams.get('createdFrom');
+    const createdToParam = searchParams.get('createdTo');
+    const pageParam = parseInt(searchParams.get('page') || '1');
+    const statusParam = searchParams.getAll('status[]');
 
-    // Validate page parameter
-    if (params.page < 1) {
-      params.page = 1;
-    }
+    const params: EventsListParams = {};
+
+    if (qParam) params.q = qParam;
+    if (statusParam.length > 0) params.status = statusParam;
+    if (createdFromParam) params.createdFrom = createdFromParam;
+    if (createdToParam) params.createdTo = createdToParam;
+    params.sort = (searchParams.get('sort') as EventsListParams['sort']) || 'created_at';
+    params.order = (searchParams.get('order') as EventsListParams['order']) || 'desc';
+    params.page = pageParam < 1 ? 1 : pageParam;
 
     const pageSize = 20;
-    const offset = (params.page - 1) * pageSize;
+    const offset = (params.page! - 1) * pageSize;
 
     // Build query
     let query = supabaseAdmin
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Apply sorting
-    query = query.order(params.sort, { ascending: params.order === 'asc' });
+    query = query.order(params.sort!, { ascending: params.order === 'asc' });
 
     // Get total count for pagination
     const { count } = await supabaseAdmin
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest) {
     const response: EventsListResponse = {
       items: events || [],
       total: count || 0,
-      page: params.page,
+      page: params.page!,
       pageSize,
     };
 
