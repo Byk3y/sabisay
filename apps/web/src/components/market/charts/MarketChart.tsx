@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from 'recharts';
 import { Series, formatTimeLabel, type TimeRange } from '@/lib/mockSeries';
+import { getDefaultOutcomeColor } from '@/lib/colors';
 
 export type MarketChartVariant = 'chance' | 'multi';
 
@@ -23,43 +24,39 @@ export interface MarketChartProps {
   className?: string;
 }
 
-// Color palette for multi-outcome charts
-const CHART_COLORS = [
-  '#3B82F6', // blue-500
-  '#EF4444', // red-500
-  '#10B981', // emerald-500
-  '#F59E0B', // amber-500
-  '#8B5CF6', // violet-500
-  '#06B6D4', // cyan-500
-  '#84CC16', // lime-500
-  '#F97316', // orange-500
-];
+// Custom tooltip: we hide the floating tooltip and instead render labels near each line via active dots
+const CustomTooltip = () => null;
 
-// Custom tooltip component
-const CustomTooltip = ({ active, payload, label, timeRange, variant }: any) => {
-  if (active && payload && payload.length) {
-    const timeLabel = formatTimeLabel(label, timeRange);
+// Custom active dot that renders a colored pill label anchored near the line point
+const CustomActiveDot = ({ cx, cy, stroke, payload, color, label }: any) => {
+  if (typeof cx !== 'number' || typeof cy !== 'number') return null;
+  const value = typeof payload?.p === 'number' ? payload.p : 0;
+  const bg = color || stroke || '#3B82F6';
+  const text = `${label ?? ''} ${Math.round(value * 10) / 10}%`;
+  const paddingX = 6;
+  const paddingY = 3;
+  const charWidth = 6.5; // rough estimate for width calculation
+  const width = Math.max(28, Math.round(text.length * charWidth) + paddingX * 2);
+  const height = 18;
 
-    return (
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg p-3">
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-          {timeLabel}
-        </p>
-        {payload.map((entry: any, index: number) => (
-          <div key={index} className="flex items-center gap-2">
-            <div
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {variant === 'chance' ? 'Chance' : entry.dataKey}: {entry.value}%
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-  return null;
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={6} stroke={bg} strokeWidth={2} fill={bg} />
+      <g transform={`translate(${cx + 8}, ${cy - height + 2})`}>
+        <rect x={0} y={0} width={width} height={height} rx={6} ry={6} fill={bg} />
+        <text
+          x={width / 2}
+          y={height / 2 + 4}
+          textAnchor="middle"
+          fontSize={10}
+          fontWeight={600}
+          fill="#fff"
+        >
+          {text}
+        </text>
+      </g>
+    </g>
+  );
 };
 
 export function MarketChart({
@@ -222,9 +219,8 @@ export function MarketChart({
             />
 
             <Tooltip
-              content={
-                <CustomTooltip timeRange={timeRange} variant={variant} />
-              }
+              content={() => null}
+              cursor={{ stroke: '#9CA3AF', strokeWidth: 1, strokeDasharray: '5 5' }}
             />
 
             {variant === 'chance' ? (
@@ -238,25 +234,29 @@ export function MarketChart({
                 activeDot={{ r: 4, stroke: '#3B82F6', strokeWidth: 2 }}
               />
             ) : (
-              // Multiple lines for multi-outcome markets
-              series.map((s, index) => (
-                <Line
-                  key={s.id}
-                  type="monotone"
-                  dataKey="p"
-                  data={s.data}
-                  name={s.label}
-                  stroke={CHART_COLORS[index % CHART_COLORS.length]}
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{
-                    r: 4,
-                    stroke:
-                      CHART_COLORS[index % CHART_COLORS.length] || '#3B82F6',
-                    strokeWidth: 2,
-                  }}
-                />
-              ))
+              // Multiple lines for multi-outcome markets - each with individual tooltip
+              series.map((s, index) => {
+                const color = s.color ?? getDefaultOutcomeColor(index);
+                return (
+                  <Line
+                    key={s.id}
+                    type="monotone"
+                    dataKey="p"
+                    data={s.data}
+                    name={s.label}
+                    stroke={color}
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={(props: any) => (
+                      <CustomActiveDot {...props} color={color} label={s.label} />
+                    )}
+                    label={({ x, y, value, index: pointIndex }: any) => {
+                      // Only show label for the active point (when hovering)
+                      return null; // Labels will be shown via Tooltip instead
+                    }}
+                  />
+                );
+              })
             )}
           </LineChart>
         </ResponsiveContainer>
