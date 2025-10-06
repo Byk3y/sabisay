@@ -111,29 +111,6 @@ export function HomePageContent({ realEvents }: HomePageContentProps) {
 
   const feed: MarketItem[] = Array.from(eventMap.values());
 
-  // Debug logging to track data flow
-  console.log('🔍 Landing Page Data Flow:');
-  console.log('📦 Mock events count:', mockFeed.length);
-  console.log(
-    '📦 Mock event IDs:',
-    mockFeed.map(e =>
-      e.kind === 'market' ? e.id : e.kind === 'group' ? e.groupId : 'unknown'
-    )
-  );
-  console.log('🔄 Real events count:', realEvents.length);
-  console.log(
-    '🔄 Real event IDs:',
-    realEvents.map(e =>
-      e.kind === 'market' ? e.id : e.kind === 'group' ? e.groupId : 'unknown'
-    )
-  );
-  console.log('🎯 Combined feed count:', feed.length);
-  console.log(
-    '📋 Final event IDs:',
-    feed.map(e =>
-      e.kind === 'market' ? e.id : e.kind === 'group' ? e.groupId : 'unknown'
-    )
-  );
 
   // TODO: Replace with actual contract data fetching
   const filteredMarkets = feed

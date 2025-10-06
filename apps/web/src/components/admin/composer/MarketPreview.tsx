@@ -3,7 +3,7 @@ import { MarketCard } from '@/components/market/MarketCard';
 interface MarketPreviewProps {
   title?: string;
   question?: string;
-  outcomes?: Array<{ label: string; oddsPct?: number }>;
+  outcomes?: Array<{ label: string; color?: string; oddsPct?: number }>;
   imageUrl?: string;
   closeTime?: string;
 }
@@ -37,6 +37,7 @@ export function MarketPreview({
     outcomes: outcomes.map(o => ({
       label: o.label,
       oddsPct: o.oddsPct || 50,
+      color: o.color,
     })),
     slug: 'preview',
   };

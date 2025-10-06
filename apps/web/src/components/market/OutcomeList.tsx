@@ -69,14 +69,9 @@ export const OutcomeList = ({
                 {/* Candidate info row */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-lg flex items-center justify-center">
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        {outcome.name.charAt(0)}
-                      </span>
-                    </div>
                     <div className="flex flex-col gap-1">
                       <div className="font-bold text-gray-900 dark:text-white text-base">
-                        {outcome.name}
+                        {outcome.label}
                       </div>
                       <div
                         className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 dark:text-gray-300`}
@@ -133,17 +128,12 @@ export const OutcomeList = ({
               // Desktop: Original horizontal layout
               <>
                 <div className="flex items-center gap-3 flex-1">
-                  <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-lg flex items-center justify-center">
-                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                      {outcome.name.charAt(0)}
-                    </span>
-                  </div>
                   <div>
                     <div className="font-semibold text-gray-900 dark:text-white text-base">
-                      {outcome.name}
+                      {outcome.label}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
-                      ${formatCurrencyNoSymbol(outcome.volume)} Vol. 📊
+                      ${formatCurrencyNoSymbol(outcome.volume)} Vol.
                     </div>
                   </div>
                 </div>

@@ -68,22 +68,24 @@ export function TopNav() {
       suppressHydrationWarning
     >
       <div
-        className="mx-auto max-w-7xl px-4 md:px-0 h-14 flex items-center justify-between"
+        className="mx-auto max-w-7xl h-14 flex items-center justify-between"
         suppressHydrationWarning
       >
         {/* Left side - Logo and Search (for all users) */}
-        <div className="flex items-center gap-2" suppressHydrationWarning>
-          <div
-            className="size-8 rounded bg-blue-500/20 dark:bg-blue-500/20 grid place-items-center"
-            suppressHydrationWarning
-          >
-            <span className="text-blue-600 dark:text-white font-bold text-lg">
-              S
-            </span>
-          </div>
-          <span className="font-semibold text-lg text-gray-900 dark:text-white">
-            PakoMarket
-          </span>
+        <div className="flex items-center pl-4 md:pl-0" suppressHydrationWarning>
+          <img
+            src="/images/pakomarket/pakomarket-logo.png"
+            alt="PakoMarket"
+            className="h-48 w-auto dark:invert -ml-3 md:-ml-5"
+            onError={(e) => {
+              // Fallback to "P" if image fails to load
+              e.currentTarget.style.display = 'none';
+              const parent = e.currentTarget.parentElement;
+              if (parent) {
+                parent.innerHTML = '<span class="text-blue-600 dark:text-white font-bold text-4xl">P</span>';
+              }
+            }}
+          />
           <Flag className="size-4 text-gray-500 dark:text-gray-400" />
 
           {/* Search bar next to logo for all users */}

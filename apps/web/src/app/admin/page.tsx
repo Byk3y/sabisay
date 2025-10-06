@@ -21,6 +21,6 @@ export default async function AdminIndexRedirect() {
     redirect('/');
   }
 
-  // ✅ Authenticated admin → send them straight to events
-  redirect('/admin/events');
+  // ✅ Authenticated admin → send them straight to dashboard
+  redirect('/admin/dashboard');
 }

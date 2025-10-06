@@ -1,6 +1,7 @@
 export interface MarketOutcome {
   label: string;
   oddsPct: number;
+  color?: string;
 }
 
 // DEPRECATED: Use Market interface from @/types/market instead

@@ -12,6 +12,7 @@ interface MarketCardProps {
 }
 
 export function MarketCard({ market, onYesClick, onNoClick }: MarketCardProps) {
+
   // Generate event URL using proper slug generation
   const marketSlug = market.slug || generateMarketSlug(market);
   const eventUrl = buildEventUrl(marketSlug);
@@ -48,8 +49,8 @@ export function MarketCard({ market, onYesClick, onNoClick }: MarketCardProps) {
                   key={index}
                   className="flex items-center justify-between gap-3 py-1"
                 >
-                  <div className="truncate text-gray-800 dark:text-gray-200 text-sm font-medium">
-                    {outcome.label}
+                  <div className="flex items-center gap-2 truncate text-gray-800 dark:text-gray-200 text-sm font-medium">
+                    <span className="truncate">{outcome.label}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <div className="w-10 text-right text-[15px] font-semibold text-gray-900 dark:text-white">
@@ -78,8 +79,8 @@ export function MarketCard({ market, onYesClick, onNoClick }: MarketCardProps) {
                     key={index}
                     className="flex items-center justify-between gap-3 py-1"
                   >
-                    <div className="truncate text-gray-800 dark:text-gray-200 text-sm font-medium">
-                      {outcome.label}
+                    <div className="flex items-center gap-2 truncate text-gray-800 dark:text-gray-200 text-sm font-medium">
+                      <span className="truncate">{outcome.label}</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <div className="w-10 text-right text-[15px] font-semibold text-gray-900 dark:text-white">

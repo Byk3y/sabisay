@@ -22,6 +22,7 @@ import {
   type TimeRange,
 } from '@/lib/mockSeries';
 import type { TradeData } from '@/types/market';
+import { getDefaultOutcomeColor } from '@/lib/colors';
 
 // Helper function to fetch event by slug from database
 async function fetchEventBySlug(slug: string): Promise<Market | null> {
@@ -37,12 +38,13 @@ async function fetchEventBySlug(slug: string): Promise<Market | null> {
 
       // Transform database event to Market format
       const outcomes =
-        event.event_outcomes && event.event_outcomes.length > 0
-          ? event.event_outcomes.map((outcome: any) => ({
+        event.outcomes && event.outcomes.length > 0
+          ? event.outcomes.map((outcome: any, index: number) => ({
               label: outcome.label,
               oddsPct: 50, // Default odds since we don't have real pricing yet
               probability: 50,
               price: { yes: 50, no: 50 }, // Default pricing
+              color: outcome.color ?? getDefaultOutcomeColor(index),
             }))
           : [
               {
@@ -50,12 +52,14 @@ async function fetchEventBySlug(slug: string): Promise<Market | null> {
                 oddsPct: 50,
                 probability: 50,
                 price: { yes: 50, no: 50 },
+                color: getDefaultOutcomeColor(0),
               },
               {
                 label: 'No',
                 oddsPct: 50,
                 probability: 50,
                 price: { yes: 50, no: 50 },
+                color: getDefaultOutcomeColor(1),
               },
             ];
 
@@ -67,14 +71,20 @@ async function fetchEventBySlug(slug: string): Promise<Market | null> {
         endDate: new Date(event.close_time), // Convert to Date object for MarketHeader
         relatedMarkets: [],
         slug: event.slug,
+        rules: event.rules,
       };
 
       // Only add optional fields if they exist
       if (event.type === 'binary') {
         market.uiStyle = 'binary';
       }
-      if (event.image_cid) {
-        market.imageUrl = `https://gateway.pinata.cloud/ipfs/${event.image_cid}`;
+      if (event.imageCid) {
+        // Check if it's already a full URL (Supabase Storage) or just a CID (IPFS)
+        if (event.imageCid.startsWith('http')) {
+          market.imageUrl = event.imageCid;
+        } else {
+          market.imageUrl = `https://gateway.pinata.cloud/ipfs/${event.imageCid}`;
+        }
       }
 
       return market;
@@ -180,10 +190,9 @@ function EventDetailsPageContent({
       const currentChance = market.outcomes?.[0]?.probability || 50;
       return generateChanceSeries(market.id, timeRange, currentChance);
     } else {
-      // For multi-outcome markets, generate multiple series
-      const labels =
-        market.outcomes?.map((outcome: { name: string }) => outcome.name) || [];
-      return generateMultiSeries(market.id, timeRange, labels);
+      // For multi-outcome markets, generate multiple series with colors
+      const outcomes = market.outcomes || [];
+      return generateMultiSeries(market.id, timeRange, outcomes);
     }
   }, [market, timeRange]);
 
@@ -379,7 +388,7 @@ function EventDetailsPageContent({
       <div className="max-w-7xl mx-auto px-0 py-0">
         <div
           className={`px-4 md:px-0 ${
-            isMobile ? 'md:pr-0 pb-20' : 'md:pr-[360px]'
+            isMobile ? 'md:pr-0 pb-20' : 'md:pr-[360px] pb-12'
           }`}
         >
           <div className="space-y-6">
@@ -396,10 +405,12 @@ function EventDetailsPageContent({
             )}
 
             {/* Rules Section */}
-            <RulesSection
-              rules="The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City."
-              onShowMore={() => console.log('Show more rules')}
-            />
+            {market?.rules && (
+              <RulesSection
+                rules={market.rules}
+                onShowMore={() => console.log('Show more rules')}
+              />
+            )}
           </div>
         </div>
       </div>

@@ -12,6 +12,7 @@ export interface Series {
   id: string;
   label: string;
   data: SeriesDataPoint[];
+  color?: string;
 }
 
 export type TimeRange = '1H' | '6H' | '1D' | '1W' | '1M' | 'ALL';
@@ -150,7 +151,7 @@ export function generateChanceSeries(
 export function generateMultiSeries(
   marketId: string,
   range: TimeRange,
-  labels: string[]
+  outcomes: Array<{ name?: string; label?: string; color?: string }>
 ): Series[] {
   const timePoints = generateTimePoints(range);
   const series: Series[] = [];
@@ -159,19 +160,20 @@ export function generateMultiSeries(
   const baseValues: number[] = [];
   let remaining = 100;
 
-  for (let i = 0; i < labels.length; i++) {
-    if (i === labels.length - 1) {
+  for (let i = 0; i < outcomes.length; i++) {
+    if (i === outcomes.length - 1) {
       baseValues.push(remaining);
     } else {
       const value =
-        20 + Math.random() * (remaining - 20 * (labels.length - i - 1));
+        20 + Math.random() * (remaining - 20 * (outcomes.length - i - 1));
       baseValues.push(value);
       remaining -= value;
     }
   }
 
   // Generate series for each outcome
-  labels.forEach((label, index) => {
+  outcomes.forEach((outcome, index) => {
+    const label = outcome.name || outcome.label || `Outcome ${index + 1}`;
     const random = seededRandom(
       marketId.charCodeAt(0) + marketId.length + index
     );
@@ -191,6 +193,7 @@ export function generateMultiSeries(
       id: `${marketId}-${label.toLowerCase().replace(/\s+/g, '-')}`,
       label,
       data,
+      color: outcome.color, // ✅ Include color from outcome
     });
   });
 

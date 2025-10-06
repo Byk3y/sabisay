@@ -6,14 +6,21 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 // Server component that fetches events directly from Supabase
 async function getEvents(): Promise<MarketItem[]> {
   try {
-    console.log('🏠 HomePage: Server component starting... v2');
-    console.log('🚀 getEvents: Starting to fetch real events...');
 
     const { data: events, error } = await supabaseAdmin
       .from('events')
-      .select('*, event_outcomes(*)')
+      .select(`
+        *,
+        event_outcomes (
+          id,
+          label,
+          idx,
+          color
+        )
+      `)
       .eq('status', 'live')
       .order('created_at', { ascending: false });
+
 
     if (error) {
       console.error('❌ getEvents: Database error:', error);
@@ -26,6 +33,7 @@ async function getEvents(): Promise<MarketItem[]> {
     }
 
     console.log('✅ getEvents: Fetched', events.length, 'events from database');
+    console.log('📋 getEvents: Event IDs:', events.map(e => e.id));
 
     // Transform database events to MarketItem format that matches mock structure
     const transformedEvents = events.map((event: any) => {
@@ -52,9 +60,7 @@ async function getEvents(): Promise<MarketItem[]> {
         uiStyle:
           event.type === 'binary' ? ('binary' as const) : ('default' as const),
         // Additional fields for compatibility
-        imageUrl: event.image_cid
-          ? `https://gateway.pinata.cloud/ipfs/${event.image_cid}`
-          : '',
+        imageUrl: event.image_cid || undefined,
         // Database-specific fields for detailed view
         chainId: event.chain_id,
         marketAddress: event.market_address,
@@ -64,17 +70,7 @@ async function getEvents(): Promise<MarketItem[]> {
       };
     });
 
-    console.log(
-      '🔄 getEvents: Transformed',
-      transformedEvents.length,
-      'events'
-    );
-    console.log(
-      '📋 getEvents: Event IDs:',
-      transformedEvents.map((e: MarketItem) =>
-        e.kind === 'market' ? e.id : 'group'
-      )
-    );
+    
     return transformedEvents;
   } catch (error) {
     console.error('❌ getEvents: Unexpected error:', error);
@@ -86,11 +82,6 @@ export default async function HomePage() {
   // Fetch events server-side using direct Supabase query
   const realEvents = await getEvents();
 
-  console.log(
-    '🏠 HomePage: Passing',
-    realEvents.length,
-    'real events to client component'
-  );
 
   return (
     <SidePanelProvider>

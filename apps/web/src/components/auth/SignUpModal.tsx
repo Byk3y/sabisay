@@ -268,10 +268,22 @@ export function SignUpModal({
         <div className="flex-1 flex flex-col justify-center md:hidden pt-20">
           {/* Logo and Title - Mobile only */}
           <div className="text-center pb-4 px-8">
-            {/* Logo placeholder - you can add your PakoMarket logo here */}
-            <div className="w-12 h-12 bg-blue-600 rounded-lg mx-auto mb-3 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
+            {/* PakoMarket logo */}
+                    <div className="mx-auto mb-3">
+                      <img
+                        src="/images/pakomarket/pakomarket-logo.png"
+                        alt="PakoMarket"
+                        className="h-56 w-auto dark:invert"
+                        onError={(e) => {
+                          // Fallback to "P" if image fails to load
+                          e.currentTarget.style.display = 'none';
+                          const parent = e.currentTarget.parentElement;
+                          if (parent) {
+                            parent.innerHTML = '<span class="text-blue-600 font-bold text-5xl">P</span>';
+                          }
+                        }}
+                      />
+                    </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               {mode === 'signup' ? 'Welcome to PakoMarket' : 'Welcome Back'}
             </h2>

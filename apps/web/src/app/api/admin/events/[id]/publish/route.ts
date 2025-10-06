@@ -93,6 +93,22 @@ export async function PUT(
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
+    // Fetch outcomes from event_outcomes table
+    const { data: outcomesData, error: outcomesError } = await supabaseAdmin
+      .from('event_outcomes')
+      .select('label, idx, color')
+      .eq('event_id', eventId)
+      .order('idx', { ascending: true });
+
+    if (outcomesError || !outcomesData) {
+      return NextResponse.json(
+        { error: 'Failed to fetch outcomes' },
+        { status: 500 }
+      );
+    }
+
+    const outcomes = outcomesData;
+
     // Preflight validation
     if (!event.title || !event.question || !event.type) {
       return NextResponse.json(
@@ -102,7 +118,6 @@ export async function PUT(
     }
 
     // Validate outcomes
-    const outcomes = event.outcomes as Array<{ label: string }>;
     if (!outcomes || outcomes.length < 2) {
       return NextResponse.json(
         { error: 'Minimum 2 outcomes required' },
@@ -264,3 +279,6 @@ export async function PUT(
     );
   }
 }
+
+
+

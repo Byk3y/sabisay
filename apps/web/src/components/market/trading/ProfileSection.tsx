@@ -41,8 +41,8 @@ const ProfileSectionComponent = ({
   }, [selectedCandidate, onCandidateSelect]);
 
   const initials = useMemo(
-    () => getInitials(currentOutcome?.name || 'Peter Obi'),
-    [getInitials, currentOutcome?.name]
+    () => getInitials(currentOutcome?.label || 'Peter Obi'),
+    [getInitials, currentOutcome?.label]
   );
 
   return (
@@ -61,7 +61,7 @@ const ProfileSectionComponent = ({
           </h3>
           <div className="flex items-center gap-2">
             <h4 className="text-sm text-gray-600 dark:text-gray-400">
-              {currentOutcome?.name || 'Peter Obi'}
+              {currentOutcome?.label || 'Peter Obi'}
             </h4>
             <button
               onClick={handleCandidateToggle}
@@ -92,7 +92,7 @@ const ProfileSectionComponent = ({
         {/* Desktop: Only candidate name */}
         <div className="hidden md:block">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-            {currentOutcome?.name || 'Peter Obi'}
+            {currentOutcome?.label || 'Peter Obi'}
           </h3>
         </div>
       </div>

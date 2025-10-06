@@ -2,16 +2,25 @@
 
 import { useState } from 'react';
 import { Toaster } from 'sonner';
-import { AdminSidebar } from './AdminSidebar';
-import { AdminTopbar } from './AdminTopbar';
+import { ModernSidebar } from './ModernSidebar';
+import { ModernTopbar } from './ModernTopbar';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
   actions?: React.ReactNode;
+  showSearch?: boolean;
+  onSearch?: (query: string) => void;
+  searchPlaceholder?: string;
 }
 
-export function AdminLayout({ children, actions }: AdminLayoutProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+export function AdminLayout({ 
+  children, 
+  actions, 
+  showSearch = true,
+  onSearch,
+  searchPlaceholder 
+}: AdminLayoutProps) {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Changed default to true
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -19,7 +28,7 @@ export function AdminLayout({ children, actions }: AdminLayoutProps) {
       <Toaster position="top-right" richColors />
       {/* Sidebar - Desktop */}
       <div className="hidden lg:block">
-        <AdminSidebar
+        <ModernSidebar
           collapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
@@ -35,7 +44,7 @@ export function AdminLayout({ children, actions }: AdminLayoutProps) {
           />
           {/* Sidebar */}
           <div className="lg:hidden">
-            <AdminSidebar collapsed={false} />
+            <ModernSidebar collapsed={false} />
           </div>
         </>
       )}
@@ -46,9 +55,12 @@ export function AdminLayout({ children, actions }: AdminLayoutProps) {
           sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
         }`}
       >
-        <AdminTopbar
+        <ModernTopbar
           onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
           actions={actions}
+          showSearch={showSearch}
+          onSearch={onSearch || (() => {})}
+          searchPlaceholder={searchPlaceholder || 'Search...'}
         />
         <main id="main-content" className="p-4 sm:p-6 lg:p-8" tabIndex={-1}>
           {children}

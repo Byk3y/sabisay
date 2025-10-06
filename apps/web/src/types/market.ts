@@ -15,7 +15,7 @@ export interface BaseMarket {
   poolUsd: number;
   imageUrl?: string;
   closesAt?: string;
-  outcomes?: Array<{ label: string; oddsPct: number }>;
+  outcomes?: Array<{ label: string; oddsPct: number; color?: string }>;
   slug?: string;
 }
 
@@ -70,19 +70,21 @@ export interface Market {
   uiStyle?: UiStyle; // Add this field to preserve uiStyle
   slug?: string;
   imageUrl?: string;
+  rules?: string;
 }
 
 /**
  * Market outcome with probability and pricing information
  */
 export interface Outcome {
-  name: string;
+  label: string;
   probability: number;
   volume: number;
   price: {
     yes: number;
     no: number;
   };
+  color?: string;
 }
 
 /**

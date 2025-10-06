@@ -22,7 +22,10 @@ export const formatCurrency = (amount: number): string => {
  * @param amount - The amount to format
  * @returns Formatted currency string without $ (e.g., "1,234.56")
  */
-export const formatCurrencyNoSymbol = (amount: number): string => {
+export const formatCurrencyNoSymbol = (amount: number | undefined): string => {
+  if (amount === undefined || amount === null) {
+    return '0.00';
+  }
   return amount.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

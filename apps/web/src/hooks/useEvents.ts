@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MarketItem } from '@/types/market';
+import { getDefaultOutcomeColor } from '@/lib/colors';
 
 interface DatabaseEvent {
   id: string;
@@ -35,6 +36,7 @@ function convertDatabaseEventToMarketItem(event: DatabaseEvent): MarketItem {
     outcomes: event.outcomes.map((outcome, index) => ({
       label: outcome.label,
       oddsPct: 50, // Default equal probability for now
+      color: outcome.color ?? getDefaultOutcomeColor(index),
     })),
   };
 

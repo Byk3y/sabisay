@@ -12,17 +12,14 @@ const draftEventSchema = z.object({
     .array(
       z.object({
         label: z.string().min(1).max(100),
+        color: z.string().optional(),
       })
     )
     .min(2)
     .max(8),
   closeTime: z.string().datetime(),
-  description: z.string().optional(),
-  rules: z.string().optional(),
-  resolutionCriteria: z.string().optional(),
-  feeBps: z.number().int().min(0).max(10000).optional(),
+  rules: z.string().min(10).max(2000).optional(),
   imageUrl: z.string().url().optional(),
-  tags: z.array(z.string()).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -76,14 +73,9 @@ export async function POST(request: NextRequest) {
         title: validated.title,
         question: validated.question,
         type: validated.type,
-        outcomes: validated.outcomes,
         close_time: validated.closeTime,
-        description: validated.description || null,
         rules: validated.rules || null,
-        resolution_criteria: validated.resolutionCriteria || null,
-        fee_bps: validated.feeBps ?? 200,
-        image_url: validated.imageUrl || null,
-        tags: validated.tags || null,
+        image_cid: validated.imageUrl || null, // Store image URL as CID for now
         slug,
         status: 'draft',
         creator_user_id: session.userId,
@@ -95,6 +87,28 @@ export async function POST(request: NextRequest) {
       console.error('Database error:', insertError);
       return NextResponse.json(
         { error: 'Failed to create draft' },
+        { status: 500 }
+      );
+    }
+
+    // Insert outcomes
+    const outcomesData = validated.outcomes.map((outcome, index) => ({
+      event_id: event.id,
+      label: outcome.label,
+      idx: index,
+      color: outcome.color || null,
+    }));
+
+    const { error: outcomesError } = await supabaseAdmin
+      .from('event_outcomes')
+      .insert(outcomesData);
+
+    if (outcomesError) {
+      console.error('Outcomes insert error:', outcomesError);
+      // Clean up the event if outcomes failed
+      await supabaseAdmin.from('events').delete().eq('id', event.id);
+      return NextResponse.json(
+        { error: 'Failed to create outcomes' },
         { status: 500 }
       );
     }

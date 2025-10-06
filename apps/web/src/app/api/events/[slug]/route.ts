@@ -35,6 +35,7 @@ export async function GET(
         tx_hash,
         status,
         created_at,
+        rules,
         event_outcomes (
           id,
           label,
@@ -57,6 +58,8 @@ export async function GET(
       );
     }
 
+    // Debug: Log the event data
+
     // Transform the data
     const eventData = {
       id: event.id,
@@ -71,6 +74,7 @@ export async function GET(
       txHash: event.tx_hash,
       status: event.status,
       createdAt: event.created_at,
+      rules: event.rules,
       outcomes: event.event_outcomes
         .sort((a: any, b: any) => a.idx - b.idx)
         .map((outcome: any) => ({
@@ -80,6 +84,8 @@ export async function GET(
           color: outcome.color,
         })),
     };
+
+    // Debug: Log the response data
 
     return NextResponse.json({
       success: true,
