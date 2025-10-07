@@ -2,54 +2,27 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 import { type MarketItem } from '@/types/market';
 
 /**
- * Fetch events from Supabase with retry logic for reliability
+ * Fetch events from Supabase
  * This function is shared between the home page and category pages
  */
 export async function getEvents(): Promise<MarketItem[]> {
   try {
-    // Add retry logic for more reliable fetching
-    let events = null;
-    let error = null;
-    let retryCount = 0;
-    const maxRetries = 3;
-
-    while (retryCount < maxRetries) {
-      const result = await supabaseAdmin
-        .from('events')
-        .select(`
-          *,
-          event_outcomes (
-            id,
-            label,
-            idx,
-            color
-          )
-        `)
-        .eq('status', 'live')
-        .order('created_at', { ascending: false });
-
-      events = result.data;
-      error = result.error;
-
-      if (error) {
-        retryCount++;
-        if (retryCount < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          continue;
-        }
-      } else if (events && events.length >= 3) {
-        break;
-      } else {
-        retryCount++;
-        if (retryCount < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          continue;
-        }
-      }
-    }
+    const { data: events, error } = await supabaseAdmin
+      .from('events')
+      .select(`
+        *,
+        event_outcomes (
+          id,
+          label,
+          idx,
+          color
+        )
+      `)
+      .eq('status', 'live')
+      .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Database error after retries:', error);
+      console.error('❌ getEvents: Database error:', error);
       return [];
     }
 
