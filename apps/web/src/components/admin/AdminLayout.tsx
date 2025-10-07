@@ -44,7 +44,7 @@ export function AdminLayout({
           />
           {/* Sidebar */}
           <div className="lg:hidden">
-            <ModernSidebar collapsed={false} />
+            <ModernSidebar collapsed={false} onMobileMenuClose={() => setMobileMenuOpen(false)} />
           </div>
         </>
       )}
@@ -62,7 +62,7 @@ export function AdminLayout({
           onSearch={onSearch || (() => {})}
           searchPlaceholder={searchPlaceholder || 'Search...'}
         />
-        <main id="main-content" className="p-4 sm:p-6 lg:p-8" tabIndex={-1}>
+        <main id="main-content" className="p-0 sm:p-6 lg:p-8" tabIndex={-1}>
           {children}
         </main>
       </div>

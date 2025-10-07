@@ -99,114 +99,128 @@ export function DashboardClient() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between px-1 md:px-0">
         <div>
-          <h1 className="text-2xl font-bold text-sabi-text-primary dark:text-sabi-text-primary-dark">
+          <h1 className="text-xl md:text-2xl font-bold text-sabi-text-primary dark:text-sabi-text-primary-dark">
             Dashboard
           </h1>
-          <p className="text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
+          <p className="hidden md:block text-sm md:text-base text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
             Welcome back! Here's what's happening with your prediction markets.
           </p>
+          <p className="md:hidden text-sm text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
+            Welcome back!
+          </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <Link href="/admin/events/new">
-            <ModernButton leftIcon={<Plus className="w-4 h-4" />}>
+            <ModernButton leftIcon={<Plus className="w-4 h-4" />} className="whitespace-nowrap"> 
               Create Event
             </ModernButton>
           </Link>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        <ModernCard hover>
-          <ModernCardContent className="p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
-                  Total Events
-                </p>
-                <p className="text-lg font-bold text-sabi-text-primary dark:text-sabi-text-primary-dark">
-                  {stats.totalEvents}
-                </p>
+      {/* KPI Bar (mobile) / Cards (desktop) */}
+      <div className="space-y-3 md:space-y-0">
+        {/* Mobile: single compact bar */}
+        <div className="md:hidden">
+          <ModernCard padding="sm" className="px-2">
+            <div className="grid grid-cols-4 divide-x divide-sabi-border dark:divide-sabi-border-dark">
+              <div className="flex flex-col items-center gap-0.5 py-2">
+                <span className="text-[10px] uppercase text-sabi-text-muted dark:text-sabi-text-muted-dark">Total</span>
+                <span className="text-base font-semibold">{stats.totalEvents}</span>
               </div>
-              <div className="p-1.5 rounded-md bg-admin-primary-100 dark:bg-admin-primary-900/20">
-                <Activity className="w-4 h-4 text-admin-primary-600 dark:text-admin-primary-400" />
+              <div className="flex flex-col items-center gap-0.5 py-2">
+                <span className="text-[10px] uppercase text-sabi-text-muted dark:text-sabi-text-muted-dark">Live</span>
+                <span className="text-base font-semibold">{stats.liveEvents}</span>
+              </div>
+              <div className="flex flex-col items-center gap-0.5 py-2">
+                <span className="text-[10px] uppercase text-sabi-text-muted dark:text-sabi-text-muted-dark">Volume</span>
+                <span className="text-base font-semibold">{formatCurrency(stats.totalVolume)}</span>
+              </div>
+              <div className="flex flex-col items-center gap-0.5 py-2">
+                <span className="text-[10px] uppercase text-sabi-text-muted dark:text-sabi-text-muted-dark">Users</span>
+                <span className="text-base font-semibold">{stats.activeUsers}</span>
               </div>
             </div>
-          </ModernCardContent>
-        </ModernCard>
+          </ModernCard>
+        </div>
 
-        <ModernCard hover>
-          <ModernCardContent className="p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
-                  Live Events
-                </p>
-                <p className="text-lg font-bold text-sabi-text-primary dark:text-sabi-text-primary-dark">
-                  {stats.liveEvents}
-                </p>
+        {/* Desktop: original 4 cards */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <ModernCard hover>
+            <ModernCardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark">Total Events</p>
+                  <p className="text-lg font-bold text-sabi-text-primary dark:text-sabi-text-primary-dark">{stats.totalEvents}</p>
+                </div>
+                <div className="p-1.5 rounded-md bg-admin-primary-100 dark:bg-admin-primary-900/20">
+                  <Activity className="w-4 h-4 text-admin-primary-600 dark:text-admin-primary-400" />
+                </div>
               </div>
-              <div className="p-1.5 rounded-md bg-admin-success-100 dark:bg-admin-success-900/20">
-                <TrendingUp className="w-4 h-4 text-admin-success-600 dark:text-admin-success-400" />
-              </div>
-            </div>
-          </ModernCardContent>
-        </ModernCard>
+            </ModernCardContent>
+          </ModernCard>
 
-        <ModernCard hover>
-          <ModernCardContent className="p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
-                  Total Volume
-                </p>
-                <p className="text-lg font-bold text-sabi-text-primary dark:text-sabi-text-primary-dark">
-                  {formatCurrency(stats.totalVolume)}
-                </p>
+          <ModernCard hover>
+            <ModernCardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark">Live Events</p>
+                  <p className="text-lg font-bold text-sabi-text-primary dark:text-sabi-text-primary-dark">{stats.liveEvents}</p>
+                </div>
+                <div className="p-1.5 rounded-md bg-admin-success-100 dark:bg-admin-success-900/20">
+                  <TrendingUp className="w-4 h-4 text-admin-success-600 dark:text-admin-success-400" />
+                </div>
               </div>
-              <div className="p-1.5 rounded-md bg-admin-warning-100 dark:bg-admin-warning-900/20">
-                <DollarSign className="w-4 h-4 text-admin-warning-600 dark:text-admin-warning-400" />
-              </div>
-            </div>
-          </ModernCardContent>
-        </ModernCard>
+            </ModernCardContent>
+          </ModernCard>
 
-        <ModernCard hover>
-          <ModernCardContent className="p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
-                  Active Users
-                </p>
-                <p className="text-lg font-bold text-sabi-text-primary dark:text-sabi-text-primary-dark">
-                  {stats.activeUsers}
-                </p>
+          <ModernCard hover>
+            <ModernCardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark">Total Volume</p>
+                  <p className="text-lg font-bold text-sabi-text-primary dark:text-sabi-text-primary-dark">{formatCurrency(stats.totalVolume)}</p>
+                </div>
+                <div className="p-1.5 rounded-md bg-admin-warning-100 dark:bg-admin-warning-900/20">
+                  <DollarSign className="w-4 h-4 text-admin-warning-600 dark:text-admin-warning-400" />
+                </div>
               </div>
-              <div className="p-1.5 rounded-md bg-admin-primary-100 dark:bg-admin-primary-900/20">
-                <Users className="w-4 h-4 text-admin-primary-600 dark:text-admin-primary-400" />
+            </ModernCardContent>
+          </ModernCard>
+
+          <ModernCard hover>
+            <ModernCardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark">Active Users</p>
+                  <p className="text-lg font-bold text-sabi-text-primary dark:text-sabi-text-primary-dark">{stats.activeUsers}</p>
+                </div>
+                <div className="p-1.5 rounded-md bg-admin-primary-100 dark:bg-admin-primary-900/20">
+                  <Users className="w-4 h-4 text-admin-primary-600 dark:text-admin-primary-400" />
+                </div>
               </div>
-            </div>
-          </ModernCardContent>
-        </ModernCard>
+            </ModernCardContent>
+          </ModernCard>
+        </div>
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Recent Events */}
-        <ModernCard>
-          <ModernCardHeader>
-            <ModernCardTitle>Recent Events</ModernCardTitle>
+        <ModernCard padding="sm">
+          <ModernCardHeader className="px-2">
+            <ModernCardTitle className="text-base md:text-lg">Recent Events</ModernCardTitle>
           </ModernCardHeader>
-          <ModernCardContent>
-            <div className="space-y-4">
+          <ModernCardContent className="px-2">
+            <div className="space-y-2 md:space-y-4">
               {stats.recentEvents.map(event => (
                 <div
                   key={event.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-sabi-border dark:border-sabi-border-dark hover:bg-sabi-bg dark:hover:bg-sabi-bg-dark transition-colors"
+                  className="flex items-center justify-between p-3 md:p-4 rounded-lg border border-sabi-border dark:border-sabi-border-dark hover:bg-sabi-bg dark:hover:bg-sabi-bg-dark transition-colors"
                 >
                   <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-medium text-sabi-text-primary dark:text-sabi-text-primary-dark truncate">
@@ -240,7 +254,7 @@ export function DashboardClient() {
                 </div>
               ))}
             </div>
-            <div className="mt-4 pt-4 border-t border-sabi-border dark:border-sabi-border-dark">
+            <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-sabi-border dark:border-sabi-border-dark">
               <Link href="/admin/events">
                 <ModernButton variant="ghost" className="w-full">
                   View All Events
@@ -251,13 +265,13 @@ export function DashboardClient() {
         </ModernCard>
 
         {/* System Health */}
-        <ModernCard>
-          <ModernCardHeader>
-            <ModernCardTitle>System Health</ModernCardTitle>
+        <ModernCard padding="sm">
+          <ModernCardHeader className="px-2">
+            <ModernCardTitle className="text-base md:text-lg">System Health</ModernCardTitle>
           </ModernCardHeader>
-          <ModernCardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg border border-sabi-border dark:border-sabi-border-dark">
+          <ModernCardContent className="px-2">
+            <div className="space-y-2 md:space-y-4">
+              <div className="flex items-center justify-between p-3 md:p-4 rounded-lg border border-sabi-border dark:border-sabi-border-dark">
                 <div className="flex items-center gap-3">
                   {getHealthIcon(stats.systemHealth.database) === '✅' ? (
                     <CheckCircle className="w-4 h-4 text-admin-success-500" />
@@ -282,7 +296,7 @@ export function DashboardClient() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-lg border border-sabi-border dark:border-sabi-border-dark">
+              <div className="flex items-center justify-between p-3 md:p-4 rounded-lg border border-sabi-border dark:border-sabi-border-dark">
                 <div className="flex items-center gap-3">
                   {getHealthIcon(stats.systemHealth.api) === '✅' ? (
                     <CheckCircle className="w-4 h-4 text-admin-success-500" />
@@ -307,7 +321,7 @@ export function DashboardClient() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-lg border border-sabi-border dark:border-sabi-border-dark">
+              <div className="flex items-center justify-between p-3 md:p-4 rounded-lg border border-sabi-border dark:border-sabi-border-dark">
                 <div className="flex items-center gap-3">
                   {getHealthIcon(stats.systemHealth.blockchain) === '✅' ? (
                     <CheckCircle className="w-4 h-4 text-admin-success-500" />

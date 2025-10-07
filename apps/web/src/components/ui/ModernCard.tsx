@@ -40,7 +40,7 @@ export const ModernCard = forwardRef<HTMLDivElement, ModernCardProps>(
     return (
       <div
         className={cn(
-          'rounded-xl transition-all duration-200',
+          'md:rounded-xl transition-all duration-200',
           cardVariants[variant],
           cardPadding[padding],
           hover && 'hover:shadow-card-hover hover:-translate-y-0.5',

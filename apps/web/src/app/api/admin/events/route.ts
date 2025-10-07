@@ -62,6 +62,7 @@ export async function GET(request: NextRequest) {
         id,
         slug,
         title,
+        question,
         type,
         status,
         close_time,

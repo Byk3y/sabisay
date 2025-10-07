@@ -23,6 +23,11 @@ library CPMMMath {
     error InvalidInput();
     error InsufficientLiquidity();
     error DivisionByZero();
+    error Overflow();
+
+    // Maximum safe value to prevent overflow in multiplications
+    // sqrt(type(uint256).max) ≈ 2^128 to ensure a * b doesn't overflow
+    uint256 private constant MAX_RESERVE = type(uint128).max;
     
     /**
      * @dev Calculate output amount when buying shares with USDC
@@ -39,7 +44,10 @@ library CPMMMath {
     ) internal pure returns (uint256 amountOut, uint256 price) {
         if (amountIn == 0) return (0, 0);
         if (reserveIn == 0 || reserveOut == 0) revert InsufficientLiquidity();
-        
+
+        // Check for potential overflow in multiplication
+        if (reserveOut > MAX_RESERVE || amountIn > MAX_RESERVE) revert Overflow();
+
         // amountOut = (reserveOut * amountIn) / (reserveIn + amountIn)
         amountOut = (reserveOut * amountIn) / (reserveIn + amountIn);
         
@@ -64,7 +72,10 @@ library CPMMMath {
         if (amountIn == 0) return (0, 0);
         if (reserveIn == 0 || reserveOut == 0) revert InsufficientLiquidity();
         if (amountIn >= reserveIn) revert InvalidInput();
-        
+
+        // Check for potential overflow in multiplication
+        if (reserveOut > MAX_RESERVE || amountIn > MAX_RESERVE) revert Overflow();
+
         // amountOut = (reserveOut * amountIn) / (reserveIn - amountIn)
         amountOut = (reserveOut * amountIn) / (reserveIn - amountIn);
         
@@ -82,7 +93,13 @@ library CPMMMath {
         uint256 reserveA,
         uint256 reserveB
     ) internal pure returns (uint256 k) {
+        // Check for potential overflow in multiplication
+        if (reserveA > MAX_RESERVE || reserveB > MAX_RESERVE) revert Overflow();
+
         k = reserveA * reserveB;
+
+        // Verify the multiplication didn't overflow (redundant with 0.8+ but explicit)
+        if (reserveA != 0 && k / reserveA != reserveB) revert Overflow();
     }
     
     /**

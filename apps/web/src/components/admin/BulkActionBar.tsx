@@ -85,8 +85,61 @@ export function BulkActionBar({
           className
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-3">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          {/* Mobile Layout */}
+          <div className="md:hidden py-3 space-y-3">
+            {/* Selection Info */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-admin-primary-600 flex-shrink-0" />
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-sabi-text-primary dark:text-sabi-text-primary-dark">
+                    {selectedCount} selected
+                  </span>
+                  {showItemCount && (
+                    <span className="text-xs text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
+                      of {totalItems} total
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              {/* Clear button */}
+              <button
+                onClick={onClearSelection}
+                className="p-2 rounded-lg hover:bg-sabi-bg dark:hover:bg-sabi-bg-dark transition-colors"
+              >
+                <XCircle className="w-5 h-5 text-sabi-text-secondary dark:text-sabi-text-secondary-dark" />
+              </button>
+            </div>
+
+            {/* Actions - Stacked */}
+            {showActions && (
+              <div className="grid grid-cols-2 gap-2">
+                {actions
+                  .filter(action => !action.disabled)
+                  .slice(0, 4) // Show first 4 actions on mobile
+                  .map(action => (
+                    <ModernButton
+                      key={action.id}
+                      variant={action.variant || 'secondary'}
+                      size="sm"
+                      onClick={() => handleAction(action)}
+                      disabled={action.disabled}
+                      className="w-full min-h-[44px] justify-center"
+                    >
+                      <span className="flex items-center gap-2">
+                        {action.icon}
+                        <span>{action.label}</span>
+                      </span>
+                    </ModernButton>
+                  ))}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden md:flex items-center justify-between py-3">
             {/* Selection Info */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
@@ -161,7 +214,7 @@ export function BulkActionBar({
                   onClick={onClearSelection}
                 >
                   <XCircle className="w-4 h-4" />
-                  Clear
+                  <span className="hidden lg:inline">Clear</span>
                 </ModernButton>
               </div>
             )}
@@ -171,37 +224,42 @@ export function BulkActionBar({
 
       {/* Confirmation Dialog */}
       {showConfirmDialog && pendingAction && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-sabi-card dark:bg-sabi-card-dark rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-full bg-admin-warning-100 dark:bg-admin-warning-900/20">
-                <AlertTriangle className="w-6 h-6 text-admin-warning-600 dark:text-admin-warning-400" />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-sabi-card dark:bg-sabi-card-dark rounded-xl shadow-lg p-4 sm:p-6 max-w-md w-full">
+            <div className="flex items-start sm:items-center gap-3 mb-4">
+              <div className="p-2 rounded-full bg-admin-warning-100 dark:bg-admin-warning-900/20 flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-admin-warning-600 dark:text-admin-warning-400" />
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-sabi-text-primary dark:text-sabi-text-primary-dark">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-sabi-text-primary dark:text-sabi-text-primary-dark">
                   Confirm Action
                 </h3>
-                <p className="text-sm text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
+                <p className="text-xs sm:text-sm text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
                   This action will affect {selectedCount} item
                   {selectedCount !== 1 ? 's' : ''}
                 </p>
               </div>
             </div>
 
-            <div className="mb-6">
-              <p className="text-sabi-text-primary dark:text-sabi-text-primary-dark">
+            <div className="mb-4 sm:mb-6">
+              <p className="text-sm sm:text-base text-sabi-text-primary dark:text-sabi-text-primary-dark">
                 {pendingAction.confirmationMessage ||
                   `Are you sure you want to ${pendingAction.label.toLowerCase()} ${selectedCount} selected item${selectedCount !== 1 ? 's' : ''}?`}
               </p>
             </div>
 
-            <div className="flex items-center justify-end gap-3">
-              <ModernButton variant="secondary" onClick={cancelAction}>
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3">
+              <ModernButton 
+                variant="secondary" 
+                onClick={cancelAction}
+                className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
+              >
                 Cancel
               </ModernButton>
               <ModernButton
                 variant={pendingAction.variant || 'danger'}
                 onClick={confirmAction}
+                className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
               >
                 {pendingAction.label}
               </ModernButton>

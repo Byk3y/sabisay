@@ -154,4 +154,35 @@ contract CPMMMathTest is Test {
         // Amount out should decrease as pool becomes more skewed
         assertLt(amountOut2, amountOut1);
     }
+
+    // Test overflow protection
+    function testOverflowProtection() public {
+        // MAX_RESERVE = type(uint128).max = 2^128 - 1
+        uint256 maxReserve = type(uint128).max;
+
+        // Test quoteBuy with excessive reserves - should revert
+        try this.callQuoteBuy(1000, maxReserve + 1, 100) {
+            revert("Should have reverted with Overflow");
+        } catch (bytes memory reason) {
+            // Success - expected to revert
+            assertEq(bytes4(reason), CPMMMath.Overflow.selector);
+        }
+
+        // Test getConstantProduct with excessive reserves
+        try this.callGetConstantProduct(maxReserve + 1, 1000) {
+            revert("Should have reverted with Overflow");
+        } catch (bytes memory reason) {
+            // Success - expected to revert
+            assertEq(bytes4(reason), CPMMMath.Overflow.selector);
+        }
+    }
+
+    // Helper functions to make library calls testable
+    function callQuoteBuy(uint256 reserveIn, uint256 reserveOut, uint256 amountIn) external pure returns (uint256, uint256) {
+        return CPMMMath.quoteBuy(reserveIn, reserveOut, amountIn);
+    }
+
+    function callGetConstantProduct(uint256 reserveA, uint256 reserveB) external pure returns (uint256) {
+        return CPMMMath.getConstantProduct(reserveA, reserveB);
+    }
 }

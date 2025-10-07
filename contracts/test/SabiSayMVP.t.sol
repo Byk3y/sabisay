@@ -102,7 +102,7 @@ contract PakoMarketMVPTest is Test {
         usdc.approve(marketAddr, tradeAmount);
 
         uint256 initialBalance = usdc.balanceOf(marketAddr);
-        market.buyYes(tradeAmount, 0);
+        market.buyYes(tradeAmount, 0, block.timestamp + 1 hours);
 
         uint256 finalBalance = usdc.balanceOf(marketAddr);
         assertEq(finalBalance, initialBalance + tradeAmount);
@@ -124,8 +124,8 @@ contract PakoMarketMVPTest is Test {
         uint256 buyAmount = 200 * 10**6; // 200 USDC
         usdc.approve(marketAddr, buyAmount * 2);
 
-        market.buyYes(buyAmount, 0);
-        market.buyNo(buyAmount, 0);
+        market.buyYes(buyAmount, 0, block.timestamp + 1 hours);
+        market.buyNo(buyAmount, 0, block.timestamp + 1 hours);
         vm.stopPrank();
 
         // Get shares after trades
@@ -189,7 +189,7 @@ contract PakoMarketMVPTest is Test {
         vm.startPrank(user1);
         usdc.approve(market1, 100 * 10**6);
         vm.expectRevert();
-        Market(market1).buyYes(100 * 10**6, 0);
+        Market(market1).buyYes(100 * 10**6, 0, block.timestamp + 1 hours);
         vm.stopPrank();
 
         // Unpause all
@@ -201,7 +201,7 @@ contract PakoMarketMVPTest is Test {
 
         // Trading should work again
         vm.startPrank(user1);
-        Market(market1).buyYes(100 * 10**6, 0);
+        Market(market1).buyYes(100 * 10**6, 0, block.timestamp + 1 hours);
         vm.stopPrank();
     }
 
@@ -264,7 +264,7 @@ contract PakoMarketMVPTest is Test {
         vm.startPrank(user1);
         uint256 tradeAmount = 1000 * 10**6;
         usdc.approve(marketAddr, tradeAmount);
-        market.buyYes(tradeAmount, 0);
+        market.buyYes(tradeAmount, 0, block.timestamp + 1 hours);
         vm.stopPrank();
 
         // Close and resolve market
@@ -337,7 +337,101 @@ contract PakoMarketMVPTest is Test {
 
         // This should revert due to MIN_RESERVE check
         vm.expectRevert("Insufficient reserve");
-        market.buyYes(massiveAmount, 0);
+        market.buyYes(massiveAmount, 0, block.timestamp + 1 hours);
+        vm.stopPrank();
+    }
+
+    // Test 10: Deadline Validation
+    function testDeadlineValidation() public {
+        vm.startPrank(admin);
+        usdc.approve(address(factory), INITIAL_YES + INITIAL_NO);
+        address marketAddr = factory.createMarket(FEE_BPS, END_TIME, RULES_CID, INITIAL_YES, INITIAL_NO);
+        vm.stopPrank();
+
+        Market market = Market(marketAddr);
+
+        // Try to trade with expired deadline
+        vm.startPrank(user1);
+        uint256 tradeAmount = 100 * 10**6;
+        usdc.approve(marketAddr, tradeAmount);
+
+        // Set deadline in the past
+        uint256 pastDeadline = block.timestamp - 1;
+
+        vm.expectRevert("Transaction expired");
+        market.buyYes(tradeAmount, 0, pastDeadline);
+        vm.stopPrank();
+    }
+
+    // Test 11: Invalid Redemption with Odd Shares (Rounding)
+    function testInvalidRedemptionOddShares() public {
+        vm.startPrank(admin);
+        usdc.approve(address(factory), INITIAL_YES + INITIAL_NO);
+        address marketAddr = factory.createMarket(FEE_BPS, END_TIME, RULES_CID, INITIAL_YES, INITIAL_NO);
+        vm.stopPrank();
+
+        Market market = Market(marketAddr);
+
+        // Manually set user to have exactly 101 shares (odd number)
+        // This simulates a scenario where user has odd number of shares
+        vm.startPrank(user1);
+
+        // Buy some shares first
+        uint256 buyAmount = 100 * 10**6;
+        usdc.approve(marketAddr, buyAmount);
+        market.buyYes(buyAmount, 0, block.timestamp + 1 hours);
+
+        // Get actual shares received
+        (uint256 yesShares,) = market.getUserBalances(user1);
+
+        vm.stopPrank();
+
+        // Close and mark invalid
+        vm.warp(END_TIME + 1);
+        market.close();
+        vm.prank(admin);
+        market.markInvalid();
+
+        // Redeem
+        vm.startPrank(user1);
+        uint256 balanceBefore = usdc.balanceOf(user1);
+        market.redeem();
+        uint256 balanceAfter = usdc.balanceOf(user1);
+        vm.stopPrank();
+
+        // Calculate expected redemption (rounded up)
+        uint256 expectedRedemption = (yesShares + 1) / 2;
+        uint256 actualRedemption = balanceAfter - balanceBefore;
+
+        // Should receive rounded up amount
+        assertEq(actualRedemption, expectedRedemption, "Should round up redemption amount");
+
+        // For odd shares, should receive more than floor division
+        if (yesShares % 2 == 1) {
+            assertGt(actualRedemption, yesShares / 2, "Odd shares should round up");
+        }
+    }
+
+    // Test 13: Fee Bounds Validation
+    function testFeeBoundsValidation() public {
+        // Test fee too high (over 10%)
+        vm.startPrank(admin);
+        usdc.approve(address(factory), (INITIAL_YES + INITIAL_NO) * 2);
+
+        vm.expectRevert("Fee too high");
+        factory.createMarket(1001, END_TIME, RULES_CID, INITIAL_YES, INITIAL_NO);
+
+        // Test fee too low (under 0.1%)
+        vm.expectRevert("Fee too low");
+        factory.createMarket(9, END_TIME, RULES_CID, INITIAL_YES, INITIAL_NO);
+
+        // Test valid fee bounds
+        address market1 = factory.createMarket(10, END_TIME, RULES_CID, INITIAL_YES, INITIAL_NO); // 0.1% min
+        assertEq(Market(market1).feeBps(), 10);
+
+        address market2 = factory.createMarket(1000, END_TIME, RULES_CID, INITIAL_YES, INITIAL_NO); // 10% max
+        assertEq(Market(market2).feeBps(), 1000);
+
         vm.stopPrank();
     }
 }

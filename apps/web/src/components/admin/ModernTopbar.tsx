@@ -102,7 +102,7 @@ export function ModernTopbar({
   };
 
   return (
-    <header className="h-14 bg-sabi-card dark:bg-sabi-card-dark border-b border-sabi-border dark:border-sabi-border-dark flex items-center justify-between px-4 lg:px-6">
+    <header className="sticky top-0 z-30 h-14 bg-sabi-card dark:bg-sabi-card-dark border-b border-sabi-border dark:border-sabi-border-dark flex items-center justify-between px-4 lg:px-6">
       {/* Left: Mobile menu + Breadcrumbs */}
       <div className="flex items-center gap-4">
         <button

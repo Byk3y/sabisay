@@ -58,11 +58,13 @@ const navItems: NavItem[] = [
 interface ModernSidebarProps {
   collapsed?: boolean;
   onToggleCollapse?: () => void;
+  onMobileMenuClose?: () => void;
 }
 
 export function ModernSidebar({
   collapsed = true, // Changed default to true
   onToggleCollapse,
+  onMobileMenuClose,
 }: ModernSidebarProps) {
   const pathname = usePathname();
 
@@ -79,6 +81,11 @@ export function ModernSidebar({
     return pathname?.startsWith(href);
   };
 
+  const handleNavClick = () => {
+    // Close mobile menu when navigation item is clicked
+    onMobileMenuClose?.();
+  };
+
   return (
     <nav
       className={cn(
@@ -92,20 +99,24 @@ export function ModernSidebar({
         {/* Logo and Brand - Show on hover when collapsed */}
         <div
           className={cn(
-            'flex items-center gap-3 transition-all duration-200',
+            'flex items-center justify-center transition-all duration-200',
             collapsed ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
           )}
         >
-          <div className="size-8 rounded-lg bg-gradient-to-br from-admin-primary-500 to-admin-primary-600 grid place-items-center shadow-sm">
-            <span className="text-white font-bold text-sm">P</span>
-          </div>
-          <div>
-            <span className="font-semibold text-sabi-text-primary dark:text-sabi-text-primary-dark text-sm">
-              Pakomarket
-            </span>
-            <div className="text-xs text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
-              Admin Panel
-            </div>
+          <img
+            src="/images/pakomarket/pakomarket-logo.png"
+            alt="PakoMarket"
+            className="h-48 w-auto dark:invert"
+            onError={(e) => {
+              // Fallback to the original P icon if logo fails to load
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const fallback = target.nextElementSibling as HTMLElement;
+              if (fallback) fallback.style.display = 'block';
+            }}
+          />
+          <div className="size-20 rounded-lg bg-gradient-to-br from-admin-primary-500 to-admin-primary-600 grid place-items-center shadow-sm hidden">
+            <span className="text-white font-bold text-4xl">P</span>
           </div>
         </div>
 
@@ -133,6 +144,7 @@ export function ModernSidebar({
             <Link
               key={item.href}
               href={item.href}
+              onClick={handleNavClick}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 group',
                 active
@@ -172,6 +184,7 @@ export function ModernSidebar({
         {/* Create Event Button */}
         <Link
           href="/admin/events/new"
+          onClick={handleNavClick}
           className={cn(
             'flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 group',
             // When collapsed: look like regular nav item
@@ -202,14 +215,20 @@ export function ModernSidebar({
             collapsed ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
           )}
         >
-          <div className="flex items-center gap-2 text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
+          <button
+            onClick={handleNavClick}
+            className="flex items-center gap-2 text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark hover:text-sabi-text-primary dark:hover:text-sabi-text-primary-dark transition-colors"
+          >
             <Bell className="w-3 h-3" />
             <span>Notifications</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
+          </button>
+          <button
+            onClick={handleNavClick}
+            className="flex items-center gap-2 text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark hover:text-sabi-text-primary dark:hover:text-sabi-text-primary-dark transition-colors"
+          >
             <MessageSquare className="w-3 h-3" />
             <span>Support</span>
-          </div>
+          </button>
         </div>
       </div>
     </nav>

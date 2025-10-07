@@ -41,12 +41,21 @@ export interface EnhancedDataTableProps<T> {
   onSelectionChange?: (selectedKeys: string[]) => void;
   onRowClick?: (item: T) => void;
   onRowAction?: (action: string, item: T) => void;
-  actions?: Array<{
+  actions?:
+    | Array<{
     label: string;
     icon: React.ReactNode;
     onClick: (item: T) => void;
     variant?: 'default' | 'danger';
-  }>;
+        disabled?: boolean;
+      }>
+    | ((item: T) => Array<{
+        label: string;
+        icon: React.ReactNode;
+        onClick: () => void;
+        variant?: 'default' | 'danger';
+        disabled?: boolean;
+      }>);
   exportable?: boolean;
   onExport?: (format: 'csv' | 'json') => void;
   pagination?: {
@@ -150,7 +159,26 @@ export function EnhancedDataTable<T>({
     return (
       <ModernCard className={className}>
         <div className="animate-pulse">
-          <div className="h-12 bg-admin-gray-200 dark:bg-admin-gray-700 rounded-t-xl" />
+          <div className="h-10 sm:h-12 bg-admin-gray-200 dark:bg-admin-gray-700 rounded-t-xl" />
+          {/* Mobile loading */}
+          <div className="md:hidden">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="p-4 border-b border-sabi-border dark:border-sabi-border-dark space-y-3"
+              >
+                <div className="h-5 bg-admin-gray-200 dark:bg-admin-gray-700 rounded w-3/4" />
+                <div className="h-4 bg-admin-gray-200 dark:bg-admin-gray-700 rounded w-1/2" />
+                <div className="h-4 bg-admin-gray-200 dark:bg-admin-gray-700 rounded w-2/3" />
+                <div className="flex gap-2 mt-3">
+                  <div className="h-10 bg-admin-gray-200 dark:bg-admin-gray-700 rounded flex-1" />
+                  <div className="h-10 bg-admin-gray-200 dark:bg-admin-gray-700 rounded flex-1" />
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Desktop loading */}
+          <div className="hidden md:block">
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
@@ -164,6 +192,7 @@ export function EnhancedDataTable<T>({
               </div>
             </div>
           ))}
+          </div>
         </div>
       </ModernCard>
     );
@@ -185,16 +214,16 @@ export function EnhancedDataTable<T>({
   }
 
   return (
-    <ModernCard className={className}>
+    <ModernCard padding="none" className={className}>
       {/* Table Header */}
-      <div className="px-6 py-4 border-b border-sabi-border dark:border-sabi-border-dark">
+      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-sabi-border dark:border-sabi-border-dark">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h3 className="text-lg font-semibold text-sabi-text-primary dark:text-sabi-text-primary-dark">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <h3 className="text-base sm:text-lg font-semibold text-sabi-text-primary dark:text-sabi-text-primary-dark">
               Results ({data.length})
             </h3>
             {selectable && selectedRows.length > 0 && (
-              <span className="text-sm text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
+              <span className="text-xs sm:text-sm text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
                 {selectedRows.length} selected
               </span>
             )}
@@ -207,8 +236,17 @@ export function EnhancedDataTable<T>({
                   size="sm"
                   rightIcon={<ChevronDown className="w-4 h-4" />}
                   onClick={() => setShowColumnMenu(!showColumnMenu)}
+                  className="hidden sm:inline-flex"
                 >
                   Export
+                </ModernButton>
+                <ModernButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowColumnMenu(!showColumnMenu)}
+                  className="sm:hidden"
+                >
+                  <Download className="w-4 h-4" />
                 </ModernButton>
                 {showColumnMenu && (
                   <div className="absolute right-0 mt-2 w-32 bg-sabi-card dark:bg-sabi-card-dark border border-sabi-border dark:border-sabi-border-dark rounded-lg shadow-lg py-1 z-50">
@@ -240,8 +278,110 @@ export function EnhancedDataTable<T>({
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Mobile Card Layout */}
+      <div className="md:hidden">
+        {data.map(item => {
+          const key = getRowKey(item);
+          const isSelected = selectedRows.includes(key);
+          const itemActions = typeof actions === 'function' ? actions(item) : actions;
+
+          return (
+            <div
+              key={key}
+              className={cn(
+                'border-b border-sabi-border dark:border-sabi-border-dark px-4 py-3 transition-colors',
+                isSelected && 'bg-admin-primary-50 dark:bg-admin-primary-900/10',
+                onRowClick && 'active:bg-sabi-bg dark:active:bg-sabi-bg-dark'
+              )}
+              onClick={() => handleRowClick(item)}
+            >
+              {/* Selection checkbox + Main content */}
+              <div className="flex items-start gap-3">
+                {selectable && (
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleSelectRow(key);
+                    }}
+                    className="flex items-center justify-center min-w-[24px] w-6 h-6 rounded border-2 border-admin-gray-300 dark:border-admin-gray-600 hover:bg-admin-gray-100 dark:hover:bg-admin-gray-700 transition-colors mt-1"
+                  >
+                    {isSelected ? (
+                      <CheckSquare className="w-5 h-5 text-admin-primary-600" />
+                    ) : (
+                      <Square className="w-5 h-5 text-admin-gray-400" />
+                    )}
+                  </button>
+                )}
+                
+                <div className="flex-1 min-w-0">
+                  {/* Top row: title + compact meta on the right (status + type) */}
+                  {(() => {
+                    const first = filteredColumns[0];
+                    const second = filteredColumns[1];
+                    const third = filteredColumns[2];
+                    return (
+                      <div className="flex items-start justify-between gap-3 mb-1">
+                        <div className="flex-1 min-w-0 text-base font-medium">
+                          {first && first.render(item)}
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {third && <div className="leading-none">{third.render(item)}</div>}
+                          {second && (
+                            <div className="text-xs text-sabi-text-secondary dark:text-sabi-text-secondary-dark leading-none">
+                              {second.render(item)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Remaining columns in a compact grid */}
+                  {filteredColumns.length > 3 && (
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2 mt-2 text-xs">
+                      {filteredColumns.slice(3).map(column => (
+                        <div key={column.key}>
+                          <span className="text-sabi-text-muted dark:text-sabi-text-muted-dark uppercase tracking-wide">
+                            {column.label}:
+                          </span>
+                          <div className="mt-0.5">{column.render(item)}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action buttons - Full width, touch-friendly */}
+              {itemActions && itemActions.length > 0 && (
+                <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-sabi-border dark:border-sabi-border-dark">
+                  {itemActions.map((action, index) => (
+                    <ModernButton
+                      key={index}
+                      variant={action.variant === 'danger' ? 'danger' : 'secondary'}
+                      size="sm"
+                      onClick={e => {
+                        e.stopPropagation();
+                        (action as any).onClick(item);
+                      }}
+                      disabled={action.disabled}
+                      className="w-full min-h-[40px]"
+                    >
+                      <span className="flex items-center justify-center gap-2 text-sm">
+                        {action.icon}
+                        <span className="hidden xs:inline">{action.label}</span>
+                      </span>
+                    </ModernButton>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop Table */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-sabi-border dark:divide-sabi-border-dark">
           <thead className="bg-admin-gray-50 dark:bg-admin-gray-800/50">
             <tr>
@@ -301,7 +441,7 @@ export function EnhancedDataTable<T>({
                   )}
                 </th>
               ))}
-              {actions.length > 0 && (
+              {actions && (
                 <th className="px-6 py-3 text-right text-xs font-medium text-sabi-text-secondary dark:text-sabi-text-secondary-dark uppercase tracking-wider">
                   Actions
                 </th>
@@ -353,18 +493,22 @@ export function EnhancedDataTable<T>({
                       {column.render(item)}
                     </td>
                   ))}
-                  {actions.length > 0 && (
+                  {actions && (
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {actions.map((action, index) => (
+                        {(typeof actions === 'function'
+                          ? actions(item)
+                          : actions
+                        ).map((action, index) => (
                           <ModernButton
                             key={index}
                             variant="ghost"
                             size="sm"
                             onClick={e => {
                               e.stopPropagation();
-                              handleAction(action.label.toLowerCase(), item);
+                              (action as any).onClick(item);
                             }}
+                            disabled={action.disabled}
                             className={cn(
                               action.variant === 'danger' &&
                                 'text-admin-error-600 hover:text-admin-error-700'
@@ -385,41 +529,42 @@ export function EnhancedDataTable<T>({
 
       {/* Pagination */}
       {pagination && (
-        <div className="px-6 py-4 border-t border-sabi-border dark:border-sabi-border-dark">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-sabi-border dark:border-sabi-border-dark">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+            <div className="text-xs sm:text-sm text-sabi-text-secondary dark:text-sabi-text-secondary-dark text-center sm:text-left">
               Showing {(pagination.page - 1) * pagination.pageSize + 1} to{' '}
               {Math.min(
                 pagination.page * pagination.pageSize,
                 pagination.total
               )}{' '}
-              of {pagination.total} results
+              of {pagination.total}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-2 w-full sm:w-auto">
               <select
                 value={pagination.pageSize}
                 onChange={e =>
                   pagination.onPageSizeChange(Number(e.target.value))
                 }
-                className="px-3 py-1 text-sm border border-sabi-border dark:border-sabi-border-dark rounded-md bg-white dark:bg-admin-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
+                className="w-full sm:w-auto px-3 py-2 sm:py-1 text-sm border border-sabi-border dark:border-sabi-border-dark rounded-md bg-white dark:bg-admin-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
               >
                 <option value={10}>10 per page</option>
                 <option value={20}>20 per page</option>
                 <option value={50}>50 per page</option>
                 <option value={100}>100 per page</option>
               </select>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <ModernButton
                   variant="secondary"
                   size="sm"
                   onClick={() => pagination.onPageChange(pagination.page - 1)}
                   disabled={pagination.page === 1}
+                  className="flex-1 sm:flex-none min-h-[40px] sm:min-h-0"
                 >
-                  Previous
+                  <span className="sm:inline">Previous</span>
+                  <span className="hidden sm:inline">Previous</span>
                 </ModernButton>
-                <span className="px-3 py-1 text-sm text-sabi-text-primary dark:text-sabi-text-primary-dark">
-                  Page {pagination.page} of{' '}
-                  {Math.ceil(pagination.total / pagination.pageSize)}
+                <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-sabi-text-primary dark:text-sabi-text-primary-dark whitespace-nowrap">
+                  {pagination.page} / {Math.ceil(pagination.total / pagination.pageSize)}
                 </span>
                 <ModernButton
                   variant="secondary"
@@ -429,6 +574,7 @@ export function EnhancedDataTable<T>({
                     pagination.page >=
                     Math.ceil(pagination.total / pagination.pageSize)
                   }
+                  className="flex-1 sm:flex-none min-h-[40px] sm:min-h-0"
                 >
                   Next
                 </ModernButton>

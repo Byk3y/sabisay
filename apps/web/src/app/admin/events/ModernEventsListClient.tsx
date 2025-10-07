@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { EventsListResponse, EventListItem, EventStatus } from '@/types/admin';
+import { EventsListResponse, EventListItem, EventStatus, EventDetail } from '@/types/admin';
 import { truncateAddress } from '@/lib/utils';
 import { formatDate } from '@/lib/formattingUtils';
+import { authenticatedFetch } from '@/lib/csrf-client';
 import {
   EnhancedDataTable,
   Column,
@@ -24,6 +25,7 @@ import {
   ModernCardContent,
 } from '@/components/ui/ModernCard';
 import { StatusBadge } from '@/components/ui/ModernBadge';
+import { ResolveModal } from '@/components/admin/ResolveModal';
 import {
   Eye,
   Edit,
@@ -34,6 +36,7 @@ import {
   DollarSign,
   Users,
   TrendingUp,
+  CheckCircle,
 } from 'lucide-react';
 
 const STATUS_OPTIONS: { value: EventStatus; label: string }[] = [
@@ -43,6 +46,7 @@ const STATUS_OPTIONS: { value: EventStatus; label: string }[] = [
   { value: 'live', label: 'Live' },
   { value: 'closed', label: 'Closed' },
   { value: 'resolved', label: 'Resolved' },
+  { value: 'archived', label: 'Archived' },
 ];
 
 const SORT_OPTIONS = [
@@ -61,6 +65,7 @@ const STATUS_OPTIONS_PILLS = [
   { value: 'live', label: 'Live' },
   { value: 'closed', label: 'Closed' },
   { value: 'resolved', label: 'Resolved' },
+  { value: 'archived', label: 'Archived' },
 ];
 
 const FREQUENCY_OPTIONS = [
@@ -77,6 +82,8 @@ export function ModernEventsListClient() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [resolveModalOpen, setResolveModalOpen] = useState(false);
+  const [eventToResolve, setEventToResolve] = useState<EventDetail | null>(null);
 
   // Pill filter states
   const {
@@ -188,25 +195,31 @@ export function ModernEventsListClient() {
   );
 
   // Handle actions
-  const handleAction = async (eventId: string, action: 'publish' | 'close') => {
-    const toastId = toast.loading(
-      `${action === 'publish' ? 'Publishing' : 'Closing'} event...`
-    );
+  const handleAction = async (
+    eventId: string,
+    action: 'publish' | 'close' | 'archive'
+  ) => {
+    const actionLabels = {
+      publish: 'Publishing',
+      close: 'Closing',
+      archive: 'Archiving',
+    };
+
+    const toastId = toast.loading(`${actionLabels[action]} event...`);
 
     try {
-      const response = await fetch(`/api/admin/events/${eventId}/${action}`, {
-        method: 'POST',
-        cache: 'no-store',
-      });
+      const response = await authenticatedFetch(
+        `/api/admin/events/${eventId}/${action}`,
+        {
+          method: 'POST',
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to ${action} event`);
       }
 
-      toast.success(
-        `Event ${action === 'publish' ? 'published' : 'closed'} successfully`,
-        { id: toastId }
-      );
+      toast.success(`Event ${action}d successfully`, { id: toastId });
 
       await fetchEvents();
     } catch (err) {
@@ -243,12 +256,25 @@ export function ModernEventsListClient() {
         'Are you sure you want to close the selected events?',
     },
     {
+      id: 'archive',
+      label: 'Archive',
+      icon: <Trash2 className="w-4 h-4" />,
+      variant: 'warning',
+      onClick: selectedIds => {
+        selectedIds.forEach(id => handleAction(id, 'archive'));
+      },
+      requiresConfirmation: true,
+      confirmationMessage:
+        'Are you sure you want to archive the selected events?',
+    },
+    {
       id: 'export',
       label: 'Export',
       icon: <Download className="w-4 h-4" />,
       variant: 'secondary',
       onClick: selectedIds => {
         // Export selected events
+        toast.info('Export functionality coming soon');
       },
     },
   ];
@@ -260,17 +286,12 @@ export function ModernEventsListClient() {
       label: 'Title',
       sortable: true,
       render: event => (
-        <div>
-          <Link
-            href={`/event/${event.slug}`}
-            className="text-sm font-medium text-admin-primary-600 dark:text-admin-primary-400 hover:text-admin-primary-800 dark:hover:text-admin-primary-300"
-          >
-            {event.question}
-          </Link>
-          <div className="text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
-            {event.slug}
-          </div>
-        </div>
+        <Link
+          href={`/event/${event.slug}`}
+          className="text-sm font-medium text-admin-primary-600 dark:text-admin-primary-400 hover:text-admin-primary-800 dark:hover:text-admin-primary-300"
+        >
+          {event.question}
+        </Link>
       ),
     },
     {
@@ -338,21 +359,21 @@ export function ModernEventsListClient() {
   const totalPages = Math.ceil(total / pageSize);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-sabi-text-primary dark:text-sabi-text-primary-dark">
+      <div className="px-4 sm:px-0">
+        <h1 className="text-xl sm:text-2xl font-bold text-sabi-text-primary dark:text-sabi-text-primary-dark">
           Events Management
         </h1>
-        <p className="text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
+        <p className="text-sm sm:text-base text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
           Manage prediction market events
         </p>
       </div>
 
       {/* Main Content */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Pill Filters */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-4 sm:px-0">
           <PillFilters
             filters={[
               {
@@ -412,21 +433,68 @@ export function ModernEventsListClient() {
               }
             });
           }}
-          actions={[
+          actions={event => [
             {
               label: 'View',
               icon: <Eye className="w-4 h-4" />,
-              onClick: event => {
+              onClick: () => {
                 window.open(`/event/${event.slug}`, '_blank');
               },
             },
             {
               label: 'Edit',
               icon: <Edit className="w-4 h-4" />,
-              onClick: event => {
-                window.location.href = `/admin/events/${event.id}`;
+              onClick: () => {
+                window.location.href = `/admin/events/${event.id}/edit`;
               },
+              disabled:
+                event.status === 'resolved' || event.status === 'archived',
             },
+            // Resolve action (show for closed events only)
+            ...(event.status === 'closed'
+              ? [
+                  {
+                    label: 'Resolve',
+                    icon: <CheckCircle className="w-4 h-4" />,
+                    onClick: async () => {
+                      // Fetch full event details for resolve modal
+                      try {
+                        const response = await fetch(
+                          `/api/admin/events/${event.id}`,
+                          { cache: 'no-store' }
+                        );
+                        if (response.ok) {
+                          const eventDetail: EventDetail = await response.json();
+                          setEventToResolve(eventDetail);
+                          setResolveModalOpen(true);
+                        } else {
+                          toast.error('Failed to load event details');
+                        }
+                      } catch (error) {
+                        toast.error('Failed to load event details');
+                      }
+                    },
+                  },
+                ]
+              : []),
+            // Archive action (show for non-archived events)
+            ...(event.status !== 'archived'
+              ? [
+                  {
+                    label: 'Archive',
+                    icon: <Trash2 className="w-4 h-4" />,
+                    onClick: () => {
+                      if (
+                        confirm(
+                          'Are you sure you want to archive this event?'
+                        )
+                      ) {
+                        handleAction(event.id, 'archive');
+                      }
+                    },
+                  },
+                ]
+              : []),
           ]}
           pagination={{
             page,
@@ -445,6 +513,21 @@ export function ModernEventsListClient() {
         actions={bulkActions}
         onClearSelection={clearSelection}
       />
+
+      {/* Resolve Modal */}
+      {eventToResolve && (
+        <ResolveModal
+          event={eventToResolve}
+          isOpen={resolveModalOpen}
+          onClose={() => {
+            setResolveModalOpen(false);
+            setEventToResolve(null);
+          }}
+          onSuccess={() => {
+            fetchEvents();
+          }}
+        />
+      )}
     </div>
   );
 }

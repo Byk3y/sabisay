@@ -111,6 +111,9 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
         uint64 _endTimeUTC,
         string memory _rulesCid
     ) {
+        require(_feeBps <= 1000, "Fee too high"); // Max 10%
+        require(_feeBps >= 10, "Fee too low"); // Min 0.1%
+
         factory = _factory;
         stable = _stable;
         feeBps = _feeBps;
@@ -186,11 +189,14 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
      * @dev Buy Yes shares with USDC
      * @param amountIn USDC amount to trade
      * @param minSharesOut Minimum shares to receive (slippage protection)
+     * @param deadline Transaction must be executed before this timestamp
      */
     function buyYes(
         uint256 amountIn,
-        uint256 minSharesOut
+        uint256 minSharesOut,
+        uint256 deadline
     ) external onlyOpen onlyBeforeClose whenNotPaused onlySeeded nonReentrant {
+        require(block.timestamp <= deadline, "Transaction expired");
         require(amountIn >= minStake, "Amount too small");
         
         // Apply fee first
@@ -205,7 +211,7 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
 
         require(sharesOut >= minSharesOut, "Slippage too high");
         require(sharesOut <= reserveNo, "Insufficient reserve");
-        require(reserveNo >= sharesOut + MIN_RESERVE, "Insufficient reserve");
+        require(reserveNo > sharesOut + MIN_RESERVE, "Insufficient reserve");
 
         // Transfer USDC from user
         IERC20(stable).safeTransferFrom(msg.sender, address(this), amountIn);
@@ -226,11 +232,14 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
      * @dev Buy No shares with USDC
      * @param amountIn USDC amount to trade
      * @param minSharesOut Minimum shares to receive (slippage protection)
+     * @param deadline Transaction must be executed before this timestamp
      */
     function buyNo(
         uint256 amountIn,
-        uint256 minSharesOut
+        uint256 minSharesOut,
+        uint256 deadline
     ) external onlyOpen onlyBeforeClose whenNotPaused onlySeeded nonReentrant {
+        require(block.timestamp <= deadline, "Transaction expired");
         require(amountIn >= minStake, "Amount too small");
         
         // Apply fee first
@@ -245,7 +254,7 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
 
         require(sharesOut >= minSharesOut, "Slippage too high");
         require(sharesOut <= reserveYes, "Insufficient reserve");
-        require(reserveYes >= sharesOut + MIN_RESERVE, "Insufficient reserve");
+        require(reserveYes > sharesOut + MIN_RESERVE, "Insufficient reserve");
 
         // Transfer USDC from user
         IERC20(stable).safeTransferFrom(msg.sender, address(this), amountIn);
@@ -266,11 +275,14 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
      * @dev Sell Yes shares for USDC (cashout)
      * @param sharesIn Number of shares to sell
      * @param minAmountOut Minimum USDC to receive (slippage protection)
+     * @param deadline Transaction must be executed before this timestamp
      */
     function sellYes(
         uint256 sharesIn,
-        uint256 minAmountOut
+        uint256 minAmountOut,
+        uint256 deadline
     ) external onlyOpen onlyBeforeClose whenNotPaused onlySeeded nonReentrant {
+        require(block.timestamp <= deadline, "Transaction expired");
         require(yesBal[msg.sender] >= sharesIn, "Insufficient shares");
         
         // Calculate trade using CPMM
@@ -285,7 +297,7 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
 
         // Apply fee
         (uint256 amountAfterFee, uint256 fee) = CPMMMath.applyFee(amountOut, feeBps);
-        require(reserveYes >= amountAfterFee + MIN_RESERVE, "Insufficient reserve");
+        require(reserveYes > amountAfterFee + MIN_RESERVE, "Insufficient reserve");
         feesAccrued += fee;
 
         // Update user balance first
@@ -305,11 +317,14 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
      * @dev Sell No shares for USDC (cashout)
      * @param sharesIn Number of shares to sell
      * @param minAmountOut Minimum USDC to receive (slippage protection)
+     * @param deadline Transaction must be executed before this timestamp
      */
     function sellNo(
         uint256 sharesIn,
-        uint256 minAmountOut
+        uint256 minAmountOut,
+        uint256 deadline
     ) external onlyOpen onlyBeforeClose whenNotPaused onlySeeded nonReentrant {
+        require(block.timestamp <= deadline, "Transaction expired");
         require(noBal[msg.sender] >= sharesIn, "Insufficient shares");
         
         // Calculate trade using CPMM
@@ -324,7 +339,7 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
 
         // Apply fee
         (uint256 amountAfterFee, uint256 fee) = CPMMMath.applyFee(amountOut, feeBps);
-        require(reserveNo >= amountAfterFee + MIN_RESERVE, "Insufficient reserve");
+        require(reserveNo > amountAfterFee + MIN_RESERVE, "Insufficient reserve");
         feesAccrued += fee;
 
         // Update user balance first
@@ -416,7 +431,8 @@ contract Market is AccessControl, ReentrancyGuard, Pausable {
 
         if (state == State.Invalid) {
             // Invalid market: each share redeems at 0.5 USDC
-            amount = totalShares / 2;
+            // Round up to favor the user (avoid loss due to integer truncation)
+            amount = (totalShares + 1) / 2;
             yesBal[msg.sender] = 0;
             noBal[msg.sender] = 0;
             emit RedeemedInvalid(msg.sender, amount);

@@ -78,7 +78,14 @@ ModernBadge.displayName = 'ModernBadge';
 
 // Status badge specifically for event statuses
 export interface StatusBadgeProps {
-  status: 'draft' | 'pending' | 'onchain' | 'live' | 'closed' | 'resolved';
+  status:
+    | 'draft'
+    | 'pending'
+    | 'onchain'
+    | 'live'
+    | 'closed'
+    | 'resolved'
+    | 'archived';
   size?: 'sm' | 'md' | 'lg';
   animated?: boolean;
 }
@@ -93,6 +100,7 @@ const statusConfig: Record<
   live: { variant: 'success', label: 'Live' },
   closed: { variant: 'error', label: 'Closed' },
   resolved: { variant: 'info', label: 'Resolved' },
+  archived: { variant: 'outline', label: 'Archived' },
 };
 
 export const StatusBadge = forwardRef<HTMLDivElement, StatusBadgeProps>(
