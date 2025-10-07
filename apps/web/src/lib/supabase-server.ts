@@ -58,4 +58,12 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
     // Don't detect session from URL on server
     detectSessionInUrl: false,
   },
+  db: {
+    schema: 'public',
+  },
+  global: {
+    headers: {
+      'x-client-info': 'pakomarket-server',
+    },
+  },
 });

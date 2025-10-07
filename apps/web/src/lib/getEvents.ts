@@ -19,7 +19,8 @@ export async function getEvents(): Promise<MarketItem[]> {
         )
       `)
       .eq('status', 'live')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false})
+      .limit(100); // Explicitly fetch all rows to avoid partial results
 
     if (error) {
       console.error('❌ getEvents: Database error:', error);
@@ -37,6 +38,16 @@ export async function getEvents(): Promise<MarketItem[]> {
     // Transform database events to MarketItem format
     const transformedEvents = events.map((event: any) => {
       try {
+        // Validate required fields
+        if (!event.id || !event.slug || !event.question) {
+          console.error(`❌ getEvents: Event missing required fields:`, {
+            id: event.id,
+            slug: event.slug,
+            hasQuestion: !!event.question
+          });
+          return null;
+        }
+
         // Create outcomes array
         const outcomes =
           event.event_outcomes && event.event_outcomes.length > 0
@@ -69,7 +80,7 @@ export async function getEvents(): Promise<MarketItem[]> {
           createdAt: event.created_at,
         };
       } catch (error) {
-        console.error(`Error transforming event ${event.id}:`, error);
+        console.error(`❌ getEvents: Error transforming event ${event?.id}:`, error);
         return null;
       }
     }).filter(event => event !== null) as MarketItem[];
