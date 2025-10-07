@@ -5,7 +5,9 @@
  * Desktop: Shows only candidate name
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+'use client';
+
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { Market, Outcome } from '@/types/market';
 
 interface ProfileSectionProps {
@@ -26,6 +28,8 @@ const ProfileSectionComponent = ({
   selectedCandidate,
   onCandidateSelect,
 }: ProfileSectionProps) => {
+  const [imageFailed, setImageFailed] = useState(false);
+
   const getInitials = useCallback((name: string) => {
     return (
       name
@@ -49,19 +53,12 @@ const ProfileSectionComponent = ({
     <div className="flex items-center gap-3 mb-6">
       {/* Avatar - Event image or initials fallback */}
       <div className="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center">
-        {market.imageUrl ? (
+        {market.imageUrl && !imageFailed ? (
           <img
             src={market.imageUrl}
             alt={market.question}
             className="w-full h-full object-cover"
-            onError={(e) => {
-              // Fallback to initials if image fails to load
-              e.currentTarget.style.display = 'none';
-              const parent = e.currentTarget.parentElement;
-              if (parent) {
-                parent.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center"><span class="text-lg font-bold text-white">${initials}</span></div>`;
-              }
-            }}
+            onError={() => setImageFailed(true)}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">

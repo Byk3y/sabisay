@@ -90,10 +90,12 @@ export function ModernSidebar({
       {/* Header */}
       <div className="h-14 flex items-center justify-between px-4 border-b border-sabi-border dark:border-sabi-border-dark">
         {/* Logo and Brand - Show on hover when collapsed */}
-        <div className={cn(
-          "flex items-center gap-3 transition-all duration-200",
-          collapsed ? "opacity-0 group-hover:opacity-100" : "opacity-100"
-        )}>
+        <div
+          className={cn(
+            'flex items-center gap-3 transition-all duration-200',
+            collapsed ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+          )}
+        >
           <div className="size-8 rounded-lg bg-gradient-to-br from-admin-primary-500 to-admin-primary-600 grid place-items-center shadow-sm">
             <span className="text-white font-bold text-sm">P</span>
           </div>
@@ -106,7 +108,7 @@ export function ModernSidebar({
             </div>
           </div>
         </div>
-        
+
         {/* Toggle Button - Always visible */}
         <button
           onClick={onToggleCollapse}
@@ -139,15 +141,23 @@ export function ModernSidebar({
               )}
               aria-current={active ? 'page' : undefined}
             >
-              <Icon className={cn(
-                'w-5 h-5 flex-shrink-0 transition-colors',
-                active ? 'text-admin-primary-600 dark:text-admin-primary-400' : ''
-              )} />
+              <Icon
+                className={cn(
+                  'w-5 h-5 flex-shrink-0 transition-colors',
+                  active
+                    ? 'text-admin-primary-600 dark:text-admin-primary-400'
+                    : ''
+                )}
+              />
               {/* Label and Badge - Show on hover when collapsed */}
-              <div className={cn(
-                "flex items-center gap-2 transition-all duration-200",
-                collapsed ? "opacity-0 group-hover:opacity-100" : "opacity-100"
-              )}>
+              <div
+                className={cn(
+                  'flex items-center gap-2 transition-all duration-200',
+                  collapsed
+                    ? 'opacity-0 group-hover:opacity-100'
+                    : 'opacity-100'
+                )}
+              >
                 <span className="font-medium truncate">{item.label}</span>
                 {item.badge && (
                   <span className="ml-auto px-2 py-0.5 text-xs font-medium rounded-full bg-admin-primary-100 text-admin-primary-700 dark:bg-admin-primary-900/30 dark:text-admin-primary-400">
@@ -165,18 +175,20 @@ export function ModernSidebar({
           className={cn(
             'flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 group',
             // When collapsed: look like regular nav item
-            collapsed 
+            collapsed
               ? 'text-sabi-text-secondary dark:text-sabi-text-secondary-dark hover:bg-sabi-card dark:hover:bg-sabi-card-dark hover:text-sabi-text-primary dark:hover:text-sabi-text-primary-dark'
-              // When expanded: prominent blue button
-              : 'bg-admin-primary-500 hover:bg-admin-primary-600 text-white shadow-sm hover:shadow-md'
+              : // When expanded: prominent blue button
+                'bg-admin-primary-500 hover:bg-admin-primary-600 text-white shadow-sm hover:shadow-md'
           )}
         >
           <Plus className="w-5 h-5 flex-shrink-0 transition-colors" />
           {/* Create Event Text - Show on hover when collapsed */}
-          <div className={cn(
-            "flex items-center gap-2 transition-all duration-200",
-            collapsed ? "opacity-0 group-hover:opacity-100" : "opacity-100"
-          )}>
+          <div
+            className={cn(
+              'flex items-center gap-2 transition-all duration-200',
+              collapsed ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+            )}
+          >
             <span className="font-medium">Create Event</span>
           </div>
         </Link>
@@ -184,10 +196,12 @@ export function ModernSidebar({
 
       {/* Footer */}
       <div className="p-4 border-t border-sabi-border dark:border-sabi-border-dark">
-        <div className={cn(
-          "space-y-2 transition-all duration-200",
-          collapsed ? "opacity-0 group-hover:opacity-100" : "opacity-100"
-        )}>
+        <div
+          className={cn(
+            'space-y-2 transition-all duration-200',
+            collapsed ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+          )}
+        >
           <div className="flex items-center gap-2 text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
             <Bell className="w-3 h-3" />
             <span>Notifications</span>

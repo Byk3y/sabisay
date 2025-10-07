@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { supabaseAdmin } from '@/lib/supabase-server';
-import { ensureEventImagesBucket, uploadEventImage } from '@/lib/storage.server';
+import {
+  ensureEventImagesBucket,
+  uploadEventImage,
+} from '@/lib/storage.server';
+import { validateCSRF } from '@/lib/csrf';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
@@ -12,6 +16,12 @@ export async function POST(request: NextRequest) {
     const session = await getSession();
     if (!session.isLoggedIn || !session.userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    // Validate CSRF token
+    const csrfError = await validateCSRF(request);
+    if (csrfError) {
+      return csrfError;
     }
 
     // Check admin status
@@ -33,16 +43,13 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File | null;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
     // Validate file type
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { 
+        {
           error: `Invalid file type. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`,
           allowedTypes: ALLOWED_MIME_TYPES,
         },
@@ -53,7 +60,7 @@ export async function POST(request: NextRequest) {
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { 
+        {
           error: `File size exceeds maximum allowed size of ${MAX_FILE_SIZE / 1024 / 1024}MB`,
           maxSizeMB: MAX_FILE_SIZE / 1024 / 1024,
         },
@@ -84,4 +91,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

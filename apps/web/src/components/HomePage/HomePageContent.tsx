@@ -79,7 +79,6 @@ export function HomePageContent({ realEvents }: HomePageContentProps) {
   // Use only real events from database
   const feed: MarketItem[] = realEvents;
 
-
   // TODO: Replace with actual contract data fetching
   const filteredMarkets = feed
     .filter(item => {
@@ -106,7 +105,6 @@ export function HomePageContent({ realEvents }: HomePageContentProps) {
       const matchesSearch =
         searchQuery === '' ||
         question.toLowerCase().includes(searchQuery.toLowerCase());
-
 
       return matchesCategory && matchesSearch;
     })
@@ -156,10 +154,6 @@ export function HomePageContent({ realEvents }: HomePageContentProps) {
     outcomeIndex?: number
   ) => {
     // TODO: Implement actual market interactions
-    console.log(
-      `${action} clicked for market ${marketId}`,
-      outcomeIndex ? `outcome ${outcomeIndex}` : ''
-    );
   };
 
   const handleTabChange = (tab: 'home' | 'search' | 'breaking' | 'more') => {

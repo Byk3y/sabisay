@@ -24,4 +24,3 @@ export const getDefaultOutcomeColor = (index: number): string =>
   PAKO_OUTCOME_COLORS[index % PAKO_OUTCOME_COLORS.length];
 
 export type HexColor = (typeof PAKO_OUTCOME_COLORS)[number] | string;
-

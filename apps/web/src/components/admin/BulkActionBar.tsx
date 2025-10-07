@@ -4,14 +4,14 @@ import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ModernButton } from '@/components/ui/ModernButton';
 import { ModernBadge } from '@/components/ui/ModernBadge';
-import { 
-  Trash2, 
-  Download, 
-  Edit, 
-  CheckCircle, 
+import {
+  Trash2,
+  Download,
+  Edit,
+  CheckCircle,
   XCircle,
   MoreHorizontal,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react';
 
 export interface BulkAction {
@@ -100,7 +100,7 @@ export function BulkActionBar({
                   </span>
                 )}
               </div>
-              
+
               {/* Selection Status */}
               <div className="flex items-center gap-2">
                 {isAllSelected && (
@@ -182,23 +182,21 @@ export function BulkActionBar({
                   Confirm Action
                 </h3>
                 <p className="text-sm text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
-                  This action will affect {selectedCount} item{selectedCount !== 1 ? 's' : ''}
+                  This action will affect {selectedCount} item
+                  {selectedCount !== 1 ? 's' : ''}
                 </p>
               </div>
             </div>
-            
+
             <div className="mb-6">
               <p className="text-sabi-text-primary dark:text-sabi-text-primary-dark">
-                {pendingAction.confirmationMessage || 
+                {pendingAction.confirmationMessage ||
                   `Are you sure you want to ${pendingAction.label.toLowerCase()} ${selectedCount} selected item${selectedCount !== 1 ? 's' : ''}?`}
               </p>
             </div>
 
             <div className="flex items-center justify-end gap-3">
-              <ModernButton
-                variant="secondary"
-                onClick={cancelAction}
-              >
+              <ModernButton variant="secondary" onClick={cancelAction}>
                 Cancel
               </ModernButton>
               <ModernButton
@@ -231,16 +229,17 @@ export function useBulkSelection<T>(
   }, []);
 
   const toggleItem = React.useCallback((key: string) => {
-    setSelectedItems(prev => 
-      prev.includes(key) 
-        ? prev.filter(k => k !== key)
-        : [...prev, key]
+    setSelectedItems(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
     );
   }, []);
 
-  const isSelected = React.useCallback((key: string) => {
-    return selectedItems.includes(key);
-  }, [selectedItems]);
+  const isSelected = React.useCallback(
+    (key: string) => {
+      return selectedItems.includes(key);
+    },
+    [selectedItems]
+  );
 
   const isAllSelected = React.useMemo(() => {
     return items.length > 0 && selectedItems.length === items.length;

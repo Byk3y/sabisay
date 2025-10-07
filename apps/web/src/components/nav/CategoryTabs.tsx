@@ -11,18 +11,18 @@ interface CategoryTabsProps {
 
 // Map display names to URL slugs
 const categorySlugMap: Record<Category, string> = {
-  'Trending': '',
-  'Politics': 'politics',
-  'Breaking': 'breaking',
-  'New': 'new',
-  'Sports': 'sports',
-  'Crypto': 'crypto',
-  'Earnings': 'earnings',
-  'Geopolitics': 'geopolitics',
-  'Tech': 'tech',
-  'Culture': 'culture',
-  'World': 'world',
-  'Economy': 'economy',
+  Trending: '',
+  Politics: 'politics',
+  Breaking: 'breaking',
+  New: 'new',
+  Sports: 'sports',
+  Crypto: 'crypto',
+  Earnings: 'earnings',
+  Geopolitics: 'geopolitics',
+  Tech: 'tech',
+  Culture: 'culture',
+  World: 'world',
+  Economy: 'economy',
   'Naija Picks': 'naija-picks',
 };
 
@@ -31,7 +31,7 @@ export function CategoryTabs({
   onCategoryChange,
 }: CategoryTabsProps) {
   const pathname = usePathname();
-  
+
   const handleCategoryClick = (category: Category) => {
     onCategoryChange?.(category);
   };
@@ -56,7 +56,7 @@ export function CategoryTabs({
           {categories.map(category => {
             const href = getCategoryHref(category);
             const isActive = isCategoryActive(category);
-            
+
             return (
               <li key={category} className="shrink-0">
                 <Link

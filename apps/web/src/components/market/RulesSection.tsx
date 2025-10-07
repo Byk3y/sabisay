@@ -13,12 +13,12 @@ import type { RulesSectionProps } from '@/types/market';
  */
 export const RulesSection = ({ rules, onShowMore }: RulesSectionProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   // Split rules into first line and remaining content
   const lines = rules.split('\n');
   const firstLine = lines[0] || '';
   const remainingLines = lines.slice(1).join('\n');
-  
+
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
     if (onShowMore) {

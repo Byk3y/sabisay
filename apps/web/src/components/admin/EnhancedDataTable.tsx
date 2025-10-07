@@ -4,17 +4,17 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { ModernButton } from '@/components/ui/ModernButton';
 import { ModernCard } from '@/components/ui/ModernCard';
-import { 
-  ChevronUp, 
-  ChevronDown, 
-  MoreHorizontal, 
-  Download, 
+import {
+  ChevronUp,
+  ChevronDown,
+  MoreHorizontal,
+  Download,
   Filter,
   Eye,
   Edit,
   Trash2,
   CheckSquare,
-  Square
+  Square,
 } from 'lucide-react';
 
 export interface Column<T> {
@@ -91,19 +91,22 @@ export function EnhancedDataTable<T>({
     });
   }, [columns, visibleColumns]);
 
-  const handleSort = useCallback((key: string) => {
-    if (!onSort) return;
-    
-    const newOrder = sortKey === key && sortOrder === 'asc' ? 'desc' : 'asc';
-    onSort(key, newOrder);
-  }, [onSort, sortKey, sortOrder]);
+  const handleSort = useCallback(
+    (key: string) => {
+      if (!onSort) return;
+
+      const newOrder = sortKey === key && sortOrder === 'asc' ? 'desc' : 'asc';
+      onSort(key, newOrder);
+    },
+    [onSort, sortKey, sortOrder]
+  );
 
   const handleSelectAll = useCallback(() => {
     if (!onSelectionChange) return;
-    
+
     const allKeys = data.map(getRowKey);
     const isAllSelected = allKeys.every(key => selectedRows.includes(key));
-    
+
     if (isAllSelected) {
       onSelectionChange([]);
     } else {
@@ -111,25 +114,36 @@ export function EnhancedDataTable<T>({
     }
   }, [data, getRowKey, selectedRows, onSelectionChange]);
 
-  const handleSelectRow = useCallback((key: string) => {
-    if (!onSelectionChange) return;
-    
-    const newSelection = selectedRows.includes(key)
-      ? selectedRows.filter(k => k !== key)
-      : [...selectedRows, key];
-    
-    onSelectionChange(newSelection);
-  }, [selectedRows, onSelectionChange]);
+  const handleSelectRow = useCallback(
+    (key: string) => {
+      if (!onSelectionChange) return;
 
-  const handleRowClick = useCallback((item: T) => {
-    onRowClick?.(item);
-  }, [onRowClick]);
+      const newSelection = selectedRows.includes(key)
+        ? selectedRows.filter(k => k !== key)
+        : [...selectedRows, key];
 
-  const handleAction = useCallback((action: string, item: T) => {
-    onRowAction?.(action, item);
-  }, [onRowAction]);
+      onSelectionChange(newSelection);
+    },
+    [selectedRows, onSelectionChange]
+  );
 
-  const isAllSelected = data.length > 0 && data.every(item => selectedRows.includes(getRowKey(item)));
+  const handleRowClick = useCallback(
+    (item: T) => {
+      onRowClick?.(item);
+    },
+    [onRowClick]
+  );
+
+  const handleAction = useCallback(
+    (action: string, item: T) => {
+      onRowAction?.(action, item);
+    },
+    [onRowAction]
+  );
+
+  const isAllSelected =
+    data.length > 0 &&
+    data.every(item => selectedRows.includes(getRowKey(item)));
   const isIndeterminate = selectedRows.length > 0 && !isAllSelected;
 
   if (loading) {
@@ -138,7 +152,10 @@ export function EnhancedDataTable<T>({
         <div className="animate-pulse">
           <div className="h-12 bg-admin-gray-200 dark:bg-admin-gray-700 rounded-t-xl" />
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-16 border-b border-sabi-border dark:border-sabi-border-dark">
+            <div
+              key={i}
+              className="h-16 border-b border-sabi-border dark:border-sabi-border-dark"
+            >
               <div className="flex items-center gap-4 p-4">
                 <div className="h-4 bg-admin-gray-200 dark:bg-admin-gray-700 rounded w-1/4" />
                 <div className="h-4 bg-admin-gray-200 dark:bg-admin-gray-700 rounded w-1/6" />
@@ -295,13 +312,14 @@ export function EnhancedDataTable<T>({
             {data.map(item => {
               const key = getRowKey(item);
               const isSelected = selectedRows.includes(key);
-              
+
               return (
                 <tr
                   key={key}
                   className={cn(
                     'hover:bg-sabi-bg dark:hover:bg-sabi-bg-dark transition-colors',
-                    isSelected && 'bg-admin-primary-50 dark:bg-admin-primary-900/10',
+                    isSelected &&
+                      'bg-admin-primary-50 dark:bg-admin-primary-900/10',
                     onRowClick && 'cursor-pointer'
                   )}
                   onClick={() => handleRowClick(item)}
@@ -309,7 +327,7 @@ export function EnhancedDataTable<T>({
                   {selectable && (
                     <td className="px-6 py-4">
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           handleSelectRow(key);
                         }}
@@ -343,12 +361,13 @@ export function EnhancedDataTable<T>({
                             key={index}
                             variant="ghost"
                             size="sm"
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation();
                               handleAction(action.label.toLowerCase(), item);
                             }}
                             className={cn(
-                              action.variant === 'danger' && 'text-admin-error-600 hover:text-admin-error-700'
+                              action.variant === 'danger' &&
+                                'text-admin-error-600 hover:text-admin-error-700'
                             )}
                           >
                             {action.icon}
@@ -369,14 +388,19 @@ export function EnhancedDataTable<T>({
         <div className="px-6 py-4 border-t border-sabi-border dark:border-sabi-border-dark">
           <div className="flex items-center justify-between">
             <div className="text-sm text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
-              Showing {((pagination.page - 1) * pagination.pageSize) + 1} to{' '}
-              {Math.min(pagination.page * pagination.pageSize, pagination.total)} of{' '}
-              {pagination.total} results
+              Showing {(pagination.page - 1) * pagination.pageSize + 1} to{' '}
+              {Math.min(
+                pagination.page * pagination.pageSize,
+                pagination.total
+              )}{' '}
+              of {pagination.total} results
             </div>
             <div className="flex items-center gap-2">
               <select
                 value={pagination.pageSize}
-                onChange={(e) => pagination.onPageSizeChange(Number(e.target.value))}
+                onChange={e =>
+                  pagination.onPageSizeChange(Number(e.target.value))
+                }
                 className="px-3 py-1 text-sm border border-sabi-border dark:border-sabi-border-dark rounded-md bg-white dark:bg-admin-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
               >
                 <option value={10}>10 per page</option>
@@ -394,13 +418,17 @@ export function EnhancedDataTable<T>({
                   Previous
                 </ModernButton>
                 <span className="px-3 py-1 text-sm text-sabi-text-primary dark:text-sabi-text-primary-dark">
-                  Page {pagination.page} of {Math.ceil(pagination.total / pagination.pageSize)}
+                  Page {pagination.page} of{' '}
+                  {Math.ceil(pagination.total / pagination.pageSize)}
                 </span>
                 <ModernButton
                   variant="secondary"
                   size="sm"
                   onClick={() => pagination.onPageChange(pagination.page + 1)}
-                  disabled={pagination.page >= Math.ceil(pagination.total / pagination.pageSize)}
+                  disabled={
+                    pagination.page >=
+                    Math.ceil(pagination.total / pagination.pageSize)
+                  }
                 >
                   Next
                 </ModernButton>
@@ -412,6 +440,3 @@ export function EnhancedDataTable<T>({
     </ModernCard>
   );
 }
-
-
-

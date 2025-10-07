@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { authenticatedFormDataFetch } from '@/lib/csrf-client';
 
 interface ImageUploadProps {
   value?: string;
@@ -24,17 +25,21 @@ export function ImageUpload({
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const acceptString = accept.map(type => {
-    const ext = type.split('/')[1];
-    return `.${ext}`;
-  }).join(',');
+  const acceptString = accept
+    .map(type => {
+      const ext = type.split('/')[1];
+      return `.${ext}`;
+    })
+    .join(',');
 
   const handleFileSelect = async (file: File | null) => {
     if (!file) return;
 
     // Validate file type
     if (!accept.includes(file.type)) {
-      toast.error(`Invalid file type. Please upload ${accept.map(t => t.split('/')[1].toUpperCase()).join(', ')} files.`);
+      toast.error(
+        `Invalid file type. Please upload ${accept.map(t => t.split('/')[1].toUpperCase()).join(', ')} files.`
+      );
       return;
     }
 
@@ -59,10 +64,10 @@ export function ImageUpload({
       formData.append('file', file);
 
       // Upload to server
-      const response = await fetch('/api/admin/uploads/image', {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await authenticatedFormDataFetch(
+        '/api/admin/uploads/image',
+        formData
+      );
 
       clearInterval(progressInterval);
       setUploadProgress(100);
@@ -77,12 +82,14 @@ export function ImageUpload({
       toast.success('Image uploaded successfully');
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to upload image');
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to upload image'
+      );
       onChange(null);
     } finally {
       setUploading(false);
       setUploadProgress(0);
-      
+
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -115,7 +122,7 @@ export function ImageUpload({
             ref={fileInputRef}
             type="file"
             accept={acceptString}
-            onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
+            onChange={e => handleFileSelect(e.target.files?.[0] || null)}
             className="hidden"
             disabled={uploading}
           />
@@ -201,4 +208,3 @@ export function ImageUpload({
     </div>
   );
 }
-

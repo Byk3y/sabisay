@@ -25,6 +25,7 @@ export function SignUpModal({
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [logoFailed, setLogoFailed] = useState(false);
   const { theme } = useTheme();
   const { connect } = useConnect();
   const { login, refreshAuth, user } = useAuth();
@@ -32,7 +33,6 @@ export function SignUpModal({
   // Auto-close modal when user is successfully authenticated
   useEffect(() => {
     if (user?.isLoggedIn && isOpen) {
-      console.log('User authenticated, closing modal...');
       onClose();
     }
   }, [user?.isLoggedIn, isOpen, onClose]);
@@ -56,11 +56,6 @@ export function SignUpModal({
   const handleGoogleSignUp = async () => {
     try {
       setIsGoogleLoading(true);
-      console.log('Starting Google OAuth flow...');
-      console.log(
-        'Magic publishable key:',
-        clientEnv.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY
-      );
 
       // Check if Magic key is available
       if (!clientEnv.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY) {
@@ -70,21 +65,15 @@ export function SignUpModal({
       // Initialize Magic client with OAuth2 extension
       const magic = createMagicClientWithOAuth();
 
-      console.log('Magic client initialized, starting OAuth popup...');
-
       // Start Google OAuth flow with popup
       const result = await (magic.oauth2 as any)?.loginWithPopup({
         provider: 'google',
       });
 
-      console.log('OAuth popup result:', result);
-
       // Process the OAuth result directly
       const didToken = (result as any)?.magic?.idToken;
 
       if (didToken) {
-        console.log('OAuth popup successful, sending to API...');
-
         // Send DID token to our API
         const response = await fetch('/api/auth/magic/login', {
           method: 'POST',
@@ -97,7 +86,6 @@ export function SignUpModal({
 
         if (response.ok) {
           const result = await response.json();
-          console.log('Login successful:', result);
           await login(result.userId, result.email, result.username || '');
 
           // Close modal immediately
@@ -122,9 +110,6 @@ export function SignUpModal({
         error instanceof Error &&
         error.message?.includes('already logged in')
       ) {
-        console.log(
-          'User already logged in with Magic Link, getting current session...'
-        );
         setIsGoogleLoading(true); // Show loading state
         try {
           // Create new Magic instance for getting current token
@@ -133,7 +118,6 @@ export function SignUpModal({
           // Get current DID token
           const didToken = await magicInstance.user.getIdToken();
           if (didToken) {
-            console.log('Got existing DID token, creating session...');
             // Send to API to create session
             const response = await fetch('/api/auth/magic/login', {
               method: 'POST',
@@ -146,7 +130,6 @@ export function SignUpModal({
 
             if (response.ok) {
               const result = await response.json();
-              console.log('Session created successfully:', result);
               await login(result.userId, result.email, result.username || '');
               onClose();
               return;
@@ -234,10 +217,8 @@ export function SignUpModal({
           break;
         case 'phantom':
           // Phantom is Solana-specific, would need different connector
-          console.log('Phantom wallet connection not implemented for Ethereum');
           break;
         default:
-          console.log('Unknown wallet type:', walletType);
       }
       // Close modal after successful connection
       onClose();
@@ -269,21 +250,18 @@ export function SignUpModal({
           {/* Logo and Title - Mobile only */}
           <div className="text-center pb-4 px-8">
             {/* PakoMarket logo */}
-                    <div className="mx-auto mb-3">
-                      <img
-                        src="/images/pakomarket/pakomarket-logo.png"
-                        alt="PakoMarket"
-                        className="h-56 w-auto dark:invert"
-                        onError={(e) => {
-                          // Fallback to "P" if image fails to load
-                          e.currentTarget.style.display = 'none';
-                          const parent = e.currentTarget.parentElement;
-                          if (parent) {
-                            parent.innerHTML = '<span class="text-blue-600 font-bold text-5xl">P</span>';
-                          }
-                        }}
-                      />
-                    </div>
+            <div className="mx-auto mb-3">
+              {!logoFailed ? (
+                <img
+                  src="/images/pakomarket/pakomarket-logo.png"
+                  alt="PakoMarket"
+                  className="h-56 w-auto dark:invert"
+                  onError={() => setLogoFailed(true)}
+                />
+              ) : (
+                <span className="text-blue-600 font-bold text-5xl">P</span>
+              )}
+            </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               {mode === 'signup' ? 'Welcome to PakoMarket' : 'Welcome Back'}
             </h2>

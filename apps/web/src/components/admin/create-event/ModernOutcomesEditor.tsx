@@ -3,7 +3,11 @@
 import { useState } from 'react';
 import { Plus, X, GripVertical, Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { PAKO_OUTCOME_COLORS, getDefaultOutcomeColor, DEFAULT_OUTCOME_COLOR } from '@/lib/colors';
+import {
+  PAKO_OUTCOME_COLORS,
+  getDefaultOutcomeColor,
+  DEFAULT_OUTCOME_COLOR,
+} from '@/lib/colors';
 
 export interface Outcome {
   label: string;
@@ -55,7 +59,7 @@ export function ModernOutcomesEditor({
       // Find the next available color that hasn't been used
       const usedColors = outcomes.map(o => o.color).filter(Boolean);
       let nextColorIndex = 0;
-      
+
       // Find the first color from PAKO_OUTCOME_COLORS that isn't already used
       while (nextColorIndex < PAKO_OUTCOME_COLORS.length) {
         const candidateColor = PAKO_OUTCOME_COLORS[nextColorIndex];
@@ -64,12 +68,13 @@ export function ModernOutcomesEditor({
         }
         nextColorIndex++;
       }
-      
+
       // If all colors are used, fall back to cycling (shouldn't happen with max 8 outcomes)
-      const newColor = nextColorIndex < PAKO_OUTCOME_COLORS.length 
-        ? PAKO_OUTCOME_COLORS[nextColorIndex]
-        : getDefaultOutcomeColor(outcomes.length);
-        
+      const newColor =
+        nextColorIndex < PAKO_OUTCOME_COLORS.length
+          ? PAKO_OUTCOME_COLORS[nextColorIndex]
+          : getDefaultOutcomeColor(outcomes.length);
+
       onChange([...outcomes, { label: '', color: newColor }]);
     }
   };
@@ -118,9 +123,13 @@ export function ModernOutcomesEditor({
             <div className="relative flex-shrink-0">
               <button
                 type="button"
-                onClick={() => setShowColorPicker(showColorPicker === index ? null : index)}
+                onClick={() =>
+                  setShowColorPicker(showColorPicker === index ? null : index)
+                }
                 className="w-8 h-8 rounded-lg border-2 border-white dark:border-gray-800 shadow-sm hover:scale-110 transition-transform"
-                style={{ backgroundColor: outcome.color || DEFAULT_OUTCOME_COLOR }}
+                style={{
+                  backgroundColor: outcome.color || DEFAULT_OUTCOME_COLOR,
+                }}
                 aria-label="Change color"
               >
                 <Palette className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -130,7 +139,7 @@ export function ModernOutcomesEditor({
               {showColorPicker === index && (
                 <div className="absolute top-10 left-0 z-50 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
                   <div className="grid grid-cols-4 gap-2">
-                    {PAKO_OUTCOME_COLORS.map((color) => (
+                    {PAKO_OUTCOME_COLORS.map(color => (
                       <button
                         key={color}
                         type="button"
@@ -150,7 +159,9 @@ export function ModernOutcomesEditor({
               <input
                 type="text"
                 value={outcome.label}
-                onChange={(e) => handleUpdateOutcome(index, 'label', e.target.value)}
+                onChange={e =>
+                  handleUpdateOutcome(index, 'label', e.target.value)
+                }
                 placeholder={`Outcome ${index + 1}`}
                 disabled={type === 'binary'}
                 className={cn(
@@ -158,7 +169,8 @@ export function ModernOutcomesEditor({
                   'focus:ring-2 focus:ring-admin-primary-500 focus:border-admin-primary-500',
                   'bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark',
                   'placeholder:text-sabi-text-muted dark:placeholder:text-sabi-text-muted-dark',
-                  type === 'binary' && 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed',
+                  type === 'binary' &&
+                    'bg-gray-100 dark:bg-gray-700 cursor-not-allowed',
                   'border-sabi-border dark:border-sabi-border-dark'
                 )}
               />
@@ -181,10 +193,9 @@ export function ModernOutcomesEditor({
 
       {/* Help text */}
       <p className="text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
-        {type === 'binary' 
+        {type === 'binary'
           ? 'Binary markets have exactly two outcomes: Yes and No.'
-          : 'Add 2-8 outcomes for your multi-choice market. Each outcome needs a clear label.'
-        }
+          : 'Add 2-8 outcomes for your multi-choice market. Each outcome needs a clear label.'}
       </p>
     </div>
   );

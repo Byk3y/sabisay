@@ -10,9 +10,11 @@ export interface ModernCardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const cardVariants = {
-  default: 'bg-sabi-card dark:bg-sabi-card-dark border border-sabi-border dark:border-sabi-border-dark',
+  default:
+    'bg-sabi-card dark:bg-sabi-card-dark border border-sabi-border dark:border-sabi-border-dark',
   elevated: 'bg-sabi-card dark:bg-sabi-card-dark shadow-card-lg border-0',
-  outlined: 'bg-transparent border-2 border-sabi-border dark:border-sabi-border-dark',
+  outlined:
+    'bg-transparent border-2 border-sabi-border dark:border-sabi-border-dark',
   ghost: 'bg-transparent border-0',
 };
 
@@ -117,6 +119,3 @@ export const ModernCardFooter = forwardRef<
   />
 ));
 ModernCardFooter.displayName = 'ModernCardFooter';
-
-
-

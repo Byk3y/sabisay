@@ -2,7 +2,15 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronRight, Menu, User, LogOut, Bell, Search, Settings } from 'lucide-react';
+import {
+  ChevronRight,
+  Menu,
+  User,
+  LogOut,
+  Bell,
+  Search,
+  Settings,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useRef, useEffect } from 'react';
 import { ModernSearchInput } from '@/components/ui/ModernInput';
@@ -135,7 +143,7 @@ export function ModernTopbar({
         <div className="flex-1 max-w-md mx-4 hidden md:block">
           <ModernSearchInput
             value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={e => handleSearch(e.target.value)}
             onClear={handleSearchClear}
             placeholder={searchPlaceholder}
             className="w-full"

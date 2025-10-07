@@ -24,11 +24,14 @@ export function ModernSectionCard({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className={cn(
-      'bg-sabi-card dark:bg-sabi-card-dark border border-sabi-border dark:border-sabi-border-dark rounded-xl shadow-sm hover:shadow-md transition-all duration-200',
-      isCompleted && 'ring-2 ring-admin-success-200 dark:ring-admin-success-800',
-      className
-    )}>
+    <div
+      className={cn(
+        'bg-sabi-card dark:bg-sabi-card-dark border border-sabi-border dark:border-sabi-border-dark rounded-xl shadow-sm hover:shadow-md transition-all duration-200',
+        isCompleted &&
+          'ring-2 ring-admin-success-200 dark:ring-admin-success-800',
+        className
+      )}
+    >
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -42,12 +45,12 @@ export function ModernSectionCard({
               {icon}
             </div>
           )}
-          
+
           {/* Title */}
           <h3 className="text-sm font-semibold text-sabi-text-primary dark:text-sabi-text-primary-dark">
             {title}
           </h3>
-          
+
           {/* Completion indicator */}
           {isCompleted && (
             <div className="flex-shrink-0">
@@ -55,7 +58,7 @@ export function ModernSectionCard({
             </div>
           )}
         </div>
-        
+
         {/* Chevron */}
         <div className="flex-shrink-0">
           {isOpen ? (

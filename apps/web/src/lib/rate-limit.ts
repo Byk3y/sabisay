@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { NextRequest } from 'next/server';
 import Redis from 'ioredis';
 
@@ -28,10 +29,11 @@ interface RateLimitStore {
 // In-memory store implementation
 class InMemoryStore implements RateLimitStore {
   private store = new Map<string, RequestRecord>();
+  private cleanupInterval: NodeJS.Timeout;
 
   constructor() {
     // Clean up expired entries periodically
-    setInterval(() => {
+    this.cleanupInterval = setInterval(() => {
       this.cleanup();
     }, 60000); // Clean every minute
   }
@@ -55,6 +57,11 @@ class InMemoryStore implements RateLimitStore {
         this.store.delete(key);
       }
     }
+  }
+
+  destroy(): void {
+    clearInterval(this.cleanupInterval);
+    this.store.clear();
   }
 }
 

@@ -4,21 +4,25 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { toSlug } from '@/lib/slugUtils';
 import { getDefaultOutcomeColor } from '@/lib/colors';
-import { 
-  FileText, 
-  Target, 
-  Clock, 
-  Save, 
+import { authenticatedFetch } from '@/lib/csrf-client';
+import {
+  FileText,
+  Target,
+  Clock,
+  Save,
   Trash2,
   Calendar,
-  Image as ImageIcon
+  Image as ImageIcon,
 } from 'lucide-react';
 
 // Import modern components
 import { ModernSectionCard } from '@/components/admin/create-event/ModernSectionCard';
 import { ModernInput } from '@/components/admin/create-event/ModernInput';
 import { MarketTypeSelector } from '@/components/admin/create-event/MarketTypeSelector';
-import { ModernOutcomesEditor, type Outcome } from '@/components/admin/create-event/ModernOutcomesEditor';
+import {
+  ModernOutcomesEditor,
+  type Outcome,
+} from '@/components/admin/create-event/ModernOutcomesEditor';
 import { ModernButton } from '@/components/ui/ModernButton';
 import { ImageUpload } from '@/components/admin/create-event/ImageUpload';
 
@@ -27,17 +31,17 @@ type SlugStatus = 'idle' | 'checking' | 'valid' | 'taken';
 // Helper function to derive title from question
 function deriveTitleFromQuestion(question: string): string {
   if (!question.trim()) return '';
-  
+
   let derived = question.trim();
-  
+
   // Shorten to ~100 chars
   if (derived.length > 100) {
     derived = derived.substring(0, 100).trim();
   }
-  
+
   // Remove trailing punctuation for slug-friendliness
   derived = derived.replace(/[?!.]+$/, '');
-  
+
   return derived;
 }
 
@@ -72,7 +76,8 @@ export function ModernNewEventForm() {
 
     if (question.trim()) completed++;
     if (type) completed++;
-    if (outcomes.length >= 2 && outcomes.every(o => o.label.trim())) completed++;
+    if (outcomes.length >= 2 && outcomes.every(o => o.label.trim()))
+      completed++;
     if (closeTime) completed++;
     if (rules.trim()) completed++;
     if (imageUrl) completed++;
@@ -187,21 +192,21 @@ export function ModernNewEventForm() {
 
     try {
       const derivedTitle = deriveTitleFromQuestion(question);
-      
-      const response = await fetch('/api/admin/events/draft', {
+
+      const response = await authenticatedFetch('/api/admin/events/draft', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-          body: JSON.stringify({
-            title: derivedTitle,
-            question: question.trim(),
-            type,
-            outcomes: outcomes.map(o => ({ label: o.label.trim(), color: o.color })),
-            closeTime: new Date(closeTime).toISOString(),
-            rules: rules.trim() || undefined,
-            imageUrl: imageUrl || undefined,
-          }),
+        body: JSON.stringify({
+          title: derivedTitle,
+          question: question.trim(),
+          type,
+          outcomes: outcomes.map(o => ({
+            label: o.label.trim(),
+            color: o.color,
+          })),
+          closeTime: new Date(closeTime).toISOString(),
+          rules: rules.trim() || undefined,
+          imageUrl: imageUrl || undefined,
+        }),
       });
 
       const data = await response.json();
@@ -266,22 +271,25 @@ export function ModernNewEventForm() {
       // If no draft exists, save it first
       if (!eventId) {
         const derivedTitle = deriveTitleFromQuestion(question);
-        
-        const draftResponse = await fetch('/api/admin/events/draft', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            title: derivedTitle,
-            question: question.trim(),
-            type,
-            outcomes: outcomes.map(o => ({ label: o.label.trim(), color: o.color })),
-            closeTime: new Date(closeTime).toISOString(),
-            rules: rules.trim() || undefined,
-            imageUrl: imageUrl || undefined,
-          }),
-        });
+
+        const draftResponse = await authenticatedFetch(
+          '/api/admin/events/draft',
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              title: derivedTitle,
+              question: question.trim(),
+              type,
+              outcomes: outcomes.map(o => ({
+                label: o.label.trim(),
+                color: o.color,
+              })),
+              closeTime: new Date(closeTime).toISOString(),
+              rules: rules.trim() || undefined,
+              imageUrl: imageUrl || undefined,
+            }),
+          }
+        );
 
         const draftData = await draftResponse.json();
 
@@ -294,12 +302,12 @@ export function ModernNewEventForm() {
       }
 
       // Now publish the event
-      const response = await fetch(`/api/admin/events/${eventId}/publish`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await authenticatedFetch(
+        `/api/admin/events/${eventId}/publish`,
+        {
+          method: 'PUT',
+        }
+      );
 
       const data = await response.json();
 
@@ -308,7 +316,7 @@ export function ModernNewEventForm() {
       }
 
       toast.success('Event published successfully!');
-      
+
       // Redirect to the published event
       window.location.href = `/event/${data.slug}`;
     } catch (error) {
@@ -329,7 +337,8 @@ export function ModernNewEventForm() {
 
   // Check if sections are completed
   const isBasicsCompleted = question.trim();
-  const isMarketTypeCompleted = type && outcomes.length >= 2 && outcomes.every(o => o.label.trim());
+  const isMarketTypeCompleted =
+    type && outcomes.length >= 2 && outcomes.every(o => o.label.trim());
   const isTimingCompleted = closeTime;
   const isMediaCompleted = !!imageUrl;
 
@@ -360,7 +369,8 @@ export function ModernNewEventForm() {
                   rows={2}
                 />
                 <p className="text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark mt-2">
-                  Your question will appear on cards, details, and SEO. A short title is derived for the URL.
+                  Your question will appear on cards, details, and SEO. A short
+                  title is derived for the URL.
                 </p>
               </div>
               <div className="lg:col-span-2">
@@ -393,7 +403,8 @@ export function ModernNewEventForm() {
               required
             />
             <p className="text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark mt-2">
-              10-2000 characters. This will be displayed prominently on the market page.
+              10-2000 characters. This will be displayed prominently on the
+              market page.
             </p>
           </ModernSectionCard>
         </div>
@@ -426,7 +437,7 @@ export function ModernNewEventForm() {
               <input
                 type="datetime-local"
                 value={closeTime}
-                onChange={(e) => setCloseTime(e.target.value)}
+                onChange={e => setCloseTime(e.target.value)}
                 className="w-full px-3 py-2.5 text-sm border border-sabi-border dark:border-sabi-border-dark rounded-lg shadow-sm focus:ring-2 focus:ring-admin-primary-500 focus:border-admin-primary-500 bg-white dark:bg-gray-800 text-sabi-text-primary dark:text-sabi-text-primary-dark"
                 required
               />
@@ -443,10 +454,7 @@ export function ModernNewEventForm() {
             isCompleted={isMediaCompleted}
             defaultOpen
           >
-            <ImageUpload
-              value={imageUrl ?? undefined}
-              onChange={setImageUrl}
-            />
+            <ImageUpload value={imageUrl ?? undefined} onChange={setImageUrl} />
           </ModernSectionCard>
         </div>
       </div>
@@ -456,7 +464,9 @@ export function ModernNewEventForm() {
         {/* Debug validation errors */}
         {validationErrors.length > 0 && (
           <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-            <h4 className="text-sm font-medium text-red-800 dark:text-red-200 mb-2">Validation Errors:</h4>
+            <h4 className="text-sm font-medium text-red-800 dark:text-red-200 mb-2">
+              Validation Errors:
+            </h4>
             <ul className="text-sm text-red-700 dark:text-red-300 space-y-1">
               {validationErrors.map((error, index) => (
                 <li key={index}>• {error}</li>
@@ -464,7 +474,7 @@ export function ModernNewEventForm() {
             </ul>
           </div>
         )}
-        
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <ModernButton
@@ -476,7 +486,7 @@ export function ModernNewEventForm() {
               Discard
             </ModernButton>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <ModernButton
               variant="secondary"
@@ -487,7 +497,7 @@ export function ModernNewEventForm() {
               <Save className="w-4 h-4 mr-2" />
               {isSaving ? 'Saving...' : 'Save Draft'}
             </ModernButton>
-            
+
             <ModernButton
               onClick={handlePublish}
               disabled={isPublishing || validationErrors.length > 0}

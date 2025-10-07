@@ -14,9 +14,11 @@ export interface ModernInputProps
 }
 
 const inputVariants = {
-  default: 'bg-white dark:bg-admin-gray-800 border border-admin-gray-300 dark:border-admin-gray-600',
+  default:
+    'bg-white dark:bg-admin-gray-800 border border-admin-gray-300 dark:border-admin-gray-600',
   filled: 'bg-admin-gray-50 dark:bg-admin-gray-800 border-0',
-  outlined: 'bg-transparent border-2 border-admin-gray-300 dark:border-admin-gray-600',
+  outlined:
+    'bg-transparent border-2 border-admin-gray-300 dark:border-admin-gray-600',
 };
 
 export const ModernInput = forwardRef<HTMLInputElement, ModernInputProps>(
@@ -96,70 +98,59 @@ export interface ModernSearchInputProps extends Omit<ModernInputProps, 'type'> {
   showClearButton?: boolean;
 }
 
-export const ModernSearchInput = forwardRef<HTMLInputElement, ModernSearchInputProps>(
-  (
-    {
-      onClear,
-      showClearButton = true,
-      value,
-      onChange,
-      ...props
-    },
-    ref
-  ) => {
-    const hasValue = value && value.toString().length > 0;
+export const ModernSearchInput = forwardRef<
+  HTMLInputElement,
+  ModernSearchInputProps
+>(({ onClear, showClearButton = true, value, onChange, ...props }, ref) => {
+  const hasValue = value && value.toString().length > 0;
 
-    return (
-      <ModernInput
-        ref={ref}
-        type="search"
-        value={value}
-        onChange={onChange}
-        leftIcon={
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+  return (
+    <ModernInput
+      ref={ref}
+      type="search"
+      value={value}
+      onChange={onChange}
+      leftIcon={
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+      }
+      rightIcon={
+        showClearButton && hasValue ? (
+          <button
+            type="button"
+            onClick={onClear}
+            className="hover:text-admin-gray-600 dark:hover:text-admin-gray-300 transition-colors"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        }
-        rightIcon={
-          showClearButton && hasValue ? (
-            <button
-              type="button"
-              onClick={onClear}
-              className="hover:text-admin-gray-600 dark:hover:text-admin-gray-300 transition-colors"
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          ) : undefined
-        }
-        {...props}
-      />
-    );
-  }
-);
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        ) : undefined
+      }
+      {...props}
+    />
+  );
+});
 
 ModernSearchInput.displayName = 'ModernSearchInput';
-
-
-

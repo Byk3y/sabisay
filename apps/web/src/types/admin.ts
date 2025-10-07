@@ -38,6 +38,3 @@ export interface EventAction {
   id: string;
   action: 'publish' | 'close';
 }
-
-
-

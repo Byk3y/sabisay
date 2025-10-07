@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { destroySession } from '@/lib/session';
 import { logoutRateLimit, createRateLimitResponse } from '@/lib/rate-limit';
+import { validateCSRF } from '@/lib/csrf';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +12,12 @@ export async function POST(request: NextRequest) {
         windowMs: 60 * 1000,
         maxRequests: 20,
       });
+    }
+
+    // Validate CSRF token
+    const csrfError = await validateCSRF(request);
+    if (csrfError) {
+      return csrfError;
     }
 
     // Properly destroy the session

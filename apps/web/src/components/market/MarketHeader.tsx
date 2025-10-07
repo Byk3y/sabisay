@@ -3,6 +3,9 @@
  * Extracted from page.tsx for better organization and reusability
  */
 
+'use client';
+
+import { useState } from 'react';
 import type { MarketHeaderProps } from '@/types/market';
 import { formatCurrencyNoSymbol, formatDate } from '@/lib/formattingUtils';
 import { getDefaultOutcomeColor } from '@/lib/colors';
@@ -19,7 +22,8 @@ export const MarketHeader = ({
   isMobile = false,
   isBinaryMarket = false,
 }: MarketHeaderProps) => {
-  
+  const [imageFailed, setImageFailed] = useState(false);
+
   return (
     <div className="mb-4">
       {/* Volume Bar - Mobile only, positioned at top */}
@@ -82,19 +86,12 @@ export const MarketHeader = ({
         <div
           className={`${isMobile ? 'w-12 h-12 rounded-lg' : 'w-16 h-16 rounded-xl'} bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden`}
         >
-          {market.imageUrl ? (
+          {market.imageUrl && !imageFailed ? (
             <img
               src={market.imageUrl}
               alt={market.title}
               className="w-full h-full object-cover"
-              onError={(e) => {
-                // Fallback to emoji if image fails to load
-                e.currentTarget.style.display = 'none';
-                const parent = e.currentTarget.parentElement;
-                if (parent) {
-                  parent.innerHTML = `<span class="text-gray-500 dark:text-gray-400 ${isMobile ? 'text-lg' : 'text-3xl'} font-bold">📊</span>`;
-                }
-              }}
+              onError={() => setImageFailed(true)}
             />
           ) : (
             <span
@@ -160,26 +157,26 @@ export const MarketHeader = ({
       {isMobile && !isBinaryMarket && (
         <div className="mb-4">
           <div className="space-y-1">
-              {market.outcomes
-                ?.map((outcome, originalIndex) => ({
-                  ...outcome,
-                  color: outcome.color ?? getDefaultOutcomeColor(originalIndex)
-                }))
-                ?.sort((a, b) => b.volume - a.volume)
-                ?.slice(0, 4)
-                ?.map((outcome, index) => {
-                  return (
-                    <div key={index} className="flex items-center gap-2">
-                      <div
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{ backgroundColor: outcome.color }}
-                      ></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                        {outcome.label} {outcome.probability}%
-                      </span>
-                    </div>
-                  );
-                })}
+            {market.outcomes
+              ?.map((outcome, originalIndex) => ({
+                ...outcome,
+                color: outcome.color ?? getDefaultOutcomeColor(originalIndex),
+              }))
+              ?.sort((a, b) => b.volume - a.volume)
+              ?.slice(0, 4)
+              ?.map((outcome, index) => {
+                return (
+                  <div key={index} className="flex items-center gap-2">
+                    <div
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ backgroundColor: outcome.color }}
+                    ></div>
+                    <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                      {outcome.label} {outcome.probability}%
+                    </span>
+                  </div>
+                );
+              })}
           </div>
         </div>
       )}
@@ -227,7 +224,7 @@ export const MarketHeader = ({
               {market.outcomes
                 ?.map((outcome, originalIndex) => ({
                   ...outcome,
-                  color: outcome.color ?? getDefaultOutcomeColor(originalIndex)
+                  color: outcome.color ?? getDefaultOutcomeColor(originalIndex),
                 }))
                 ?.sort((a, b) => b.volume - a.volume)
                 ?.slice(0, 4)

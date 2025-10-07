@@ -11,8 +11,6 @@ const magic = new Magic(serverEnv.MAGIC_SECRET_KEY);
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Magic login API called');
-
     // Apply rate limiting with error handling
     try {
       const rateLimitResult = authRateLimit(request);
@@ -38,25 +36,15 @@ export async function POST(request: NextRequest) {
       didToken = body.didToken;
     }
 
-    console.log('DID token received:', didToken ? 'Yes' : 'No');
-
     if (!didToken) {
-      console.log('No DID token provided');
       return NextResponse.json(
         { error: 'DID token is required' },
         { status: 400 }
       );
     }
 
-    console.log('Verifying DID token with Magic Admin...');
-    console.log(
-      'Magic secret key configured:',
-      serverEnv.MAGIC_SECRET_KEY ? 'Yes' : 'No'
-    );
-
     // Verify the DID token with Magic Admin
     const metadata = await magic.users.getMetadataByToken(didToken);
-    console.log('Magic metadata:', metadata);
 
     if (!metadata || !metadata.issuer) {
       return NextResponse.json(
@@ -74,7 +62,6 @@ export async function POST(request: NextRequest) {
         throw new Error('No public address found in metadata');
       }
       walletAddress = publicAddress;
-      console.log('Wallet address retrieved:', walletAddress);
     } catch (walletError) {
       console.error('Failed to get wallet address:', walletError);
       return NextResponse.json(
@@ -184,7 +171,6 @@ export async function POST(request: NextRequest) {
           console.error('Wallet creation error:', walletError);
           // Don't throw - this is not critical for auth
         } else {
-          console.log('Wallet recorded in wallets table:', walletAddress);
         }
       }
     } catch (walletError) {

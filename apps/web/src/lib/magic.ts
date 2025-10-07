@@ -10,7 +10,7 @@ import { clientEnv } from './env.client';
 // Polygon network configuration
 const POLYGON_NETWORK = {
   rpcUrl: clientEnv.NEXT_PUBLIC_RPC_URL,
-  chainId: parseInt(clientEnv.NEXT_PUBLIC_CHAIN_ID),
+  chainId: parseInt(clientEnv.NEXT_PUBLIC_CHAIN_ID, 10),
 };
 
 /**

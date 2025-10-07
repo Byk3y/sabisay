@@ -4,8 +4,6 @@ import { type MarketItem } from '@/types/market';
 // Server component that fetches events directly from Supabase
 export async function getEvents(): Promise<MarketItem[]> {
   try {
-    console.log('🚀 getEvents: Starting to fetch real events...');
-
     const { data: events, error } = await supabaseAdmin
       .from('events')
       .select('*, event_outcomes(*)')
@@ -18,16 +16,13 @@ export async function getEvents(): Promise<MarketItem[]> {
     }
 
     if (!events || events.length === 0) {
-      console.log('📭 getEvents: No events found in database');
       return [];
     }
-
-    console.log('✅ getEvents: Fetched', events.length, 'events from database');
 
     // Transform database events to MarketItem format that matches mock structure
     const transformedEvents: MarketItem[] = events.map(event => {
       const outcomes = event.event_outcomes || [];
-      
+
       return {
         kind: 'market',
         id: event.id,
@@ -55,13 +50,9 @@ export async function getEvents(): Promise<MarketItem[]> {
       };
     });
 
-    console.log('🔄 getEvents: Transformed', transformedEvents.length, 'events');
-    console.log('📋 getEvents: Event IDs:', transformedEvents.map(e => e.kind === 'market' ? e.id : 'group'));
-    
     // Debug: Log image data for events
     transformedEvents.forEach(event => {
       if (event.kind === 'market' && event.imageUrl) {
-        console.log('🖼️ getEvents: Event has image:', event.id, event.imageUrl);
       }
     });
 

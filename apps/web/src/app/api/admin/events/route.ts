@@ -30,12 +30,21 @@ export async function GET(request: NextRequest) {
     const qParam = searchParams.get('q');
     const createdFromParam = searchParams.get('createdFrom');
     const createdToParam = searchParams.get('createdTo');
-    const pageParam = parseInt(searchParams.get('page') || '1');
+    const pageParam = parseInt(searchParams.get('page') || '1', 10);
     const statusParam = searchParams.getAll('status[]');
 
     const params: EventsListParams = {};
 
-    if (qParam) params.q = qParam;
+    if (qParam) {
+      // Validate search query length to prevent DoS
+      if (qParam.length > 200) {
+        return NextResponse.json(
+          { error: 'Search query too long (max 200 characters)' },
+          { status: 400 }
+        );
+      }
+      params.q = qParam;
+    }
     if (statusParam.length > 0) params.status = statusParam;
     if (createdFromParam) params.createdFrom = createdFromParam;
     if (createdToParam) params.createdTo = createdToParam;
@@ -64,8 +73,10 @@ export async function GET(request: NextRequest) {
 
     // Apply filters
     if (params.q) {
+      // Sanitize search query by escaping SQL LIKE wildcards
+      const sanitizedQuery = params.q.replace(/[%_]/g, '\\$&');
       query = query.or(
-        `question.ilike.%${params.q}%,slug.ilike.%${params.q}%`
+        `question.ilike.%${sanitizedQuery}%,slug.ilike.%${sanitizedQuery}%`
       );
     }
 

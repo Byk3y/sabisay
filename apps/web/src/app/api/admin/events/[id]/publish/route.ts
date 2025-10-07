@@ -2,12 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { clientEnv } from '@/lib/env.client';
-import { createPublicClient, createWalletClient, http, parseUnits } from 'viem';
+import {
+  createPublicClient,
+  createWalletClient,
+  http,
+  parseUnits,
+  decodeEventLog,
+} from 'viem';
 import { polygonAmoy } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 import { serverEnv } from '@/lib/env.server';
+import { validateCSRF } from '@/lib/csrf';
 
-// ABI for MarketFactory.createMarket
+// ABI for MarketFactory
 const FACTORY_ABI = [
   {
     inputs: [
@@ -21,6 +28,20 @@ const FACTORY_ABI = [
     outputs: [{ name: 'market', type: 'address' }],
     stateMutability: 'nonpayable',
     type: 'function',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'marketId', type: 'uint256' },
+      { indexed: true, name: 'market', type: 'address' },
+      { indexed: false, name: 'endTime', type: 'uint256' },
+      { indexed: false, name: 'feeBps', type: 'uint256' },
+      { indexed: false, name: 'rulesCid', type: 'string' },
+      { indexed: false, name: 'initialYes', type: 'uint256' },
+      { indexed: false, name: 'initialNo', type: 'uint256' },
+    ],
+    name: 'MarketCreated',
+    type: 'event',
   },
 ] as const;
 
@@ -64,6 +85,12 @@ export async function PUT(
     const session = await getSession();
     if (!session.isLoggedIn || !session.userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    // Validate CSRF token
+    const csrfError = await validateCSRF(request);
+    if (csrfError) {
+      return csrfError;
     }
 
     // Check admin status
@@ -219,8 +246,11 @@ export async function PUT(
         args: [factoryAddress as `0x${string}`, totalRequired],
       });
 
-      // Wait for approval transaction
-      await publicClient.waitForTransactionReceipt({ hash: approveHash });
+      // Wait for approval transaction with timeout (5 minutes)
+      await publicClient.waitForTransactionReceipt({
+        hash: approveHash,
+        timeout: 300_000, // 5 minutes
+      });
     }
 
     // Prepare market parameters
@@ -228,22 +258,66 @@ export async function PUT(
     const endTimeUTC = Math.floor(closeTime.getTime() / 1000); // Convert to Unix timestamp
     const rulesCid = event.rules || 'QmDefault'; // Use IPFS CID or placeholder
 
-    // Create market on-chain
+    // Estimate gas for market creation
+    let gas: bigint;
+    try {
+      gas = await publicClient.estimateContractGas({
+        address: factoryAddress as `0x${string}`,
+        abi: FACTORY_ABI,
+        functionName: 'createMarket',
+        args: [feeBps, BigInt(endTimeUTC), rulesCid, initialYes, initialNo],
+        account: walletClient.account,
+      });
+      // Add 20% buffer for safety
+      gas = (gas * 120n) / 100n;
+    } catch (error) {
+      console.error('Gas estimation failed, using fallback:', error);
+      gas = 500_000n; // Fallback gas limit
+    }
+
+    // Create market on-chain with estimated gas
     const txHash = await walletClient.writeContract({
       address: factoryAddress as `0x${string}`,
       abi: FACTORY_ABI,
       functionName: 'createMarket',
       args: [feeBps, BigInt(endTimeUTC), rulesCid, initialYes, initialNo],
+      gas,
     });
 
-    // Wait for transaction and get receipt
+    // Wait for transaction and get receipt with timeout (5 minutes)
     const receipt = await publicClient.waitForTransactionReceipt({
       hash: txHash,
+      timeout: 300_000, // 5 minutes
     });
 
-    // Extract market address from event logs
-    // The MarketCreated event should contain the market address
-    const marketAddress = receipt.logs[0]?.address || null;
+    // Extract market address from event logs by decoding MarketCreated event
+    let marketAddress: string | null = null;
+
+    for (const log of receipt.logs) {
+      try {
+        const decoded = decodeEventLog({
+          abi: FACTORY_ABI,
+          data: log.data,
+          topics: log.topics as [`0x${string}`, ...`0x${string}`[]],
+        });
+
+        if (decoded.eventName === 'MarketCreated') {
+          marketAddress = decoded.args.market;
+          break;
+        }
+      } catch {
+        // Not a MarketCreated event or decoding failed, continue
+        continue;
+      }
+    }
+
+    if (!marketAddress) {
+      console.error('MarketCreated event not found in transaction logs');
+      return NextResponse.json(
+        { error: 'Failed to extract market address from transaction' },
+        { status: 500 }
+      );
+    }
 
     // Update database with on-chain details
     const { error: updateError } = await supabaseAdmin
@@ -279,6 +353,3 @@ export async function PUT(
     );
   }
 }
-
-
-

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { validateCSRF } from '@/lib/csrf';
 
 export async function POST(
   request: NextRequest,
@@ -11,6 +12,12 @@ export async function POST(
     const session = await getSession();
     if (!session.isLoggedIn || !session.userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    // Validate CSRF token
+    const csrfError = await validateCSRF(request);
+    if (csrfError) {
+      return csrfError;
     }
 
     // Check admin status
@@ -66,6 +73,3 @@ export async function POST(
     );
   }
 }
-
-
-

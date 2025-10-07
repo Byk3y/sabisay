@@ -36,14 +36,25 @@ const CustomActiveDot = ({ cx, cy, stroke, payload, color, label }: any) => {
   const paddingX = 6;
   const paddingY = 3;
   const charWidth = 6.5; // rough estimate for width calculation
-  const width = Math.max(28, Math.round(text.length * charWidth) + paddingX * 2);
+  const width = Math.max(
+    28,
+    Math.round(text.length * charWidth) + paddingX * 2
+  );
   const height = 18;
 
   return (
     <g>
       <circle cx={cx} cy={cy} r={6} stroke={bg} strokeWidth={2} fill={bg} />
       <g transform={`translate(${cx + 8}, ${cy - height + 2})`}>
-        <rect x={0} y={0} width={width} height={height} rx={6} ry={6} fill={bg} />
+        <rect
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          rx={6}
+          ry={6}
+          fill={bg}
+        />
         <text
           x={width / 2}
           y={height / 2 + 4}
@@ -220,7 +231,11 @@ export function MarketChart({
 
             <Tooltip
               content={() => null}
-              cursor={{ stroke: '#9CA3AF', strokeWidth: 1, strokeDasharray: '5 5' }}
+              cursor={{
+                stroke: '#9CA3AF',
+                strokeWidth: 1,
+                strokeDasharray: '5 5',
+              }}
             />
 
             {variant === 'chance' ? (
@@ -248,7 +263,11 @@ export function MarketChart({
                     strokeWidth={2}
                     dot={false}
                     activeDot={(props: any) => (
-                      <CustomActiveDot {...props} color={color} label={s.label} />
+                      <CustomActiveDot
+                        {...props}
+                        color={color}
+                        label={s.label}
+                      />
                     )}
                     label={({ x, y, value, index: pointIndex }: any) => {
                       // Only show label for the active point (when hovering)

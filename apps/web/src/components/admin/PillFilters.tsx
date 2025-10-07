@@ -78,11 +78,18 @@ export function PillFilters({ filters, className }: PillFiltersProps) {
   };
 
   return (
-    <div className={cn('flex items-center gap-2 overflow-x-auto no-scrollbar', className)}>
+    <div
+      className={cn(
+        'flex items-center gap-2 overflow-x-auto no-scrollbar',
+        className
+      )}
+    >
       {filters.map(filter => (
         <div
           key={filter.key}
-          ref={el => { dropdownRefs.current[filter.key] = el; }}
+          ref={el => {
+            dropdownRefs.current[filter.key] = el;
+          }}
           className="relative"
         >
           <button
@@ -98,7 +105,7 @@ export function PillFilters({ filters, className }: PillFiltersProps) {
             <span className="font-normal">{getDisplayValue(filter)}</span>
             {hasActiveValue(filter) && filter.onClear && (
               <button
-                onClick={(e) => handleClear(filter.key, e)}
+                onClick={e => handleClear(filter.key, e)}
                 className="ml-1 p-0.5 rounded-full hover:bg-admin-primary-200 dark:hover:bg-admin-primary-800 transition-colors"
               >
                 <X className="w-3 h-3" />
@@ -139,7 +146,8 @@ export function PillFilters({ filters, className }: PillFiltersProps) {
 
 // Hook for managing pill filter state
 export function usePillFilters(initialFilters: Record<string, string> = {}) {
-  const [filterValues, setFilterValues] = useState<Record<string, string>>(initialFilters);
+  const [filterValues, setFilterValues] =
+    useState<Record<string, string>>(initialFilters);
 
   const updateFilter = (key: string, value: string) => {
     setFilterValues(prev => ({ ...prev, [key]: value }));

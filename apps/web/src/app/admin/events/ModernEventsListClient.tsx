@@ -6,22 +6,34 @@ import Link from 'next/link';
 import { EventsListResponse, EventListItem, EventStatus } from '@/types/admin';
 import { truncateAddress } from '@/lib/utils';
 import { formatDate } from '@/lib/formattingUtils';
-import { EnhancedDataTable, Column } from '@/components/admin/EnhancedDataTable';
+import {
+  EnhancedDataTable,
+  Column,
+} from '@/components/admin/EnhancedDataTable';
 import { PillFilters, usePillFilters } from '@/components/admin/PillFilters';
-import { BulkActionBar, BulkAction, useBulkSelection } from '@/components/admin/BulkActionBar';
+import {
+  BulkActionBar,
+  BulkAction,
+  useBulkSelection,
+} from '@/components/admin/BulkActionBar';
 import { ModernButton } from '@/components/ui/ModernButton';
-import { ModernCard, ModernCardHeader, ModernCardTitle, ModernCardContent } from '@/components/ui/ModernCard';
+import {
+  ModernCard,
+  ModernCardHeader,
+  ModernCardTitle,
+  ModernCardContent,
+} from '@/components/ui/ModernCard';
 import { StatusBadge } from '@/components/ui/ModernBadge';
-import { 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Download, 
+import {
+  Eye,
+  Edit,
+  Trash2,
+  Download,
   ExternalLink,
   Calendar,
   DollarSign,
   Users,
-  TrendingUp
+  TrendingUp,
 } from 'lucide-react';
 
 const STATUS_OPTIONS: { value: EventStatus; label: string }[] = [
@@ -59,14 +71,13 @@ const FREQUENCY_OPTIONS = [
   { value: 'year', label: 'This Year' },
 ];
 
-
 export function ModernEventsListClient() {
   const [events, setEvents] = useState<EventListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  
+
   // Pill filter states
   const {
     filterValues,
@@ -91,7 +102,6 @@ export function ModernEventsListClient() {
     isIndeterminate,
   } = useBulkSelection(events, event => event.id);
 
-
   // Fetch events
   const fetchEvents = useCallback(async () => {
     try {
@@ -110,16 +120,28 @@ export function ModernEventsListClient() {
         let fromDate = '';
         switch (filterValues.frequency) {
           case 'today':
-            fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString().split('T')[0];
+            fromDate = new Date(
+              now.getFullYear(),
+              now.getMonth(),
+              now.getDate()
+            )
+              .toISOString()
+              .split('T')[0];
             break;
           case 'week':
-            fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .split('T')[0];
             break;
           case 'month':
-            fromDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            fromDate = new Date(now.getFullYear(), now.getMonth(), 1)
+              .toISOString()
+              .split('T')[0];
             break;
           case 'year':
-            fromDate = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+            fromDate = new Date(now.getFullYear(), 0, 1)
+              .toISOString()
+              .split('T')[0];
             break;
         }
         if (fromDate) {
@@ -149,15 +171,21 @@ export function ModernEventsListClient() {
   }, [filterValues, page, pageSize]);
 
   // Handle pill filter changes
-  const handlePillFilterChange = useCallback((key: string, value: string) => {
-    updateFilter(key, value);
-    setPage(1); // Reset to first page when filters change
-  }, [updateFilter]);
+  const handlePillFilterChange = useCallback(
+    (key: string, value: string) => {
+      updateFilter(key, value);
+      setPage(1); // Reset to first page when filters change
+    },
+    [updateFilter]
+  );
 
-  const handlePillFilterClear = useCallback((key: string) => {
-    clearFilter(key);
-    setPage(1);
-  }, [clearFilter]);
+  const handlePillFilterClear = useCallback(
+    (key: string) => {
+      clearFilter(key);
+      setPage(1);
+    },
+    [clearFilter]
+  );
 
   // Handle actions
   const handleAction = async (eventId: string, action: 'publish' | 'close') => {
@@ -195,31 +223,32 @@ export function ModernEventsListClient() {
       label: 'Publish',
       icon: <TrendingUp className="w-4 h-4" />,
       variant: 'success',
-      onClick: (selectedIds) => {
+      onClick: selectedIds => {
         selectedIds.forEach(id => handleAction(id, 'publish'));
       },
       requiresConfirmation: true,
-      confirmationMessage: 'Are you sure you want to publish the selected events?',
+      confirmationMessage:
+        'Are you sure you want to publish the selected events?',
     },
     {
       id: 'close',
       label: 'Close',
       icon: <Calendar className="w-4 h-4" />,
       variant: 'warning',
-      onClick: (selectedIds) => {
+      onClick: selectedIds => {
         selectedIds.forEach(id => handleAction(id, 'close'));
       },
       requiresConfirmation: true,
-      confirmationMessage: 'Are you sure you want to close the selected events?',
+      confirmationMessage:
+        'Are you sure you want to close the selected events?',
     },
     {
       id: 'export',
       label: 'Export',
       icon: <Download className="w-4 h-4" />,
       variant: 'secondary',
-      onClick: (selectedIds) => {
+      onClick: selectedIds => {
         // Export selected events
-        console.log('Exporting events:', selectedIds);
       },
     },
   ];
@@ -247,9 +276,7 @@ export function ModernEventsListClient() {
     {
       key: 'type',
       label: 'Type',
-      render: event => (
-        <span className="text-sm capitalize">{event.type}</span>
-      ),
+      render: event => <span className="text-sm capitalize">{event.type}</span>,
     },
     {
       key: 'status',
@@ -333,7 +360,7 @@ export function ModernEventsListClient() {
                 label: 'Sort by',
                 value: filterValues.sortBy,
                 options: SORT_OPTIONS,
-                onValueChange: (value) => handlePillFilterChange('sortBy', value),
+                onValueChange: value => handlePillFilterChange('sortBy', value),
                 onClear: () => handlePillFilterClear('sortBy'),
               },
               {
@@ -341,7 +368,8 @@ export function ModernEventsListClient() {
                 label: 'Frequency',
                 value: filterValues.frequency,
                 options: FREQUENCY_OPTIONS,
-                onValueChange: (value) => handlePillFilterChange('frequency', value),
+                onValueChange: value =>
+                  handlePillFilterChange('frequency', value),
                 onClear: () => handlePillFilterClear('frequency'),
               },
               {
@@ -349,18 +377,14 @@ export function ModernEventsListClient() {
                 label: 'Status',
                 value: filterValues.status,
                 options: STATUS_OPTIONS_PILLS,
-                onValueChange: (value) => handlePillFilterChange('status', value),
+                onValueChange: value => handlePillFilterChange('status', value),
                 onClear: () => handlePillFilterClear('status'),
               },
             ]}
             className="flex-1"
           />
           {hasActiveFilters && (
-            <ModernButton
-              variant="ghost"
-              size="sm"
-              onClick={clearAllFilters}
-            >
+            <ModernButton variant="ghost" size="sm" onClick={clearAllFilters}>
               Clear All
             </ModernButton>
           )}
@@ -375,7 +399,7 @@ export function ModernEventsListClient() {
           getRowKey={event => event.id}
           selectable={true}
           selectedRows={selectedItems}
-          onSelectionChange={(keys) => {
+          onSelectionChange={keys => {
             // Handle selection change
             keys.forEach(key => {
               if (!selectedItems.includes(key)) {
@@ -392,14 +416,14 @@ export function ModernEventsListClient() {
             {
               label: 'View',
               icon: <Eye className="w-4 h-4" />,
-              onClick: (event) => {
+              onClick: event => {
                 window.open(`/event/${event.slug}`, '_blank');
               },
             },
             {
               label: 'Edit',
               icon: <Edit className="w-4 h-4" />,
-              onClick: (event) => {
+              onClick: event => {
                 window.location.href = `/admin/events/${event.id}`;
               },
             },

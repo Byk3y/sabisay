@@ -11,12 +11,17 @@ export interface ModernBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const badgeVariants = {
-  default: 'bg-admin-gray-100 text-admin-gray-800 dark:bg-admin-gray-800 dark:text-admin-gray-200',
-  success: 'bg-admin-success-100 text-admin-success-800 dark:bg-admin-success-900/20 dark:text-admin-success-400',
-  warning: 'bg-admin-warning-100 text-admin-warning-800 dark:bg-admin-warning-900/20 dark:text-admin-warning-400',
-  error: 'bg-admin-error-100 text-admin-error-800 dark:bg-admin-error-900/20 dark:text-admin-error-400',
+  default:
+    'bg-admin-gray-100 text-admin-gray-800 dark:bg-admin-gray-800 dark:text-admin-gray-200',
+  success:
+    'bg-admin-success-100 text-admin-success-800 dark:bg-admin-success-900/20 dark:text-admin-success-400',
+  warning:
+    'bg-admin-warning-100 text-admin-warning-800 dark:bg-admin-warning-900/20 dark:text-admin-warning-400',
+  error:
+    'bg-admin-error-100 text-admin-error-800 dark:bg-admin-error-900/20 dark:text-admin-error-400',
   info: 'bg-admin-primary-100 text-admin-primary-800 dark:bg-admin-primary-900/20 dark:text-admin-primary-400',
-  outline: 'border border-admin-gray-300 text-admin-gray-700 dark:border-admin-gray-600 dark:text-admin-gray-300',
+  outline:
+    'border border-admin-gray-300 text-admin-gray-700 dark:border-admin-gray-600 dark:text-admin-gray-300',
 };
 
 const badgeSizes = {
@@ -78,7 +83,10 @@ export interface StatusBadgeProps {
   animated?: boolean;
 }
 
-const statusConfig: Record<StatusBadgeProps['status'], { variant: ModernBadgeProps['variant']; label: string }> = {
+const statusConfig: Record<
+  StatusBadgeProps['status'],
+  { variant: ModernBadgeProps['variant']; label: string }
+> = {
   draft: { variant: 'default', label: 'Draft' },
   pending: { variant: 'warning', label: 'Pending' },
   onchain: { variant: 'info', label: 'On Chain' },
@@ -90,7 +98,7 @@ const statusConfig: Record<StatusBadgeProps['status'], { variant: ModernBadgePro
 export const StatusBadge = forwardRef<HTMLDivElement, StatusBadgeProps>(
   ({ status, size = 'md', animated = false, ...props }, ref) => {
     const config = statusConfig[status];
-    
+
     return (
       <ModernBadge
         ref={ref}
@@ -106,6 +114,3 @@ export const StatusBadge = forwardRef<HTMLDivElement, StatusBadgeProps>(
 );
 
 StatusBadge.displayName = 'StatusBadge';
-
-
-

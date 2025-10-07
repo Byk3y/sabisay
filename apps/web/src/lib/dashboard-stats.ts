@@ -39,7 +39,7 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
   }
 
   const result = await response.json();
-  
+
   if (!result.success) {
     throw new Error(result.error || 'Failed to fetch dashboard stats');
   }

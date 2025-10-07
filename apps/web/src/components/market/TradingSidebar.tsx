@@ -327,14 +327,14 @@ export const TradingSidebar = ({
           </div>
         </div>
       </div>
-      
+
       {/* Desktop Terms Disclaimer - Outside the card */}
       {!isMobile && (
         <div className="mt-3 px-4">
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
             By trading, you agree to the{' '}
-            <a 
-              href="/terms" 
+            <a
+              href="/terms"
               className="underline hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
             >
               Terms of Use

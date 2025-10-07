@@ -10,15 +10,15 @@ import { SidePanelProvider, useSidePanel } from '@/contexts/SidePanelContext';
 import { useSignUpModalContext } from '@/contexts/SignUpModalContext';
 import { useAuthSafe } from '@/contexts/AuthContext';
 import { useAccount, useChainId } from 'wagmi';
-import { 
-  Search, 
-  SlidersHorizontal, 
-  Bookmark, 
+import {
+  Search,
+  SlidersHorizontal,
+  Bookmark,
   ChevronDown,
   TrendingUp,
   Clock,
   Calendar,
-  ArrowUpDown
+  ArrowUpDown,
 } from 'lucide-react';
 import { MarketItem } from '@/types/market';
 import { categories } from '@/lib/mock';
@@ -31,12 +31,14 @@ interface CategoryPageClientProps {
   categorySlug: string;
 }
 
-export function CategoryPageClient({ 
-  realEvents, 
+export function CategoryPageClient({
+  realEvents,
   category,
-  categorySlug 
+  categorySlug,
 }: CategoryPageClientProps) {
-  const [activeCategory, setActiveCategory] = useState<Category>(category as Category);
+  const [activeCategory, setActiveCategory] = useState<Category>(
+    category as Category
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<
     'home' | 'search' | 'breaking' | 'more'
@@ -86,147 +88,215 @@ export function CategoryPageClient({
   // Enhanced category filtering logic
   const getCategoryFilter = (categoryName: string) => {
     const lowerCategory = categoryName.toLowerCase();
-    
+
     switch (lowerCategory) {
       case 'politics':
         return (item: MarketItem) => {
-          const question = item.kind === 'market' ? item.question : 
-                          item.kind === 'group' ? item.title : '';
-          return question.toLowerCase().includes('election') ||
-                 question.toLowerCase().includes('president') ||
-                 question.toLowerCase().includes('government') ||
-                 question.toLowerCase().includes('political') ||
-                 question.toLowerCase().includes('vote') ||
-                 question.toLowerCase().includes('candidate');
+          const question =
+            item.kind === 'market'
+              ? item.question
+              : item.kind === 'group'
+                ? item.title
+                : '';
+          return (
+            question.toLowerCase().includes('election') ||
+            question.toLowerCase().includes('president') ||
+            question.toLowerCase().includes('government') ||
+            question.toLowerCase().includes('political') ||
+            question.toLowerCase().includes('vote') ||
+            question.toLowerCase().includes('candidate')
+          );
         };
-      
+
       case 'breaking':
         return (item: MarketItem) => {
-          const question = item.kind === 'market' ? item.question : 
-                          item.kind === 'group' ? item.title : '';
-          return question.toLowerCase().includes('breaking') ||
-                 question.toLowerCase().includes('urgent') ||
-                 question.toLowerCase().includes('alert') ||
-                 question.toLowerCase().includes('crisis') ||
-                 question.toLowerCase().includes('emergency');
+          const question =
+            item.kind === 'market'
+              ? item.question
+              : item.kind === 'group'
+                ? item.title
+                : '';
+          return (
+            question.toLowerCase().includes('breaking') ||
+            question.toLowerCase().includes('urgent') ||
+            question.toLowerCase().includes('alert') ||
+            question.toLowerCase().includes('crisis') ||
+            question.toLowerCase().includes('emergency')
+          );
         };
-      
+
       case 'crypto':
         return (item: MarketItem) => {
-          const question = item.kind === 'market' ? item.question : 
-                          item.kind === 'group' ? item.title : '';
-          return question.toLowerCase().includes('bitcoin') ||
-                 question.toLowerCase().includes('ethereum') ||
-                 question.toLowerCase().includes('crypto') ||
-                 question.toLowerCase().includes('blockchain') ||
-                 question.toLowerCase().includes('defi') ||
-                 question.toLowerCase().includes('nft');
+          const question =
+            item.kind === 'market'
+              ? item.question
+              : item.kind === 'group'
+                ? item.title
+                : '';
+          return (
+            question.toLowerCase().includes('bitcoin') ||
+            question.toLowerCase().includes('ethereum') ||
+            question.toLowerCase().includes('crypto') ||
+            question.toLowerCase().includes('blockchain') ||
+            question.toLowerCase().includes('defi') ||
+            question.toLowerCase().includes('nft')
+          );
         };
-      
+
       case 'economy':
         return (item: MarketItem) => {
-          const question = item.kind === 'market' ? item.question : 
-                          item.kind === 'group' ? item.title : '';
-          return question.toLowerCase().includes('fed') ||
-                 question.toLowerCase().includes('inflation') ||
-                 question.toLowerCase().includes('gdp') ||
-                 question.toLowerCase().includes('recession') ||
-                 question.toLowerCase().includes('market') ||
-                 question.toLowerCase().includes('economy');
+          const question =
+            item.kind === 'market'
+              ? item.question
+              : item.kind === 'group'
+                ? item.title
+                : '';
+          return (
+            question.toLowerCase().includes('fed') ||
+            question.toLowerCase().includes('inflation') ||
+            question.toLowerCase().includes('gdp') ||
+            question.toLowerCase().includes('recession') ||
+            question.toLowerCase().includes('market') ||
+            question.toLowerCase().includes('economy')
+          );
         };
-      
+
       case 'sports':
         return (item: MarketItem) => {
-          const question = item.kind === 'market' ? item.question : 
-                          item.kind === 'group' ? item.title : '';
-          return question.toLowerCase().includes('sport') ||
-                 question.toLowerCase().includes('football') ||
-                 question.toLowerCase().includes('basketball') ||
-                 question.toLowerCase().includes('soccer') ||
-                 question.toLowerCase().includes('championship') ||
-                 question.toLowerCase().includes('tournament');
+          const question =
+            item.kind === 'market'
+              ? item.question
+              : item.kind === 'group'
+                ? item.title
+                : '';
+          return (
+            question.toLowerCase().includes('sport') ||
+            question.toLowerCase().includes('football') ||
+            question.toLowerCase().includes('basketball') ||
+            question.toLowerCase().includes('soccer') ||
+            question.toLowerCase().includes('championship') ||
+            question.toLowerCase().includes('tournament')
+          );
         };
-      
+
       case 'tech':
         return (item: MarketItem) => {
-          const question = item.kind === 'market' ? item.question : 
-                          item.kind === 'group' ? item.title : '';
-          return question.toLowerCase().includes('tech') ||
-                 question.toLowerCase().includes('ai') ||
-                 question.toLowerCase().includes('artificial intelligence') ||
-                 question.toLowerCase().includes('software') ||
-                 question.toLowerCase().includes('startup') ||
-                 question.toLowerCase().includes('innovation');
+          const question =
+            item.kind === 'market'
+              ? item.question
+              : item.kind === 'group'
+                ? item.title
+                : '';
+          return (
+            question.toLowerCase().includes('tech') ||
+            question.toLowerCase().includes('ai') ||
+            question.toLowerCase().includes('artificial intelligence') ||
+            question.toLowerCase().includes('software') ||
+            question.toLowerCase().includes('startup') ||
+            question.toLowerCase().includes('innovation')
+          );
         };
-      
+
       case 'naija picks':
         return (item: MarketItem) => {
-          const question = item.kind === 'market' ? item.question : 
-                          item.kind === 'group' ? item.title : '';
-          return question.toLowerCase().includes('nigerian') ||
-                 question.toLowerCase().includes('nigeria') ||
-                 question.toLowerCase().includes('naija') ||
-                 question.toLowerCase().includes('lagos') ||
-                 question.toLowerCase().includes('abuja');
+          const question =
+            item.kind === 'market'
+              ? item.question
+              : item.kind === 'group'
+                ? item.title
+                : '';
+          return (
+            question.toLowerCase().includes('nigerian') ||
+            question.toLowerCase().includes('nigeria') ||
+            question.toLowerCase().includes('naija') ||
+            question.toLowerCase().includes('lagos') ||
+            question.toLowerCase().includes('abuja')
+          );
         };
-      
+
       case 'world':
         return (item: MarketItem) => {
-          const question = item.kind === 'market' ? item.question : 
-                          item.kind === 'group' ? item.title : '';
-          return question.toLowerCase().includes('world') ||
-                 question.toLowerCase().includes('global') ||
-                 question.toLowerCase().includes('international') ||
-                 question.toLowerCase().includes('united nations') ||
-                 question.toLowerCase().includes('climate');
+          const question =
+            item.kind === 'market'
+              ? item.question
+              : item.kind === 'group'
+                ? item.title
+                : '';
+          return (
+            question.toLowerCase().includes('world') ||
+            question.toLowerCase().includes('global') ||
+            question.toLowerCase().includes('international') ||
+            question.toLowerCase().includes('united nations') ||
+            question.toLowerCase().includes('climate')
+          );
         };
-      
+
       case 'geopolitics':
         return (item: MarketItem) => {
-          const question = item.kind === 'market' ? item.question : 
-                          item.kind === 'group' ? item.title : '';
-          return question.toLowerCase().includes('war') ||
-                 question.toLowerCase().includes('conflict') ||
-                 question.toLowerCase().includes('treaty') ||
-                 question.toLowerCase().includes('diplomacy') ||
-                 question.toLowerCase().includes('sanctions');
+          const question =
+            item.kind === 'market'
+              ? item.question
+              : item.kind === 'group'
+                ? item.title
+                : '';
+          return (
+            question.toLowerCase().includes('war') ||
+            question.toLowerCase().includes('conflict') ||
+            question.toLowerCase().includes('treaty') ||
+            question.toLowerCase().includes('diplomacy') ||
+            question.toLowerCase().includes('sanctions')
+          );
         };
-      
+
       case 'culture':
         return (item: MarketItem) => {
-          const question = item.kind === 'market' ? item.question : 
-                          item.kind === 'group' ? item.title : '';
-          return question.toLowerCase().includes('culture') ||
-                 question.toLowerCase().includes('entertainment') ||
-                 question.toLowerCase().includes('music') ||
-                 question.toLowerCase().includes('movie') ||
-                 question.toLowerCase().includes('celebrity');
+          const question =
+            item.kind === 'market'
+              ? item.question
+              : item.kind === 'group'
+                ? item.title
+                : '';
+          return (
+            question.toLowerCase().includes('culture') ||
+            question.toLowerCase().includes('entertainment') ||
+            question.toLowerCase().includes('music') ||
+            question.toLowerCase().includes('movie') ||
+            question.toLowerCase().includes('celebrity')
+          );
         };
-      
+
       case 'earnings':
         return (item: MarketItem) => {
-          const question = item.kind === 'market' ? item.question : 
-                          item.kind === 'group' ? item.title : '';
-          return question.toLowerCase().includes('earnings') ||
-                 question.toLowerCase().includes('quarterly') ||
-                 question.toLowerCase().includes('revenue') ||
-                 question.toLowerCase().includes('profit') ||
-                 question.toLowerCase().includes('stock');
+          const question =
+            item.kind === 'market'
+              ? item.question
+              : item.kind === 'group'
+                ? item.title
+                : '';
+          return (
+            question.toLowerCase().includes('earnings') ||
+            question.toLowerCase().includes('quarterly') ||
+            question.toLowerCase().includes('revenue') ||
+            question.toLowerCase().includes('profit') ||
+            question.toLowerCase().includes('stock')
+          );
         };
-      
+
       case 'new':
         return (item: MarketItem) => {
           // For "new" category, show items created in the last 7 days
           const now = new Date();
-          const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          
+          const sevenDaysAgo = new Date(
+            now.getTime() - 7 * 24 * 60 * 60 * 1000
+          );
+
           if (item.kind === 'market' && item.closesAt) {
             const closesAt = new Date(item.closesAt);
             return closesAt > sevenDaysAgo;
           }
           return false;
         };
-      
+
       default:
         return () => true;
     }
@@ -235,12 +305,17 @@ export function CategoryPageClient({
   // Filter markets based on category and search
   const filteredMarkets = feed
     .filter(item => {
-      const question = item.kind === 'market' ? item.question : 
-                      item.kind === 'group' ? item.title : '';
+      const question =
+        item.kind === 'market'
+          ? item.question
+          : item.kind === 'group'
+            ? item.title
+            : '';
 
       const matchesCategory = getCategoryFilter(category)(item);
-      const matchesSearch = searchQuery === '' || 
-                           question.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch =
+        searchQuery === '' ||
+        question.toLowerCase().includes(searchQuery.toLowerCase());
 
       return matchesCategory && matchesSearch;
     })
@@ -262,12 +337,17 @@ export function CategoryPageClient({
           const aClosesAtOld = getClosesAt(a);
           const bClosesAtOld = getClosesAt(b);
           if (!aClosesAtOld || !bClosesAtOld) return 0;
-          return new Date(aClosesAtOld).getTime() - new Date(bClosesAtOld).getTime();
+          return (
+            new Date(aClosesAtOld).getTime() - new Date(bClosesAtOld).getTime()
+          );
         case 'closing':
           const aClosesAtClosing = getClosesAt(a);
           const bClosesAtClosing = getClosesAt(b);
           if (!aClosesAtClosing || !bClosesAtClosing) return 0;
-          return new Date(aClosesAtClosing).getTime() - new Date(bClosesAtClosing).getTime();
+          return (
+            new Date(aClosesAtClosing).getTime() -
+            new Date(bClosesAtClosing).getTime()
+          );
         default:
           return 0;
       }
@@ -278,10 +358,7 @@ export function CategoryPageClient({
     marketId: string,
     outcomeIndex?: number
   ) => {
-    console.log(
-      `${action} clicked for market ${marketId}`,
-      outcomeIndex ? `outcome ${outcomeIndex}` : ''
-    );
+    // Handle market action
   };
 
   const handleTabChange = (tab: 'home' | 'search' | 'breaking' | 'more') => {
@@ -348,7 +425,9 @@ export function CategoryPageClient({
         <div className="hidden md:block mx-auto max-w-7xl px-0 py-2">
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Sort by:</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Sort by:
+              </span>
               <div className="relative" ref={sortRef}>
                 <button
                   onClick={() => setIsSortOpen(!isSortOpen)}
@@ -387,7 +466,11 @@ export function CategoryPageClient({
                       { value: 'volume', label: 'Volume', icon: TrendingUp },
                       { value: 'newest', label: 'Newest', icon: Clock },
                       { value: 'oldest', label: 'Oldest', icon: Calendar },
-                      { value: 'closing', label: 'Closing Soon', icon: ArrowUpDown },
+                      {
+                        value: 'closing',
+                        label: 'Closing Soon',
+                        icon: ArrowUpDown,
+                      },
                     ].map(({ value, label, icon: Icon }) => (
                       <button
                         key={value}
@@ -422,8 +505,12 @@ export function CategoryPageClient({
                   <MarketCard
                     key={item.id}
                     market={item as any} // Type assertion for now
-                    onYesClick={(marketId, outcomeIndex) => handleMarketAction('yes', marketId, outcomeIndex)}
-                    onNoClick={(marketId, outcomeIndex) => handleMarketAction('no', marketId, outcomeIndex)}
+                    onYesClick={(marketId, outcomeIndex) =>
+                      handleMarketAction('yes', marketId, outcomeIndex)
+                    }
+                    onNoClick={(marketId, outcomeIndex) =>
+                      handleMarketAction('no', marketId, outcomeIndex)
+                    }
                   />
                 );
               }

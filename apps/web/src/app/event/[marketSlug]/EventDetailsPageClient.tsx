@@ -114,19 +114,15 @@ function EventDetailsPageContent({
       setIsLoading(true);
       try {
         // Try to fetch from database first
-        console.log(`🔍 Loading market: ${marketSlug}`);
         const dbMarket = await fetchEventBySlug(marketSlug);
 
         if (dbMarket) {
-          console.log('✅ Found market in database:', dbMarket.title);
           setMarket(dbMarket);
         } else {
           // Fallback to mock data
-          console.log('📦 Market not found in database, trying mock data...');
           const mockMarket = getMarketBySlug(marketSlug);
 
           if (mockMarket) {
-            console.log('✅ Found market in mock data:', mockMarket.title);
             setMarket(mockMarket);
           } else {
             console.error(
@@ -198,21 +194,14 @@ function EventDetailsPageContent({
   }, [market, timeRange]);
 
   // Event handlers
-  const handleShare = () => {
-    console.log('Share market:', market?.title);
-  };
+  const handleShare = () => {};
 
-  const handleBookmark = () => {
-    console.log('Bookmark market:', market?.title);
-  };
+  const handleBookmark = () => {};
 
-  const handleTrade = (tradeData: TradeData) => {
-    console.log('Execute trade:', tradeData);
-  };
+  const handleTrade = (tradeData: TradeData) => {};
 
   const handleTimePeriodChange = (period: string) => {
     setTimeRange(period as TimeRange);
-    console.log('Time period changed:', period);
   };
 
   // Mobile-specific handlers
@@ -406,12 +395,7 @@ function EventDetailsPageContent({
             )}
 
             {/* Rules Section */}
-            {market?.rules && (
-              <RulesSection
-                rules={market.rules}
-                onShowMore={() => console.log('Show more rules')}
-              />
-            )}
+            {market?.rules && <RulesSection rules={market.rules} />}
           </div>
         </div>
       </div>
@@ -490,7 +474,6 @@ function EventDetailsPageContent({
             if (tab === 'more') {
               handleSidePanelOpen();
             } else {
-              console.log('Tab changed to:', tab);
             }
           }}
         />

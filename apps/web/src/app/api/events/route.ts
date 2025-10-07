@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 
 export async function GET() {
-  console.log('📡 API /api/events: Request received');
   try {
     const { data: events, error } = await supabaseAdmin
       .from('events')
@@ -18,12 +17,8 @@ export async function GET() {
       );
     }
 
-    console.log('✅ API /api/events: Found', events?.length || 0, 'events');
     if (events && events.length > 0) {
-      console.log(
-        '📋 API /api/events: Event slugs:',
-        events.map(e => e.slug)
-      );
+      // Events fetched successfully
     }
 
     return NextResponse.json(

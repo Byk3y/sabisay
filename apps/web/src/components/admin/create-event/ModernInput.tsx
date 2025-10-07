@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { AlertCircle, CheckCircle, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ModernInputProps {
@@ -89,7 +96,8 @@ export function ModernInput({
   }, [value, type, isCollapsed]);
 
   const InputComponent = type === 'textarea' ? 'textarea' : 'input';
-  const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
+  const inputType =
+    type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -113,7 +121,7 @@ export function ModernInput({
           ref={inputRef as any}
           type={inputType}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           onFocus={() => {
             setIsFocused(true);
             if (suggestions.length > 0) setShowSuggestions(true);
@@ -135,8 +143,8 @@ export function ModernInput({
             error
               ? 'border-red-300 dark:border-red-700 focus:ring-red-500 focus:border-red-500'
               : success
-              ? 'border-admin-success-300 dark:border-admin-success-700 focus:ring-admin-success-500 focus:border-admin-success-500'
-              : 'border-sabi-border dark:border-sabi-border-dark',
+                ? 'border-admin-success-300 dark:border-admin-success-700 focus:ring-admin-success-500 focus:border-admin-success-500'
+                : 'border-sabi-border dark:border-sabi-border-dark',
             isFocused && 'shadow-md',
             type === 'textarea' && 'resize-none'
           )}
@@ -149,7 +157,11 @@ export function ModernInput({
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-sabi-text-secondary dark:text-sabi-text-secondary-dark hover:text-sabi-text-primary dark:hover:text-sabi-text-primary-dark transition-colors"
           >
-            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {showPassword ? (
+              <EyeOff className="w-4 h-4" />
+            ) : (
+              <Eye className="w-4 h-4" />
+            )}
           </button>
         )}
 
@@ -160,17 +172,25 @@ export function ModernInput({
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="absolute right-3 top-3 text-sabi-text-secondary dark:text-sabi-text-secondary-dark hover:text-sabi-text-primary dark:hover:text-sabi-text-primary-dark transition-colors"
           >
-            {isCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+            {isCollapsed ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronUp className="w-4 h-4" />
+            )}
           </button>
         )}
 
         {/* Status icon */}
-        <div className={cn(
-          "absolute top-1/2 -translate-y-1/2",
-          type === 'password' ? "right-10" : 
-          type === 'textarea' && value.length > 0 ? "right-10" : 
-          "right-3"
-        )}>
+        <div
+          className={cn(
+            'absolute top-1/2 -translate-y-1/2',
+            type === 'password'
+              ? 'right-10'
+              : type === 'textarea' && value.length > 0
+                ? 'right-10'
+                : 'right-3'
+          )}
+        >
           {error ? (
             <AlertCircle className="w-4 h-4 text-red-500" />
           ) : success ? (
@@ -201,19 +221,27 @@ export function ModernInput({
       {/* Character counter */}
       {maxLength && (
         <div className="flex justify-between items-center text-xs">
-          <span className={cn(
-            'text-sabi-text-muted dark:text-sabi-text-muted-dark',
-            value.length > maxLength * 0.9 && 'text-yellow-600 dark:text-yellow-400',
-            value.length >= maxLength && 'text-red-500'
-          )}>
-            {minLength && `${minLength}-`}{maxLength} characters
+          <span
+            className={cn(
+              'text-sabi-text-muted dark:text-sabi-text-muted-dark',
+              value.length > maxLength * 0.9 &&
+                'text-yellow-600 dark:text-yellow-400',
+              value.length >= maxLength && 'text-red-500'
+            )}
+          >
+            {minLength && `${minLength}-`}
+            {maxLength} characters
           </span>
-          <span className={cn(
-            'font-medium',
-            value.length > maxLength * 0.9 && 'text-yellow-600 dark:text-yellow-400',
-            value.length >= maxLength && 'text-red-500',
-            value.length < maxLength * 0.9 && 'text-sabi-text-muted dark:text-sabi-text-muted-dark'
-          )}>
+          <span
+            className={cn(
+              'font-medium',
+              value.length > maxLength * 0.9 &&
+                'text-yellow-600 dark:text-yellow-400',
+              value.length >= maxLength && 'text-red-500',
+              value.length < maxLength * 0.9 &&
+                'text-sabi-text-muted dark:text-sabi-text-muted-dark'
+            )}
+          >
             {value.length}/{maxLength}
           </span>
         </div>
@@ -229,6 +257,3 @@ export function ModernInput({
     </div>
   );
 }
-
-
-

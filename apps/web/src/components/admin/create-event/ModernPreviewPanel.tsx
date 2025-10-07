@@ -42,10 +42,11 @@ export function ModernPreviewPanel({
     id: 'preview',
     question: question || '',
     poolUsd: 0,
-    outcomes: outcomes?.map(o => ({
-      label: o.label,
-      oddsPct: o.oddsPct || 50,
-    })) || [],
+    outcomes:
+      outcomes?.map(o => ({
+        label: o.label,
+        oddsPct: o.oddsPct || 50,
+      })) || [],
     slug: 'preview',
   };
 
@@ -176,7 +177,8 @@ export function ModernPreviewPanel({
               </h4>
             </div>
             <p className="text-xs text-admin-success-700 dark:text-admin-success-300">
-              Your market is complete and ready to be published. All required fields are filled and validated.
+              Your market is complete and ready to be published. All required
+              fields are filled and validated.
             </p>
           </div>
         )}

@@ -12,7 +12,6 @@ interface MarketCardProps {
 }
 
 export function MarketCard({ market, onYesClick, onNoClick }: MarketCardProps) {
-
   // Generate event URL using proper slug generation
   const marketSlug = market.slug || generateMarketSlug(market);
   const eventUrl = buildEventUrl(marketSlug);

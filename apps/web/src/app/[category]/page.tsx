@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 // Valid category slugs (URL-friendly versions)
 const validCategories = [
   'politics',
-  'breaking', 
+  'breaking',
   'new',
   'sports',
   'crypto',
@@ -17,25 +17,25 @@ const validCategories = [
   'culture',
   'world',
   'economy',
-  'naija-picks'
+  'naija-picks',
 ] as const;
 
-type CategorySlug = typeof validCategories[number];
+type CategorySlug = (typeof validCategories)[number];
 
 // Map URL slugs to display names
 const categoryMap: Record<CategorySlug, string> = {
-  'politics': 'Politics',
-  'breaking': 'Breaking',
-  'new': 'New',
-  'sports': 'Sports',
-  'crypto': 'Crypto',
-  'earnings': 'Earnings',
-  'geopolitics': 'Geopolitics',
-  'tech': 'Tech',
-  'culture': 'Culture',
-  'world': 'World',
-  'economy': 'Economy',
-  'naija-picks': 'Naija Picks'
+  politics: 'Politics',
+  breaking: 'Breaking',
+  new: 'New',
+  sports: 'Sports',
+  crypto: 'Crypto',
+  earnings: 'Earnings',
+  geopolitics: 'Geopolitics',
+  tech: 'Tech',
+  culture: 'Culture',
+  world: 'World',
+  economy: 'Economy',
+  'naija-picks': 'Naija Picks',
 };
 
 function isValidCategory(category: string): category is CategorySlug {
@@ -78,7 +78,7 @@ export async function generateMetadata({
 
 // Generate static params for all valid categories
 export async function generateStaticParams() {
-  return validCategories.map((category) => ({
+  return validCategories.map(category => ({
     category,
   }));
 }
@@ -88,7 +88,6 @@ interface CategoryPageProps {
     category: string;
   };
 }
-
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = params;
@@ -106,8 +105,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <SidePanelProvider>
-      <CategoryPageClient 
-        realEvents={realEvents} 
+      <CategoryPageClient
+        realEvents={realEvents}
         category={categoryName}
         categorySlug={category}
       />

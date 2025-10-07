@@ -1,22 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ModernCard, ModernCardHeader, ModernCardTitle, ModernCardContent } from '@/components/ui/ModernCard';
+import {
+  ModernCard,
+  ModernCardHeader,
+  ModernCardTitle,
+  ModernCardContent,
+} from '@/components/ui/ModernCard';
 import { ModernBadge } from '@/components/ui/ModernBadge';
 import { ModernButton } from '@/components/ui/ModernButton';
-import { 
-  TrendingUp, 
-  Users, 
-  DollarSign, 
-  Activity, 
+import {
+  TrendingUp,
+  Users,
+  DollarSign,
+  Activity,
   Plus,
   Eye,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import Link from 'next/link';
-import { fetchDashboardStats, formatCurrency, getHealthIcon, type DashboardStats } from '@/lib/dashboard-stats';
+import {
+  fetchDashboardStats,
+  formatCurrency,
+  getHealthIcon,
+  type DashboardStats,
+} from '@/lib/dashboard-stats';
 
 // DashboardStats interface is now imported from @/lib/dashboard-stats
 
@@ -39,7 +49,7 @@ export function DashboardClient() {
     // Fetch real dashboard data from API
     const loadDashboardData = async () => {
       setLoading(true);
-      
+
       try {
         const data = await fetchDashboardStats();
         setStats(data);
@@ -73,7 +83,10 @@ export function DashboardClient() {
           <div className="h-8 bg-admin-gray-200 dark:bg-admin-gray-700 rounded w-1/4" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-admin-gray-200 dark:bg-admin-gray-700 rounded-xl" />
+              <div
+                key={i}
+                className="h-32 bg-admin-gray-200 dark:bg-admin-gray-700 rounded-xl"
+              />
             ))}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -190,7 +203,7 @@ export function DashboardClient() {
           </ModernCardHeader>
           <ModernCardContent>
             <div className="space-y-4">
-              {stats.recentEvents.map((event) => (
+              {stats.recentEvents.map(event => (
                 <div
                   key={event.id}
                   className="flex items-center justify-between p-4 rounded-lg border border-sabi-border dark:border-sabi-border-dark hover:bg-sabi-bg dark:hover:bg-sabi-bg-dark transition-colors"
@@ -205,8 +218,8 @@ export function DashboardClient() {
                           event.status === 'live'
                             ? 'success'
                             : event.status === 'draft'
-                            ? 'default'
-                            : 'error'
+                              ? 'default'
+                              : 'error'
                         }
                         size="sm"
                       >
@@ -262,7 +275,9 @@ export function DashboardClient() {
                     </p>
                   </div>
                 </div>
-                <span className={`text-sm font-medium ${getHealthColor(stats.systemHealth.database)}`}>
+                <span
+                  className={`text-sm font-medium ${getHealthColor(stats.systemHealth.database)}`}
+                >
                   {stats.systemHealth.database}
                 </span>
               </div>
@@ -285,7 +300,9 @@ export function DashboardClient() {
                     </p>
                   </div>
                 </div>
-                <span className={`text-sm font-medium ${getHealthColor(stats.systemHealth.api)}`}>
+                <span
+                  className={`text-sm font-medium ${getHealthColor(stats.systemHealth.api)}`}
+                >
                   {stats.systemHealth.api}
                 </span>
               </div>
@@ -308,7 +325,9 @@ export function DashboardClient() {
                     </p>
                   </div>
                 </div>
-                <span className={`text-sm font-medium ${getHealthColor(stats.systemHealth.blockchain)}`}>
+                <span
+                  className={`text-sm font-medium ${getHealthColor(stats.systemHealth.blockchain)}`}
+                >
                   {stats.systemHealth.blockchain}
                 </span>
               </div>
@@ -319,6 +338,3 @@ export function DashboardClient() {
     </div>
   );
 }
-
-
-

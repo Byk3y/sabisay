@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  Search,
-  Menu,
-  ChevronDown,
-  Bell,
-  LogOut,
-  User,
-} from 'lucide-react';
+import { Search, Menu, ChevronDown, Bell, LogOut, User } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useSignUpModalContext } from '@/contexts/SignUpModalContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -18,6 +11,7 @@ import { generateAddressGradient, truncateAddress } from '@/lib/utils';
 export function TopNav() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -71,23 +65,25 @@ export function TopNav() {
         suppressHydrationWarning
       >
         {/* Left side - Logo and Search (for all users) */}
-        <div className="flex items-center pl-0 md:pl-0" suppressHydrationWarning>
+        <div
+          className="flex items-center pl-0 md:pl-0"
+          suppressHydrationWarning
+        >
+          {!logoFailed ? (
+            <img
+              src="/images/pakomarket/pakomarket-logo.png"
+              alt="PakoMarket"
+              className="h-48 w-auto dark:invert -ml-1 md:-ml-5"
+              onError={() => setLogoFailed(true)}
+            />
+          ) : (
+            <span className="text-blue-600 dark:text-white font-bold text-4xl">
+              P
+            </span>
+          )}
           <img
-            src="/images/pakomarket/pakomarket-logo.png"
-            alt="PakoMarket"
-            className="h-48 w-auto dark:invert -ml-1 md:-ml-5"
-            onError={(e) => {
-              // Fallback to "P" if image fails to load
-              e.currentTarget.style.display = 'none';
-              const parent = e.currentTarget.parentElement;
-              if (parent) {
-                parent.innerHTML = '<span class="text-blue-600 dark:text-white font-bold text-4xl">P</span>';
-              }
-            }}
-          />
-          <img 
-            src="/images/nigerian-flag.svg" 
-            alt="Nigeria" 
+            src="/images/nigerian-flag.svg"
+            alt="Nigeria"
             className="w-6 h-4 -ml-2"
           />
 
@@ -345,7 +341,6 @@ export function TopNav() {
                   </div>
                   <button
                     onClick={() => {
-                      console.log('Log In button clicked (loading state)!');
                       openSignUpModal('signin');
                     }}
                     className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
@@ -354,7 +349,6 @@ export function TopNav() {
                   </button>
                   <button
                     onClick={() => {
-                      console.log('Sign Up button clicked (loading state)!');
                       openSignUpModal('signup');
                     }}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
@@ -366,7 +360,6 @@ export function TopNav() {
                 <>
                   <button
                     onClick={() => {
-                      console.log('Log In button clicked (normal state)!');
                       openSignUpModal('signin');
                     }}
                     className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
@@ -375,7 +368,6 @@ export function TopNav() {
                   </button>
                   <button
                     onClick={() => {
-                      console.log('Sign Up button clicked (normal state)!');
                       openSignUpModal('signup');
                     }}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
@@ -388,7 +380,6 @@ export function TopNav() {
               <div className="hidden lg:block relative" ref={dropdownRef}>
                 <button
                   onClick={() => {
-                    console.log('Dropdown button clicked!', !isDropdownOpen);
                     setIsDropdownOpen(!isDropdownOpen);
                   }}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"

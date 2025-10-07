@@ -13,12 +13,12 @@ interface AdminLayoutProps {
   searchPlaceholder?: string;
 }
 
-export function AdminLayout({ 
-  children, 
-  actions, 
+export function AdminLayout({
+  children,
+  actions,
   showSearch = true,
   onSearch,
-  searchPlaceholder 
+  searchPlaceholder,
 }: AdminLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Changed default to true
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

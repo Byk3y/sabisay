@@ -8,12 +8,15 @@ interface ModernHeroProps {
   className?: string;
 }
 
-export function ModernHero({ completionPercentage, className }: ModernHeroProps) {
+export function ModernHero({
+  completionPercentage,
+  className,
+}: ModernHeroProps) {
   return (
     <div className={cn('relative overflow-hidden', className)}>
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-admin-primary-50 via-white to-admin-primary-50/30 dark:from-admin-primary-900/20 dark:via-sabi-bg-dark dark:to-admin-primary-900/10" />
-      
+
       {/* Content */}
       <div className="relative px-6 py-8">
         <div className="flex items-start gap-4">
@@ -23,7 +26,7 @@ export function ModernHero({ completionPercentage, className }: ModernHeroProps)
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
           </div>
-          
+
           {/* Text content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
@@ -33,13 +36,14 @@ export function ModernHero({ completionPercentage, className }: ModernHeroProps)
               <Sparkles className="w-5 h-5 text-admin-primary-500" />
             </div>
             <p className="text-sabi-text-secondary dark:text-sabi-text-secondary-dark mb-4">
-              Turn your insights into tradable markets. Share your predictions and let the community decide.
+              Turn your insights into tradable markets. Share your predictions
+              and let the community decide.
             </p>
-            
+
             {/* Progress indicator */}
             <div className="flex items-center gap-3">
               <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-admin-primary-500 to-admin-primary-600 rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${completionPercentage}%` }}
                 />
@@ -54,6 +58,3 @@ export function ModernHero({ completionPercentage, className }: ModernHeroProps)
     </div>
   );
 }
-
-
-

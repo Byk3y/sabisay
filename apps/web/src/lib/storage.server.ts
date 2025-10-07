@@ -1,13 +1,14 @@
 /**
  * Server-side Supabase Storage utilities for event images
- * 
+ *
  * This module handles:
  * - Creating and managing the event-images storage bucket
  * - Uploading event images with validation
  * - Generating public URLs for uploaded images
- * 
+ *
  * IMPORTANT: This file should only be imported server-side
  */
+/* eslint-disable no-console */
 
 import { supabaseAdmin } from './supabase-server';
 
@@ -22,8 +23,9 @@ const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 export async function ensureEventImagesBucket(): Promise<void> {
   try {
     // Check if bucket exists
-    const { data: buckets, error: listError } = await supabaseAdmin.storage.listBuckets();
-    
+    const { data: buckets, error: listError } =
+      await supabaseAdmin.storage.listBuckets();
+
     if (listError) {
       throw new Error(`Failed to list buckets: ${listError.message}`);
     }
@@ -32,11 +34,14 @@ export async function ensureEventImagesBucket(): Promise<void> {
 
     if (!bucketExists) {
       // Create bucket with public access
-      const { error: createError } = await supabaseAdmin.storage.createBucket(BUCKET_NAME, {
-        public: true,
-        fileSizeLimit: MAX_FILE_SIZE,
-        allowedMimeTypes: ALLOWED_MIME_TYPES,
-      });
+      const { error: createError } = await supabaseAdmin.storage.createBucket(
+        BUCKET_NAME,
+        {
+          public: true,
+          fileSizeLimit: MAX_FILE_SIZE,
+          allowedMimeTypes: ALLOWED_MIME_TYPES,
+        }
+      );
 
       if (createError) {
         throw new Error(`Failed to create bucket: ${createError.message}`);
@@ -59,21 +64,21 @@ function generateSafeFilePath(
 ): string {
   // Extract extension
   const ext = originalFilename.split('.').pop()?.toLowerCase() || 'jpg';
-  
+
   // Generate random suffix
   const randomSuffix = Math.random().toString(36).substring(2, 15);
-  
+
   // Create safe filename
   const timestamp = Date.now();
   const filename = `${timestamp}-${randomSuffix}.${ext}`;
-  
+
   // Return full path
   return `events/${adminUserId}/${filename}`;
 }
 
 /**
  * Upload an event image to Supabase Storage
- * 
+ *
  * @param file - The image file to upload
  * @param opts - Upload options including admin user ID
  * @returns Object containing publicUrl and storage path
@@ -84,12 +89,16 @@ export async function uploadEventImage(
 ): Promise<{ publicUrl: string; path: string }> {
   // Validate file size
   if (file.size > MAX_FILE_SIZE) {
-    throw new Error(`File size exceeds maximum allowed size of ${MAX_FILE_SIZE / 1024 / 1024}MB`);
+    throw new Error(
+      `File size exceeds maximum allowed size of ${MAX_FILE_SIZE / 1024 / 1024}MB`
+    );
   }
 
   // Validate mime type
   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-    throw new Error(`Invalid file type. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`);
+    throw new Error(
+      `Invalid file type. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`
+    );
   }
 
   // Generate safe path
@@ -109,9 +118,7 @@ export async function uploadEventImage(
     }
 
     // Get public URL
-    const { data } = supabaseAdmin.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(path);
+    const { data } = supabaseAdmin.storage.from(BUCKET_NAME).getPublicUrl(path);
 
     if (!data?.publicUrl) {
       throw new Error('Failed to generate public URL');
@@ -129,7 +136,7 @@ export async function uploadEventImage(
 
 /**
  * Delete an event image from storage
- * 
+ *
  * @param path - The storage path to delete
  */
 export async function deleteEventImage(path: string): Promise<void> {
@@ -146,4 +153,3 @@ export async function deleteEventImage(path: string): Promise<void> {
     throw error;
   }
 }
-

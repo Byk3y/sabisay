@@ -25,7 +25,7 @@ const marketTypes: MarketTypeOption[] = [
     description: 'Simple Yes/No predictions',
     example: 'Will Bitcoin reach $100k by 2025?',
     icon: <Target className="w-6 h-6" />,
-    features: ['Two outcomes', 'Simple to understand', 'High liquidity']
+    features: ['Two outcomes', 'Simple to understand', 'High liquidity'],
   },
   {
     id: 'multi',
@@ -33,19 +33,23 @@ const marketTypes: MarketTypeOption[] = [
     description: 'Multiple outcome options',
     example: 'Who will win the 2024 election?',
     icon: <List className="w-6 h-6" />,
-    features: ['Up to 8 outcomes', 'Complex scenarios', 'Detailed predictions']
-  }
+    features: ['Up to 8 outcomes', 'Complex scenarios', 'Detailed predictions'],
+  },
 ];
 
-export function MarketTypeSelector({ value, onChange, className }: MarketTypeSelectorProps) {
+export function MarketTypeSelector({
+  value,
+  onChange,
+  className,
+}: MarketTypeSelectorProps) {
   return (
     <div className={cn('space-y-4', className)}>
       <label className="block text-sm font-medium text-sabi-text-primary dark:text-sabi-text-primary-dark">
         Market Type *
       </label>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {marketTypes.map((type) => (
+        {marketTypes.map(type => (
           <button
             key={type.id}
             type="button"
@@ -66,12 +70,14 @@ export function MarketTypeSelector({ value, onChange, className }: MarketTypeSel
             )}
 
             {/* Icon */}
-            <div className={cn(
-              'w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors',
-              value === type.id
-                ? 'bg-admin-primary-500 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-sabi-text-secondary dark:text-sabi-text-secondary-dark group-hover:bg-admin-primary-100 dark:group-hover:bg-admin-primary-800'
-            )}>
+            <div
+              className={cn(
+                'w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors',
+                value === type.id
+                  ? 'bg-admin-primary-500 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-sabi-text-secondary dark:text-sabi-text-secondary-dark group-hover:bg-admin-primary-100 dark:group-hover:bg-admin-primary-800'
+              )}
+            >
               {type.icon}
             </div>
 
@@ -99,7 +105,10 @@ export function MarketTypeSelector({ value, onChange, className }: MarketTypeSel
               {/* Features */}
               <div className="space-y-1">
                 {type.features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2 text-xs text-sabi-text-secondary dark:text-sabi-text-secondary-dark">
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 text-xs text-sabi-text-secondary dark:text-sabi-text-secondary-dark"
+                  >
                     <div className="w-1 h-1 bg-current rounded-full" />
                     <span>{feature}</span>
                   </div>
@@ -112,7 +121,8 @@ export function MarketTypeSelector({ value, onChange, className }: MarketTypeSel
 
       {/* Help text */}
       <p className="text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
-        Choose the market type that best fits your prediction. You can change this later if needed.
+        Choose the market type that best fits your prediction. You can change
+        this later if needed.
       </p>
     </div>
   );

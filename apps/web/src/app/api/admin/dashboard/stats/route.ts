@@ -39,37 +39,35 @@ export async function GET(request: NextRequest) {
       totalEventsResult,
       liveEventsResult,
       activeUsersResult,
-      recentEventsResult
+      recentEventsResult,
     ] = await Promise.all([
       // Total Events
-      supabaseAdmin
-        .from('events')
-        .select('id', { count: 'exact', head: true }),
-      
+      supabaseAdmin.from('events').select('id', { count: 'exact', head: true }),
+
       // Live Events
       supabaseAdmin
         .from('events')
         .select('id', { count: 'exact', head: true })
         .eq('status', 'live'),
-      
+
       // Active Users (total registered users)
-      supabaseAdmin
-        .from('users')
-        .select('id', { count: 'exact', head: true }),
-      
+      supabaseAdmin.from('users').select('id', { count: 'exact', head: true }),
+
       // Recent Events (last 5)
       supabaseAdmin
         .from('events')
-        .select(`
+        .select(
+          `
           id,
           slug,
           title,
           status,
           close_time,
           created_at
-        `)
+        `
+        )
         .order('created_at', { ascending: false })
-        .limit(5)
+        .limit(5),
     ]);
 
     // Check for database errors
@@ -102,13 +100,20 @@ export async function GET(request: NextRequest) {
     }
 
     // Format recent events for dashboard
-    const recentEvents = recentEventsResult.data?.map(event => ({
-      id: event.id,
-      question: event.question,
-      status: event.status as 'draft' | 'pending' | 'onchain' | 'live' | 'closed' | 'resolved',
-      closeTime: event.close_time,
-      volume: 0, // Will be updated when trading is live
-    })) || [];
+    const recentEvents =
+      recentEventsResult.data?.map(event => ({
+        id: event.id,
+        question: event.question,
+        status: event.status as
+          | 'draft'
+          | 'pending'
+          | 'onchain'
+          | 'live'
+          | 'closed'
+          | 'resolved',
+        closeTime: event.close_time,
+        volume: 0, // Will be updated when trading is live
+      })) || [];
 
     // System health checks
     const systemHealth = {
@@ -130,7 +135,6 @@ export async function GET(request: NextRequest) {
       success: true,
       data: stats,
     });
-
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },

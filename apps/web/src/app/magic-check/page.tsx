@@ -28,7 +28,6 @@ export default function MagicCheckPage() {
 
       // Login with email OTP
       const didToken = await magic.auth.loginWithEmailOTP({ email });
-      console.log('DID Token received:', didToken ? 'Yes' : 'No');
 
       // Send DID token to our API
       const loginResponse = await fetch('/api/auth/magic/login', {
@@ -40,12 +39,10 @@ export default function MagicCheckPage() {
       });
 
       const loginResult = await loginResponse.json();
-      console.log('Login API response:', loginResult);
 
       // Check session
       const meResponse = await fetch('/api/auth/me');
       const meResult = await meResponse.json();
-      console.log('Me API response:', meResult);
 
       setResult({
         login: loginResult,

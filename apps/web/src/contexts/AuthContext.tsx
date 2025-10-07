@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { clearCSRFToken } from '@/lib/csrf-client';
 
 interface User {
   userId: string;
@@ -33,6 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasChecked, setHasChecked] = useState(false);
   const isCheckingRef = useRef(false);
+  const authCheckPromiseRef = useRef<Promise<void> | null>(null);
 
   // Check authentication status on mount - only once
   useEffect(() => {
@@ -41,13 +43,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    console.log('AuthContext: Starting auth check');
-
     // Skip auth check if OAuth callback is in progress
     if (isOAuthCallbackInProgress) {
-      console.log(
-        'AuthContext: OAuth callback in progress, skipping initial auth check'
-      );
       setIsLoading(false);
       setHasChecked(true);
       return;
@@ -55,33 +52,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check authentication with proper sequencing to avoid race conditions
     const performAuthCheck = async () => {
-      try {
-        // First check for existing server session
-        const serverAuthSuccess = await checkAuth();
-
-        // If server auth didn't find a user, then check Magic Link session
-        if (!serverAuthSuccess) {
-          await checkMagicLinkSession();
-        }
-      } catch (error) {
-        console.error('Auth check sequence failed:', error);
+      // If there's already an auth check in progress, wait for it
+      if (authCheckPromiseRef.current) {
+        await authCheckPromiseRef.current;
+        return;
       }
+
+      // Create a new auth check promise
+      const authCheckPromise = (async () => {
+        try {
+          isCheckingRef.current = true;
+          setIsLoading(true);
+
+          // First check for existing server session
+          const serverAuthSuccess = await checkAuth();
+
+          // If server auth didn't find a user, then check Magic Link session
+          if (!serverAuthSuccess) {
+            await checkMagicLinkSession();
+          }
+        } catch (error) {
+          console.error('Auth check sequence failed:', error);
+        } finally {
+          isCheckingRef.current = false;
+          setIsLoading(false);
+          setHasChecked(true);
+          authCheckPromiseRef.current = null;
+        }
+      })();
+
+      authCheckPromiseRef.current = authCheckPromise;
+      await authCheckPromise;
     };
 
     performAuthCheck();
   }, [hasChecked]);
 
   const checkAuth = async (): Promise<boolean> => {
-    // Prevent multiple simultaneous auth checks
-    if (isCheckingRef.current) {
-      return false;
-    }
-
     try {
-      isCheckingRef.current = true;
-      setIsLoading(true);
-      console.log('Checking auth...');
-
       const response = await fetch('/api/auth/me', {
         method: 'GET',
         credentials: 'include',
@@ -91,11 +99,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         cache: 'no-cache',
       });
 
-      console.log('Auth response:', response.status);
-
       if (response.ok) {
         const userData = await response.json();
-        console.log('User data:', userData);
         setUser({
           userId: userData.userId,
           email: userData.email,
@@ -105,7 +110,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         return true; // Successfully authenticated
       } else {
-        console.log('Auth failed, setting user to null');
         setUser(null);
         return false; // Authentication failed
       }
@@ -113,11 +117,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Auth check failed:', error);
       setUser(null);
       return false; // Authentication failed
-    } finally {
-      console.log('Auth check complete, setting loading to false');
-      isCheckingRef.current = false;
-      setIsLoading(false);
-      setHasChecked(true);
     }
   };
 
@@ -137,10 +136,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check for existing Magic Link session
   const checkMagicLinkSession = async () => {
     try {
-      // Only check if we don't have a user and haven't checked yet
-      if (user || hasChecked) return;
-
-      console.log('Checking for existing Magic Link session...');
+      // Only check if we don't already have a user
+      if (user) {
+        return;
+      }
 
       // Dynamically import Magic to avoid SSR issues
       const { createMagicClient } = await import('@/lib/magic');
@@ -148,7 +147,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const isLoggedIn = await magic.user.isLoggedIn();
       if (isLoggedIn) {
-        console.log('Found existing Magic Link session, getting DID token...');
         const didToken = await magic.user.getIdToken();
         if (didToken) {
           // Send to API to create session
@@ -161,14 +159,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (response.ok) {
             const result = await response.json();
-            console.log('Magic Link session restored:', result);
 
             // Only set user if we don't already have one (prevent override)
             setUser(prevUser => {
               if (prevUser) {
-                console.log(
-                  'User already exists, not overriding with Magic Link data'
-                );
                 return prevUser;
               }
 
@@ -183,26 +177,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       }
-    } catch (error) {
-      console.log('No Magic Link session found or error checking:', error);
-    }
+    } catch (error) {}
   };
 
   const logout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       setUser(null);
+      clearCSRFToken(); // Clear cached CSRF token
     } catch (error) {
       console.error('Logout failed:', error);
       // Still clear local state even if API call fails
       setUser(null);
+      clearCSRFToken(); // Clear cached CSRF token even on error
     }
   };
 
   const refreshAuth = async () => {
-    console.log('AuthContext: Refreshing auth state...');
-    setHasChecked(false); // Allow re-checking
-    await checkAuth();
+    // If there's already an auth check in progress, wait for it
+    if (authCheckPromiseRef.current) {
+      await authCheckPromiseRef.current;
+      return;
+    }
+
+    // Create a new auth check promise
+    const authCheckPromise = (async () => {
+      try {
+        isCheckingRef.current = true;
+        setIsLoading(true);
+        await checkAuth();
+      } catch (error) {
+        console.error('Refresh auth failed:', error);
+      } finally {
+        isCheckingRef.current = false;
+        setIsLoading(false);
+        authCheckPromiseRef.current = null;
+      }
+    })();
+
+    authCheckPromiseRef.current = authCheckPromise;
+    await authCheckPromise;
   };
 
   return (

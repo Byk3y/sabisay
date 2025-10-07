@@ -14,9 +14,11 @@ export interface ModernSelectProps
 }
 
 const selectVariants = {
-  default: 'bg-white dark:bg-admin-gray-800 border border-admin-gray-300 dark:border-admin-gray-600',
+  default:
+    'bg-white dark:bg-admin-gray-800 border border-admin-gray-300 dark:border-admin-gray-600',
   filled: 'bg-admin-gray-50 dark:bg-admin-gray-800 border-0',
-  outlined: 'bg-transparent border-2 border-admin-gray-300 dark:border-admin-gray-600',
+  outlined:
+    'bg-transparent border-2 border-admin-gray-300 dark:border-admin-gray-600',
 };
 
 export const ModernSelect = forwardRef<HTMLSelectElement, ModernSelectProps>(
@@ -97,7 +99,10 @@ export interface ModernMultiSelectProps {
   className?: string;
 }
 
-export const ModernMultiSelect = forwardRef<HTMLDivElement, ModernMultiSelectProps>(
+export const ModernMultiSelect = forwardRef<
+  HTMLDivElement,
+  ModernMultiSelectProps
+>(
   (
     {
       label,
@@ -120,7 +125,9 @@ export const ModernMultiSelect = forwardRef<HTMLDivElement, ModernMultiSelectPro
       }
     };
 
-    const selectedOptions = options.filter(option => value.includes(option.value));
+    const selectedOptions = options.filter(option =>
+      value.includes(option.value)
+    );
 
     return (
       <div ref={ref} className={cn('space-y-1', className)}>
@@ -151,8 +158,18 @@ export const ModernMultiSelect = forwardRef<HTMLDivElement, ModernMultiSelectPro
                     onClick={() => handleToggle(option.value)}
                     className="hover:text-admin-primary-600 dark:hover:text-admin-primary-300"
                   >
-                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="h-3 w-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </span>
@@ -176,6 +193,3 @@ export const ModernMultiSelect = forwardRef<HTMLDivElement, ModernMultiSelectPro
 );
 
 ModernMultiSelect.displayName = 'ModernMultiSelect';
-
-
-

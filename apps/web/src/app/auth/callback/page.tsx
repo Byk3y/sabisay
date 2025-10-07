@@ -23,8 +23,6 @@ export default function AuthCallback() {
 
     (async () => {
       try {
-        console.log('Auth callback page loaded, processing OAuth result...');
-
         // First check if user is already authenticated
         const authCheck = await fetch('/api/auth/me', {
           method: 'GET',
@@ -35,9 +33,6 @@ export default function AuthCallback() {
         });
 
         if (authCheck.ok) {
-          console.log(
-            'User already authenticated, refreshing auth context and redirecting to home...'
-          );
           await refreshAuth();
           setStatus('success');
           setTimeout(() => {
@@ -54,8 +49,6 @@ export default function AuthCallback() {
         const didToken = result?.magic?.idToken;
 
         if (didToken) {
-          console.log('OAuth redirect successful, sending to API...');
-
           // Send DID token to our API
           const response = await fetch('/api/auth/magic/login', {
             method: 'POST',
@@ -67,9 +60,6 @@ export default function AuthCallback() {
           });
 
           if (response.ok) {
-            console.log(
-              'Login successful, refreshing auth context and redirecting to home...'
-            );
             await refreshAuth();
             setStatus('success');
             // Redirect to home page after successful login
@@ -85,9 +75,6 @@ export default function AuthCallback() {
               errorData.error &&
               errorData.error.includes('already logged in')
             ) {
-              console.log(
-                'User already logged in, refreshing auth context and redirecting to home...'
-              );
               await refreshAuth();
               setStatus('success');
               setTimeout(() => {
@@ -112,9 +99,6 @@ export default function AuthCallback() {
           errorMessage.includes('already logged in') ||
           errorMessage.includes('Skipped remaining OAuth verification steps')
         ) {
-          console.log(
-            'User already logged in, refreshing auth context and treating as success...'
-          );
           await refreshAuth();
           setStatus('success');
           setTimeout(() => {

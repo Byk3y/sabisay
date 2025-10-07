@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getSession } from '@/lib/session';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { toSlug } from '@/lib/slugUtils';
+import { validateCSRF } from '@/lib/csrf';
 
 const draftEventSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -28,6 +29,12 @@ export async function POST(request: NextRequest) {
     const session = await getSession();
     if (!session.isLoggedIn || !session.userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    // Validate CSRF token
+    const csrfError = await validateCSRF(request);
+    if (csrfError) {
+      return csrfError;
     }
 
     // Check admin status

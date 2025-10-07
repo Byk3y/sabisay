@@ -13,11 +13,16 @@ export interface ModernButtonProps
 }
 
 const buttonVariants = {
-  primary: 'bg-admin-primary-500 hover:bg-admin-primary-600 text-white shadow-sm focus:ring-admin-primary-500',
-  secondary: 'bg-admin-gray-100 hover:bg-admin-gray-200 text-admin-gray-900 border border-admin-gray-300 focus:ring-admin-primary-500',
-  ghost: 'hover:bg-admin-gray-100 text-admin-gray-700 hover:text-admin-gray-900 focus:ring-admin-primary-500',
-  danger: 'bg-admin-error-500 hover:bg-admin-error-600 text-white shadow-sm focus:ring-admin-error-500',
-  success: 'bg-admin-success-500 hover:bg-admin-success-600 text-white shadow-sm focus:ring-admin-success-500',
+  primary:
+    'bg-admin-primary-500 hover:bg-admin-primary-600 text-white shadow-sm focus:ring-admin-primary-500',
+  secondary:
+    'bg-admin-gray-100 hover:bg-admin-gray-200 text-admin-gray-900 border border-admin-gray-300 focus:ring-admin-primary-500',
+  ghost:
+    'hover:bg-admin-gray-100 text-admin-gray-700 hover:text-admin-gray-900 focus:ring-admin-primary-500',
+  danger:
+    'bg-admin-error-500 hover:bg-admin-error-600 text-white shadow-sm focus:ring-admin-error-500',
+  success:
+    'bg-admin-success-500 hover:bg-admin-success-600 text-white shadow-sm focus:ring-admin-success-500',
 };
 
 const buttonSizes = {
@@ -75,15 +80,16 @@ export const ModernButton = forwardRef<HTMLButtonElement, ModernButtonProps>(
             />
           </svg>
         )}
-        {!loading && leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
+        {!loading && leftIcon && (
+          <span className="flex-shrink-0">{leftIcon}</span>
+        )}
         {children}
-        {!loading && rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
+        {!loading && rightIcon && (
+          <span className="flex-shrink-0">{rightIcon}</span>
+        )}
       </button>
     );
   }
 );
 
 ModernButton.displayName = 'ModernButton';
-
-
-
