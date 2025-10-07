@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
-import { getEvents } from '@/lib/events';
 import { CategoryPageClient } from '@/components/HomePage/CategoryPageClient';
 import { SidePanelProvider } from '@/contexts/SidePanelContext';
+import { getEvents } from '@/lib/getEvents';
 import type { Metadata } from 'next';
 
 // Valid category slugs (URL-friendly versions)
@@ -88,6 +88,7 @@ interface CategoryPageProps {
     category: string;
   };
 }
+
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = params;

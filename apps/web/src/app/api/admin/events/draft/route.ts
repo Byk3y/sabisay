@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 import { toSlug } from '@/lib/slugUtils';
 
 const draftEventSchema = z.object({
-  title: z.string().min(1).max(200),
+  title: z.string().min(1).max(200).optional(),
   question: z.string().min(1).max(500),
   type: z.enum(['binary', 'multi']),
   outcomes: z
@@ -48,8 +48,20 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = draftEventSchema.parse(body);
 
-    // Generate slug from title
-    const baseSlug = toSlug(validated.title);
+    // Derive title from question if not provided
+    let derivedTitle = validated.title;
+    if (!derivedTitle) {
+      derivedTitle = validated.question.trim();
+      // Shorten to ~100 chars
+      if (derivedTitle.length > 100) {
+        derivedTitle = derivedTitle.substring(0, 100).trim();
+      }
+      // Remove trailing punctuation for slug-friendliness
+      derivedTitle = derivedTitle.replace(/[?!.]+$/, '');
+    }
+
+    // Generate slug from derived title
+    const baseSlug = toSlug(derivedTitle);
     let slug = baseSlug;
     let counter = 1;
 
@@ -70,7 +82,7 @@ export async function POST(request: NextRequest) {
     const { data: event, error: insertError } = await supabaseAdmin
       .from('events')
       .insert({
-        title: validated.title,
+        title: derivedTitle,
         question: validated.question,
         type: validated.type,
         close_time: validated.closeTime,

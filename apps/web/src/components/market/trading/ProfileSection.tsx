@@ -47,9 +47,27 @@ const ProfileSectionComponent = ({
 
   return (
     <div className="flex items-center gap-3 mb-6">
-      {/* Avatar */}
-      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-        <span className="text-lg font-bold text-white">{initials}</span>
+      {/* Avatar - Event image or initials fallback */}
+      <div className="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center">
+        {market.imageUrl ? (
+          <img
+            src={market.imageUrl}
+            alt={market.question}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to initials if image fails to load
+              e.currentTarget.style.display = 'none';
+              const parent = e.currentTarget.parentElement;
+              if (parent) {
+                parent.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center"><span class="text-lg font-bold text-white">${initials}</span></div>`;
+              }
+            }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-lg font-bold text-white">{initials}</span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -57,7 +75,7 @@ const ProfileSectionComponent = ({
         {/* Mobile: Market title + candidate name + Yes/No toggle */}
         <div className="block md:hidden">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-            {market.title}
+            {market.question}
           </h3>
           <div className="flex items-center gap-2">
             <h4 className="text-sm text-gray-600 dark:text-gray-400">

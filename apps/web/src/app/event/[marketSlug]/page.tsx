@@ -20,16 +20,16 @@ export async function generateMetadata({
 
   if (event) {
     return {
-      title: `${event.title} | SabiSay`,
+      title: `${event.question} | SabiSay`,
       description: `Trade on ${event.question}`,
       openGraph: {
-        title: event.title,
+        title: event.question,
         description: `Trade on ${event.question}`,
         type: 'website',
       },
       twitter: {
         card: 'summary_large_image',
-        title: event.title,
+        title: event.question,
         description: `Trade on ${event.question}`,
       },
     };

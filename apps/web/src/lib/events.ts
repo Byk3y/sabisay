@@ -33,7 +33,7 @@ export async function getEvents(): Promise<MarketItem[]> {
         id: event.id,
         slug: event.slug,
         title: event.title,
-        question: event.question || event.title,
+        question: event.question,
         type: event.type || 'binary',
         status: event.status,
         poolUsd: 0, // Will be updated with real data later

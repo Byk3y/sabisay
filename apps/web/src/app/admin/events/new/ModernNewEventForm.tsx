@@ -24,9 +24,25 @@ import { ImageUpload } from '@/components/admin/create-event/ImageUpload';
 
 type SlugStatus = 'idle' | 'checking' | 'valid' | 'taken';
 
+// Helper function to derive title from question
+function deriveTitleFromQuestion(question: string): string {
+  if (!question.trim()) return '';
+  
+  let derived = question.trim();
+  
+  // Shorten to ~100 chars
+  if (derived.length > 100) {
+    derived = derived.substring(0, 100).trim();
+  }
+  
+  // Remove trailing punctuation for slug-friendliness
+  derived = derived.replace(/[?!.]+$/, '');
+  
+  return derived;
+}
+
 export function ModernNewEventForm() {
   // Form state
-  const [title, setTitle] = useState('');
   const [question, setQuestion] = useState('');
   const [type, setType] = useState<'binary' | 'multi'>('binary');
   const [closeTime, setCloseTime] = useState('');
@@ -52,9 +68,8 @@ export function ModernNewEventForm() {
   // Calculate completion percentage
   const calculateCompletion = () => {
     let completed = 0;
-    const total = 7; // title, question, type, outcomes, closeTime, rules, image
+    const total = 6; // question, type, outcomes, closeTime, rules, image
 
-    if (title.trim()) completed++;
     if (question.trim()) completed++;
     if (type) completed++;
     if (outcomes.length >= 2 && outcomes.every(o => o.label.trim())) completed++;
@@ -67,16 +82,17 @@ export function ModernNewEventForm() {
 
   const completionPercentage = calculateCompletion();
 
-  // Generate slug from title
+  // Generate slug from derived title
   useEffect(() => {
-    if (title) {
-      const slug = toSlug(title);
+    if (question) {
+      const derivedTitle = deriveTitleFromQuestion(question);
+      const slug = toSlug(derivedTitle);
       setGeneratedSlug(slug);
     } else {
       setGeneratedSlug('');
       setSlugStatus('idle');
     }
-  }, [title]);
+  }, [question]);
 
   // Debounced slug check
   useEffect(() => {
@@ -112,10 +128,6 @@ export function ModernNewEventForm() {
   useEffect(() => {
     const errors: string[] = [];
 
-    if (title && (title.length < 3 || title.length > 100)) {
-      errors.push('Title must be 3-100 characters');
-    }
-
     if (question && (question.length < 10 || question.length > 500)) {
       errors.push('Question must be 10-500 characters');
     }
@@ -136,7 +148,7 @@ export function ModernNewEventForm() {
     }
 
     setValidationErrors(errors);
-  }, [title, question, outcomes, closeTime]);
+  }, [question, outcomes, closeTime]);
 
   // Handle type change
   const handleTypeChange = (newType: 'binary' | 'multi') => {
@@ -158,10 +170,6 @@ export function ModernNewEventForm() {
   // Save draft
   const handleSaveDraft = async () => {
     // Basic validation
-    if (!title.trim()) {
-      toast.error('Title is required');
-      return;
-    }
     if (!question.trim()) {
       toast.error('Question is required');
       return;
@@ -178,13 +186,15 @@ export function ModernNewEventForm() {
     setIsSaving(true);
 
     try {
+      const derivedTitle = deriveTitleFromQuestion(question);
+      
       const response = await fetch('/api/admin/events/draft', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
           body: JSON.stringify({
-            title: title.trim(),
+            title: derivedTitle,
             question: question.trim(),
             type,
             outcomes: outcomes.map(o => ({ label: o.label.trim(), color: o.color })),
@@ -221,7 +231,6 @@ export function ModernNewEventForm() {
         'Are you sure you want to discard your changes? This cannot be undone.'
       )
     ) {
-      setTitle('');
       setQuestion('');
       setType('binary');
       setCloseTime('');
@@ -244,7 +253,7 @@ export function ModernNewEventForm() {
       return;
     }
 
-    if (!title.trim() || !question.trim() || !closeTime) {
+    if (!question.trim() || !closeTime) {
       toast.error('Please complete all required fields');
       return;
     }
@@ -256,13 +265,15 @@ export function ModernNewEventForm() {
 
       // If no draft exists, save it first
       if (!eventId) {
+        const derivedTitle = deriveTitleFromQuestion(question);
+        
         const draftResponse = await fetch('/api/admin/events/draft', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            title: title.trim(),
+            title: derivedTitle,
             question: question.trim(),
             type,
             outcomes: outcomes.map(o => ({ label: o.label.trim(), color: o.color })),
@@ -317,7 +328,7 @@ export function ModernNewEventForm() {
   };
 
   // Check if sections are completed
-  const isBasicsCompleted = title.trim() && question.trim();
+  const isBasicsCompleted = question.trim();
   const isMarketTypeCompleted = type && outcomes.length >= 2 && outcomes.every(o => o.label.trim());
   const isTimingCompleted = closeTime;
   const isMediaCompleted = !!imageUrl;
@@ -338,18 +349,7 @@ export function ModernNewEventForm() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="lg:col-span-2">
                 <ModernInput
-                  label="Title"
-                  value={title}
-                  onChange={setTitle}
-                  placeholder="Will Bitcoin hit $100k by 2025?"
-                  required
-                  minLength={3}
-                  maxLength={100}
-                />
-              </div>
-              <div className="lg:col-span-2">
-                <ModernInput
-                  label="Question"
+                  label="Market Question"
                   value={question}
                   onChange={setQuestion}
                   placeholder="Will Bitcoin reach $100,000 by December 31, 2025?"
@@ -359,6 +359,9 @@ export function ModernNewEventForm() {
                   maxLength={500}
                   rows={2}
                 />
+                <p className="text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark mt-2">
+                  Your question will appear on cards, details, and SEO. A short title is derived for the URL.
+                </p>
               </div>
               <div className="lg:col-span-2">
                 <ModernInput

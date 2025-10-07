@@ -63,6 +63,7 @@ export type Category =
 export interface Market {
   id: string;
   title: string;
+  question: string;
   volume: number;
   endDate: Date | undefined; // Allow undefined for safety
   outcomes: Outcome[];

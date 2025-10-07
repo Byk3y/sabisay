@@ -108,7 +108,7 @@ export const MarketHeader = ({
           <h1
             className={`${isMobile ? 'text-lg' : 'text-3xl'} font-bold text-gray-900 dark:text-white`}
           >
-            {market.title}
+            {market.question}
           </h1>
         </div>
         {/* Action buttons - Desktop only */}

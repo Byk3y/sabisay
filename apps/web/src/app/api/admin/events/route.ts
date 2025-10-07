@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     // Apply filters
     if (params.q) {
       query = query.or(
-        `title.ilike.%${params.q}%,question.ilike.%${params.q}%,slug.ilike.%${params.q}%`
+        `question.ilike.%${params.q}%,slug.ilike.%${params.q}%`
       );
     }
 

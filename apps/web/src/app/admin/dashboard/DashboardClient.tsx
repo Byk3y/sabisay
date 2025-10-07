@@ -197,7 +197,7 @@ export function DashboardClient() {
                 >
                   <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-medium text-sabi-text-primary dark:text-sabi-text-primary-dark truncate">
-                      {event.title}
+                      {event.question}
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
                       <ModernBadge

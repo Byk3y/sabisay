@@ -17,7 +17,7 @@ import { SidePanel } from '@/components/nav/SidePanel';
 import { SignUpModal } from '@/components/auth/SignUpModal';
 import { useSignUpModalContext } from '@/contexts/SignUpModalContext';
 import { useSidePanel } from '@/contexts/SidePanelContext';
-import { mockMarkets, extraFeedItems, type Category } from '@/lib/mock';
+import { type Category } from '@/lib/mock';
 import { isGroup, type MarketItem } from '@/types/market';
 import { isBinaryMarketView } from '@/lib/marketUtils';
 import { BinaryCard } from '@/components/market/BinaryCard';
@@ -76,40 +76,8 @@ export function HomePageContent({ realEvents }: HomePageContentProps) {
     };
   }, [isSortOpen]);
 
-  // Build feed with discriminated union
-  const legacyItems: MarketItem[] = mockMarkets.map(m => ({
-    kind: 'market',
-    ...m,
-  }));
-
-  // Combine mock data with real events from database
-  const mockFeed: MarketItem[] =
-    clientEnv.NODE_ENV === 'development'
-      ? [...legacyItems, ...extraFeedItems]
-      : legacyItems;
-
-  // Create a map to deduplicate by ID (more reliable than slug)
-  const eventMap = new Map<string, MarketItem>();
-
-  // Add mock events first - they provide the base dataset
-  mockFeed.forEach(event => {
-    if (event.kind === 'market' && event.id) {
-      eventMap.set(event.id, event);
-    } else if (event.kind === 'group' && event.groupId) {
-      // For groups, use groupId as the key
-      eventMap.set(`group-${event.groupId}`, event);
-    }
-  });
-
-  // Add real events (they will override mock events with same ID, or add new ones)
-  realEvents.forEach(event => {
-    if (event.kind === 'market' && event.id) {
-      // Real events override mock events with same ID, or get added as new events
-      eventMap.set(event.id, event);
-    }
-  });
-
-  const feed: MarketItem[] = Array.from(eventMap.values());
+  // Use only real events from database
+  const feed: MarketItem[] = realEvents;
 
 
   // TODO: Replace with actual contract data fetching
@@ -138,6 +106,7 @@ export function HomePageContent({ realEvents }: HomePageContentProps) {
       const matchesSearch =
         searchQuery === '' ||
         question.toLowerCase().includes(searchQuery.toLowerCase());
+
 
       return matchesCategory && matchesSearch;
     })

@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  Flag,
   Search,
   Menu,
   ChevronDown,
@@ -72,11 +71,11 @@ export function TopNav() {
         suppressHydrationWarning
       >
         {/* Left side - Logo and Search (for all users) */}
-        <div className="flex items-center pl-4 md:pl-0" suppressHydrationWarning>
+        <div className="flex items-center pl-0 md:pl-0" suppressHydrationWarning>
           <img
             src="/images/pakomarket/pakomarket-logo.png"
             alt="PakoMarket"
-            className="h-48 w-auto dark:invert -ml-3 md:-ml-5"
+            className="h-48 w-auto dark:invert -ml-1 md:-ml-5"
             onError={(e) => {
               // Fallback to "P" if image fails to load
               e.currentTarget.style.display = 'none';
@@ -86,7 +85,11 @@ export function TopNav() {
               }
             }}
           />
-          <Flag className="size-4 text-gray-500 dark:text-gray-400" />
+          <img 
+            src="/images/nigerian-flag.svg" 
+            alt="Nigeria" 
+            className="w-6 h-4 -ml-2"
+          />
 
           {/* Search bar next to logo for all users */}
           <div className="hidden md:flex ml-4" suppressHydrationWarning>
@@ -103,7 +106,7 @@ export function TopNav() {
 
         {/* Right side - Navigation */}
         <div
-          className="flex items-center justify-end gap-3"
+          className="flex items-center justify-end gap-3 pr-4 md:pr-0"
           suppressHydrationWarning
         >
           {!isClient ? (

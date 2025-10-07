@@ -21,7 +21,7 @@ import {
   ArrowUpDown
 } from 'lucide-react';
 import { MarketItem } from '@/types/market';
-import { mockMarkets, extraFeedItems, categories } from '@/lib/mock';
+import { categories } from '@/lib/mock';
 import { clientEnv } from '@/lib/env';
 import type { Category } from '@/types/market';
 
@@ -80,39 +80,8 @@ export function CategoryPageClient({
     };
   }, [isSortOpen]);
 
-  // Build feed with discriminated union
-  const legacyItems: MarketItem[] = mockMarkets.map(m => ({
-    kind: 'market',
-    ...m,
-  }));
-
-  // Combine mock data with real events from database
-  const mockFeed: MarketItem[] =
-    clientEnv.NODE_ENV === 'development'
-      ? [...legacyItems, ...extraFeedItems]
-      : legacyItems;
-
-  // Create a map to deduplicate by ID (more reliable than slug)
-  const eventMap = new Map<string, MarketItem>();
-
-  // Add mock events first - they provide the base dataset
-  mockFeed.forEach(event => {
-    if (event.kind === 'market' && event.id) {
-      eventMap.set(event.id, event);
-    } else if (event.kind === 'group' && event.groupId) {
-      eventMap.set(`group-${event.groupId}`, event);
-    }
-  });
-
-  // Add real events (they will override mock events with same ID, or add new ones)
-  realEvents.forEach(event => {
-    if (event.kind === 'market' && event.id) {
-      // Real events override mock events with same ID, or get added as new events
-      eventMap.set(event.id, event);
-    }
-  });
-
-  const feed: MarketItem[] = Array.from(eventMap.values());
+  // Use only real events from database
+  const feed: MarketItem[] = realEvents;
 
   // Enhanced category filtering logic
   const getCategoryFilter = (categoryName: string) => {

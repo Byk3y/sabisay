@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
     // Format recent events for dashboard
     const recentEvents = recentEventsResult.data?.map(event => ({
       id: event.id,
-      title: event.title,
+      question: event.question,
       status: event.status as 'draft' | 'pending' | 'onchain' | 'live' | 'closed' | 'resolved',
       closeTime: event.close_time,
       volume: 0, // Will be updated when trading is live

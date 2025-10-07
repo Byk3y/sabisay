@@ -110,7 +110,7 @@ export async function PUT(
     const outcomes = outcomesData;
 
     // Preflight validation
-    if (!event.title || !event.question || !event.type) {
+    if (!event.question || !event.type) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }

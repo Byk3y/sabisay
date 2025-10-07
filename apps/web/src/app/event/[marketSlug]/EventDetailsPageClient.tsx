@@ -66,6 +66,7 @@ async function fetchEventBySlug(slug: string): Promise<Market | null> {
       const market: Market = {
         id: event.id.toString(),
         title: event.title,
+        question: event.question,
         outcomes: outcomes,
         volume: 1000000, // Default volume
         endDate: new Date(event.close_time), // Convert to Date object for MarketHeader

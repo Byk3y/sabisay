@@ -22,6 +22,11 @@ export function BinaryCard({
     market.outcomes && market.outcomes.length > 0 && market.outcomes[0]
       ? Math.round(market.outcomes[0].oddsPct)
       : 50;
+  const clampedYesPct = Math.max(0, Math.min(100, yesPct));
+  // Ensure only a single dash renders from the left by using a very large gap
+  // This prevents the pattern from repeating and drawing a tiny cap at the right tip
+  const dashLength = clampedYesPct;
+  const gapLength = 1000; // larger than the normalized path length
 
   // Icon placeholder (same as MarketCard)
   const iconSlot = market.imageUrl ? (
@@ -55,20 +60,22 @@ export function BinaryCard({
             <svg className="w-17 h-10 mt-1" viewBox="0 0 68 32">
               {/* Background semi-circle (umbrella shape) */}
               <path
-                d="M 8 29.5 A 20 20 0 0 1 60 29.5"
+                d="M 8 29.5 A 26 26 0 0 1 60 29.5"
                 fill="none"
                 stroke="#E5E7EB"
                 strokeWidth="4"
                 className="dark:stroke-gray-700"
+                pathLength={100}
               />
               {/* Progress semi-circle */}
               <path
-                d="M 8 29.5 A 20 20 0 0 1 60 29.5"
+                d="M 8 29.5 A 26 26 0 0 1 60 29.5"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="4"
-                strokeDasharray={`${(Math.PI * 20 * yesPct) / 100} ${Math.PI * 20 * 2}`}
-                strokeDashoffset="0"
+                pathLength={100}
+                strokeDasharray={`${dashLength} ${gapLength}`}
+                strokeDashoffset={0.0001}
                 className={getChanceColor(yesPct)}
                 strokeLinecap="round"
               />

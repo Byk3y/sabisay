@@ -236,7 +236,7 @@ export function ModernEventsListClient() {
             href={`/event/${event.slug}`}
             className="text-sm font-medium text-admin-primary-600 dark:text-admin-primary-400 hover:text-admin-primary-800 dark:hover:text-admin-primary-300"
           >
-            {event.title}
+            {event.question}
           </Link>
           <div className="text-xs text-sabi-text-muted dark:text-sabi-text-muted-dark">
             {event.slug}
