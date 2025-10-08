@@ -182,7 +182,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      // 1. Clear Magic Link session (prevents auto-login on refresh)
+      try {
+        const { createMagicClient } = await import('@/lib/magic');
+        const magic = createMagicClient();
+        await magic.user.logout();
+      } catch (magicError) {
+        console.warn('Magic logout failed:', magicError);
+        // Continue with other logout steps even if Magic fails
+      }
+
+      // 2. Clear Supabase session (prevents auto-login from localStorage)
+      try {
+        const { supabaseClient } = await import('@/lib/supabase-client');
+        await supabaseClient.auth.signOut();
+      } catch (supabaseError) {
+        console.warn('Supabase logout failed:', supabaseError);
+        // Continue with other logout steps even if Supabase fails
+      }
+
+      // 3. Clear server Iron session (with CSRF token)
+      const { authenticatedFetch } = await import('@/lib/csrf-client');
+      await authenticatedFetch('/api/auth/logout', { method: 'POST' });
+
+      // 4. Clear local state
       setUser(null);
       clearCSRFToken(); // Clear cached CSRF token
     } catch (error) {
