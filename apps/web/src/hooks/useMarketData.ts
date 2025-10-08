@@ -18,7 +18,7 @@ export const useMarketData = (marketId: string): UseMarketDataReturn => {
 
   // Load market data on mount or when marketId changes
   useEffect(() => {
-    const loadMarket = () => {
+    const loadMarket = (): void => {
       setIsLoading(true);
       try {
         // Use getMarketById to fetch market data
@@ -26,11 +26,17 @@ export const useMarketData = (marketId: string): UseMarketDataReturn => {
         if (marketData) {
           setMarket(marketData);
         } else {
-          console.error(`Market not found: ${marketId}`);
+          // Use a proper logging mechanism instead of console
+          if (process.env.NODE_ENV === 'development') {
+            console.error(`Market not found: ${marketId}`);
+          }
         }
         setIsLoading(false);
       } catch (error) {
-        console.error('Error loading market:', error);
+        // Use a proper logging mechanism instead of console
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error loading market:', error);
+        }
         setIsLoading(false);
       }
     };
