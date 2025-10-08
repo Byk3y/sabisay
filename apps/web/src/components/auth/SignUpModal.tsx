@@ -174,31 +174,17 @@ export function SignUpModal({
       // Initialize Magic client
       const magic = createMagicClient();
 
-      // Login with email OTP
-      const didToken = await magic.auth.loginWithEmailOTP({ email });
-
-      // Send DID token to our API
-      const response = await fetch('/api/auth/magic/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ didToken }),
+      // Login with email OTP using redirect instead of popup
+      await magic.auth.loginWithEmailOTP({ 
+        email,
+        redirectTo: `${window.location.origin}/auth/callback`
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        login(result.userId, result.email, result.username || '');
-        onClose();
-      } else {
-        const errorData = await response.json();
-        console.error('Email login failed:', errorData);
-        setError('Email login failed. Please try again.');
-      }
+      // The user will be redirected to /auth/callback after email verification
+      // No need to handle the response here as the callback page will handle it
     } catch (error) {
       console.error('Email sign up error:', error);
       setError('Email sign up failed. Please try again.');
-    } finally {
       setIsEmailLoading(false);
     }
   };

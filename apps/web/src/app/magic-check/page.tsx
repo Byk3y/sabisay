@@ -36,28 +36,17 @@ export default function MagicCheckPage() {
       // Initialize Magic client
       const magic = createMagicClient();
 
-      // Login with email OTP
-      const didToken = await magic.auth.loginWithEmailOTP({ email });
-
-      // Send DID token to our API
-      const loginResponse = await fetch('/api/auth/magic/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ didToken }),
+      // Login with email OTP using redirect instead of popup
+      await magic.auth.loginWithEmailOTP({ 
+        email,
+        redirectTo: `${window.location.origin}/auth/callback`
       });
 
-      const loginResult = await loginResponse.json();
-
-      // Check session
-      const meResponse = await fetch('/api/auth/me');
-      const meResult = await meResponse.json();
-
+      // The user will be redirected to /auth/callback after email verification
+      // No need to handle the response here as the callback page will handle it
       setResult({
-        login: loginResult,
-        me: meResult,
-        success: loginResponse.ok && meResponse.ok,
+        message: 'Check your email for the magic link. You will be redirected after clicking it.',
+        success: true,
       });
     } catch (error) {
       console.error('Magic login error:', error);

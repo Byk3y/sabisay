@@ -44,9 +44,19 @@ export default function AuthCallback() {
         // Initialize Magic client
         const magic = createMagicClientWithOAuth();
 
-        // Get the result from the redirect
+        // Get the result from the redirect (handles both OAuth and email OTP)
         const result = await (magic.oauth2 as any)?.getRedirectResult({});
-        const didToken = result?.magic?.idToken;
+        
+        // For email OTP, we need to get the DID token differently
+        let didToken = result?.magic?.idToken;
+        
+        // If no OAuth result, try to get DID token from email OTP flow
+        if (!didToken) {
+          const isLoggedIn = await magic.user.isLoggedIn();
+          if (isLoggedIn) {
+            didToken = await magic.user.getIdToken();
+          }
+        }
 
         if (didToken) {
           // Send DID token to our API
@@ -86,7 +96,7 @@ export default function AuthCallback() {
             }
           }
         } else {
-          console.error('No ID token received from OAuth redirect');
+          console.error('No ID token received from authentication redirect');
           setError('No authentication token received');
           setStatus('error');
         }

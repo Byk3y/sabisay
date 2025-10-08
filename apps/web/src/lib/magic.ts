@@ -31,6 +31,8 @@ export function createMagicClient(extensions: any[] = []): Magic {
   return new Magic(apiKey, {
     network: POLYGON_NETWORK,
     extensions,
+    // Configure Magic to use redirects instead of popups
+    redirectURI: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : undefined,
   });
 }
 
