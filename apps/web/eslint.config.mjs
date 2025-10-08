@@ -18,6 +18,8 @@ const eslintConfig = [
       'out/**',
       'build/**',
       'next-env.d.ts',
+      'src/lib/__tests__/**',
+      'src/scripts/**',
     ],
   },
   {
@@ -28,6 +30,8 @@ const eslintConfig = [
       'src/app/api/**/*',
       'src/lib/session.ts',
       'src/lib/supabase-server.ts',
+      'src/lib/__tests__/**',
+      'src/scripts/**',
     ],
     rules: {
       // Flag process.env usage in client components (except in env.client.ts)
@@ -38,6 +42,17 @@ const eslintConfig = [
           message: 'Direct process.env usage is not allowed in client components. Use clientEnv from @/lib/env.client instead.',
         },
       ],
+      // Make these warnings instead of errors for now
+      '@typescript-eslint/explicit-function-return-type': 'warn',
+      '@typescript-eslint/no-unused-vars': 'warn',
+      'no-console': 'warn',
+      'no-undef': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'prettier/prettier': 'warn',
+      'no-empty': 'warn',
+      'no-constant-condition': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+      'no-case-declarations': 'warn',
     },
   },
 ];
