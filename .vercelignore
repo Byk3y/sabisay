@@ -1,0 +1,21 @@
+# Ignore everything except the web app
+/*
+!/apps/web
+!/packages/sdk
+!/package.json
+!/pnpm-lock.yaml
+!/vercel.json
+
+# Ignore development files
+apps/web/.env.local
+apps/web/.next
+apps/web/node_modules
+apps/web/tsconfig.tsbuildinfo
+
+# Ignore contracts and docs
+contracts/
+docs/
+
+# Ignore other apps
+apps/web/apps/
+apps/web/packages/
