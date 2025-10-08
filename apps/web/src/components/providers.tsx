@@ -1,9 +1,18 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider, createConfig, http } from 'wagmi';
+import { polygonAmoy } from 'wagmi/chains';
 import { useState, useMemo } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ChainWarningBanner } from '@/components/wallet/ChainWarningBanner';
+
+// Create a minimal SSR-safe config without connectors
+const ssrConfig = createConfig({
+  chains: [polygonAmoy],
+  connectors: [],
+  transports: { [polygonAmoy.id]: http() },
+}) as any;
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -20,23 +29,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   // Lazy-load wagmi config only on client side to avoid SSR issues with WalletConnect
   const wagmiConfig = useMemo(() => {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === 'undefined') return ssrConfig;
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require('@/lib/wagmi').wagmiConfig;
   }, []);
 
-  if (!wagmiConfig) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>{children}</AuthProvider>
-      </QueryClientProvider>
-    );
-  }
-
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {typeof window !== 'undefined' && <ChainWarningBanner />}
+          {children}
+        </AuthProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

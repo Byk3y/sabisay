@@ -2,7 +2,6 @@ import './globals.css';
 import { Providers } from '@/components/providers';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { SignUpModalProvider } from '@/contexts/SignUpModalContext';
-import { ChainWarningBanner } from '@/components/wallet/ChainWarningBanner';
 
 export default function RootLayout({
   children,
@@ -35,10 +34,7 @@ export default function RootLayout({
       >
         <Providers>
           <ThemeProvider>
-            <SignUpModalProvider>
-              <ChainWarningBanner />
-              {children}
-            </SignUpModalProvider>
+            <SignUpModalProvider>{children}</SignUpModalProvider>
           </ThemeProvider>
         </Providers>
       </body>
