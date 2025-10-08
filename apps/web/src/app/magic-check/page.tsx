@@ -3,12 +3,22 @@
 import { useState } from 'react';
 import { createMagicClient } from '@/lib/magic';
 
-// Only available in development
-if (process.env.NODE_ENV === 'production') {
-  throw new Error('This page is only available in development');
-}
-
 export default function MagicCheckPage() {
+  // Only available in development
+  if (process.env.NODE_ENV === 'production') {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">
+            Magic Auth Test
+          </h1>
+          <div className="text-center text-gray-600">
+            This page is only available in development mode.
+          </div>
+        </div>
+      </div>
+    );
+  }
   const [email, setEmail] = useState('');
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
