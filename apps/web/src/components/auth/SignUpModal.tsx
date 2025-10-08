@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { useConnect } from 'wagmi';
-import { metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors';
+import { useConnect, useSwitchChain } from 'wagmi';
+import { injected, walletConnect, coinbaseWallet, metaMask } from 'wagmi/connectors';
+import { polygonAmoy } from 'wagmi/chains';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { createMagicClientWithOAuth, createMagicClient } from '@/lib/magic';
@@ -27,8 +28,9 @@ export function SignUpModal({
   const [error, setError] = useState<string | null>(null);
   const [logoFailed, setLogoFailed] = useState(false);
   const { theme } = useTheme();
-  const { connect } = useConnect();
   const { login, refreshAuth, user } = useAuth();
+  const { connect } = useConnect();
+  const { switchChain } = useSwitchChain();
 
   // Auto-close modal when user is successfully authenticated
   useEffect(() => {
@@ -201,29 +203,55 @@ export function SignUpModal({
     }
   };
 
-  const handleWalletConnect = (walletType: string) => {
+  const handleWalletConnect = async (walletType: string) => {
     try {
+      let connector;
+
       switch (walletType) {
         case 'metamask':
-          connect({ connector: metaMask() });
+          // Use MetaMask connector (triggers extension directly)
+          connector = metaMask();
           break;
         case 'walletconnect':
-          connect({
-            connector: walletConnect({ projectId: 'your-project-id' }),
+          // WalletConnect with QR modal
+          connector = walletConnect({
+            projectId: clientEnv.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
+            showQrModal: true,
           });
           break;
         case 'coinbase':
-          connect({ connector: coinbaseWallet() });
+          // Coinbase Wallet
+          connector = coinbaseWallet({ appName: 'PakoMarket' });
           break;
-        case 'phantom':
-          // Phantom is Solana-specific, would need different connector
+        case 'trust':
+          // Trust Wallet uses injected
+          connector = injected();
           break;
         default:
+          throw new Error('Unsupported wallet type');
       }
-      // Close modal after successful connection
+
+      // Connect wallet
+      await connect({ connector });
+
+      // Switch to Polygon Amoy after connection (non-blocking)
+      if (switchChain) {
+        try {
+          await switchChain({ chainId: polygonAmoy.id });
+        } catch (switchError) {
+          // User rejected chain switch - connection is still valid
+          console.warn('Chain switch rejected:', switchError);
+        }
+      }
+
+      // Close sign-up modal
       onClose();
     } catch (error) {
       console.error('Wallet connection failed:', error);
+      // Only show error if connection actually failed
+      if (error instanceof Error && !error.message.includes('User rejected')) {
+        setError('Failed to connect wallet. Please try again.');
+      }
     }
   };
 
@@ -374,9 +402,9 @@ export function SignUpModal({
                 <WalletBrandIcon name="walletconnect" className="w-8 h-8" />
               </button>
 
-              {/* Phantom */}
+              {/* Trust Wallet */}
               <button
-                onClick={() => handleWalletConnect('phantom')}
+                onClick={() => handleWalletConnect('trust')}
                 className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors flex items-center justify-center border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md"
               >
                 <WalletBrandIcon name="phantom" className="w-8 h-8" />
@@ -519,9 +547,9 @@ export function SignUpModal({
                 <WalletBrandIcon name="walletconnect" className="w-8 h-8" />
               </button>
 
-              {/* Phantom */}
+              {/* Trust Wallet */}
               <button
-                onClick={() => handleWalletConnect('phantom')}
+                onClick={() => handleWalletConnect('trust')}
                 className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors flex items-center justify-center border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md"
               >
                 <WalletBrandIcon name="phantom" className="w-8 h-8" />

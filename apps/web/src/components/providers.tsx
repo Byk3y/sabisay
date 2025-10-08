@@ -2,8 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
-import { wagmiConfig } from '@/lib/wagmi';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -18,6 +17,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
       })
   );
+
+  // Lazy-load wagmi config only on client side to avoid SSR issues with WalletConnect
+  const wagmiConfig = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require('@/lib/wagmi').wagmiConfig;
+  }, []);
+
+  if (!wagmiConfig) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>{children}</AuthProvider>
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <WagmiProvider config={wagmiConfig}>

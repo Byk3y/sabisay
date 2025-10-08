@@ -11,7 +11,9 @@ const ClientSchema = z.object({
   NODE_ENV: z.string().default('development'),
   NEXT_PUBLIC_CHAIN_ID: z.string().default('80002'),
   NEXT_PUBLIC_RPC_URL: z.string().url(),
-  NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: z.string().optional(),
+  NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: z
+    .string()
+    .min(1, 'Missing WalletConnect Project ID'),
   NEXT_PUBLIC_USDC_ADDRESS: z
     .string()
     .regex(/^0x[0-9a-fA-F]{40}$/)
