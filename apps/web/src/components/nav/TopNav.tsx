@@ -219,9 +219,11 @@ export function TopNav() {
                               : 'Connecting...'}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {user?.username
-                              ? truncateAddress(user.username, 4, 4)
-                              : 'Loading...'}
+                            {user?.username ? (
+                              truncateAddress(user.username, 4, 4)
+                            ) : (
+                              <div className="h-3 w-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                            )}
                           </div>
                         </div>
                       </div>
@@ -340,25 +342,10 @@ export function TopNav() {
               {/* Auth buttons */}
               {isLoading ? (
                 <div className="flex items-center gap-3">
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    Loading...
-                  </div>
-                  <button
-                    onClick={() => {
-                      openSignUpModal('signin');
-                    }}
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-                  >
-                    Log In
-                  </button>
-                  <button
-                    onClick={() => {
-                      openSignUpModal('signup');
-                    }}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
-                  >
-                    Sign Up
-                  </button>
+                  {/* Log In skeleton - matches text-sm button */}
+                  <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  {/* Sign Up skeleton - matches px-4 py-2 button */}
+                  <div className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
                 </div>
               ) : (
                 <>

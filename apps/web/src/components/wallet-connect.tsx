@@ -19,12 +19,9 @@ export function WalletConnect() {
   // Show loading state during hydration to prevent mismatch
   if (!isHydrated) {
     return (
-      <button
-        disabled
-        className="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg text-sm font-medium transition-colors cursor-not-allowed text-gray-500 dark:text-gray-300"
-      >
-        Loading...
-      </button>
+      <div className="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg animate-pulse">
+        <div className="h-4 w-20 bg-gray-300 dark:bg-gray-500 rounded" />
+      </div>
     );
   }
 
