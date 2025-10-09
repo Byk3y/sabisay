@@ -44,13 +44,19 @@ export default function AuthCallback() {
         // Initialize Magic client
         const magic = createMagicClientWithOAuth();
 
-        // Get the result from the redirect (handles both OAuth and email OTP)
-        const result = await (magic.oauth2 as any)?.getRedirectResult({});
+        // Try to get the result from the redirect (handles both OAuth and email OTP)
+        let didToken = null;
         
-        // For email OTP, we need to get the DID token differently
-        let didToken = result?.magic?.idToken;
+        try {
+          const result = await (magic.oauth2 as any)?.getRedirectResult({});
+          didToken = result?.magic?.idToken;
+        } catch (oauthError) {
+          // OAuth getRedirectResult might fail in incognito or if data is missing
+          // This is okay - we'll try to get the token directly from Magic
+          console.log('OAuth redirect result not available, trying direct token retrieval');
+        }
         
-        // If no OAuth result, try to get DID token from email OTP flow
+        // If no OAuth result, try to get DID token directly from Magic
         if (!didToken) {
           const isLoggedIn = await magic.user.isLoggedIn();
           if (isLoggedIn) {
@@ -103,17 +109,24 @@ export default function AuthCallback() {
       } catch (err) {
         console.error('OAuth callback error:', err);
 
-        // Check if the error is about user already being logged in
+        // Check if the error is about user already being logged in or missing OAuth data
         const errorMessage = err instanceof Error ? err.message : String(err);
         if (
           errorMessage.includes('already logged in') ||
-          errorMessage.includes('Skipped remaining OAuth verification steps')
+          errorMessage.includes('Skipped remaining OAuth verification steps') ||
+          errorMessage.includes('Missing required data in browser')
         ) {
-          await refreshAuth();
-          setStatus('success');
-          setTimeout(() => {
-            router.push('/');
-          }, 1500);
+          // Try to refresh auth anyway - user might already be logged in
+          try {
+            await refreshAuth();
+            setStatus('success');
+            setTimeout(() => {
+              router.push('/');
+            }, 500);
+          } catch (refreshError) {
+            setError('Authentication completed but session refresh failed. Please try logging in again.');
+            setStatus('error');
+          }
         } else {
           setError(errorMessage);
           setStatus('error');
