@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { createMagicClientWithOAuth, createMagicClient } from '@/lib/magic';
 import { clientEnv } from '@/lib/env.client';
 import { WalletBrandIcon } from './WalletBrandIcon';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 
 interface SignUpModalProps {
   isOpen: boolean;
@@ -27,7 +28,6 @@ export function SignUpModal({
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [logoFailed, setLogoFailed] = useState(false);
   const { theme } = useTheme();
   const { login, refreshAuth, user } = useAuth();
   const { connect } = useConnect();
@@ -183,19 +183,17 @@ export function SignUpModal({
           <div className="text-center pb-4 px-8">
             {/* PakoMarket logo */}
             <div className="mx-auto mb-3">
-              {!logoFailed ? (
-                <Image
-                  src="/images/pakomarket/pakomarket-logo.png"
-                  alt="PakoMarket"
-                  width={256}
-                  height={256}
-                  className="h-56 w-auto dark:invert"
-                  onError={() => setLogoFailed(true)}
-                  priority
-                />
-              ) : (
-                <span className="text-blue-600 font-bold text-5xl">P</span>
-              )}
+              <ImageWithFallback
+                src="/images/pakomarket/pakomarket-logo.png"
+                alt="PakoMarket"
+                width={256}
+                height={256}
+                className="h-56 w-auto dark:invert"
+                priority
+                fallbackElement={
+                  <span className="text-blue-600 font-bold text-5xl">P</span>
+                }
+              />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               {mode === 'signup' ? 'Welcome to PakoMarket' : 'Welcome Back'}

@@ -8,11 +8,11 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSidePanel } from '@/contexts/SidePanelContext';
 import { generateAddressGradient, truncateAddress } from '@/lib/utils';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 
 export function TopNav() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  const [logoFailed, setLogoFailed] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -70,21 +70,19 @@ export function TopNav() {
           className="flex items-center pl-0 md:pl-0"
           suppressHydrationWarning
         >
-          {!logoFailed ? (
-            <Image
-              src="/images/pakomarket/pakomarket-logo.png"
-              alt="PakoMarket"
-              width={256}
-              height={256}
-              className="h-48 w-auto dark:invert -ml-1 md:-ml-5"
-              onError={() => setLogoFailed(true)}
-              priority
-            />
-          ) : (
-            <span className="text-blue-600 dark:text-white font-bold text-4xl">
-              P
-            </span>
-          )}
+          <ImageWithFallback
+            src="/images/pakomarket/pakomarket-logo.png"
+            alt="PakoMarket"
+            width={256}
+            height={256}
+            className="h-48 w-auto dark:invert -ml-1 md:-ml-5"
+            priority
+            fallbackElement={
+              <span className="text-blue-600 dark:text-white font-bold text-4xl">
+                P
+              </span>
+            }
+          />
           <Image
             src="/images/nigerian-flag.svg"
             alt="Nigeria"

@@ -92,6 +92,10 @@ dist
 # Gatsby files
 .cache/
 public
+# Allow Next.js public images
+!apps/web/public/
+apps/web/public/*
+!apps/web/public/images/
 
 # Storybook build outputs
 .out

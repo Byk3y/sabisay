@@ -18,6 +18,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 
 interface NavItem {
   label: string;
@@ -104,23 +105,18 @@ export function ModernSidebar({
             collapsed ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
           )}
         >
-          <Image
+          <ImageWithFallback
             src="/images/pakomarket/pakomarket-logo.png"
             alt="PakoMarket"
             width={256}
             height={256}
             className="h-48 w-auto dark:invert"
-            onError={(e) => {
-              // Fallback to the original P icon if logo fails to load
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const fallback = target.nextElementSibling as HTMLElement;
-              if (fallback) fallback.style.display = 'block';
-            }}
+            fallbackElement={
+              <div className="size-20 rounded-lg bg-gradient-to-br from-admin-primary-500 to-admin-primary-600 grid place-items-center shadow-sm">
+                <span className="text-white font-bold text-4xl">P</span>
+              </div>
+            }
           />
-          <div className="size-20 rounded-lg bg-gradient-to-br from-admin-primary-500 to-admin-primary-600 grid place-items-center shadow-sm hidden">
-            <span className="text-white font-bold text-4xl">P</span>
-          </div>
         </div>
 
         {/* Toggle Button - Always visible */}
