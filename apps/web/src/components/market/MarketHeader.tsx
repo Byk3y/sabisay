@@ -9,6 +9,7 @@ import { useState } from 'react';
 import type { MarketHeaderProps } from '@/types/market';
 import { formatCurrencyNoSymbol, formatDate } from '@/lib/formattingUtils';
 import { getDefaultOutcomeColor } from '@/lib/colors';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 
 /**
  * Market header component with title, volume, date, and action buttons
@@ -22,7 +23,6 @@ export const MarketHeader = ({
   isMobile = false,
   isBinaryMarket = false,
 }: MarketHeaderProps) => {
-  const [imageFailed, setImageFailed] = useState(false);
 
   return (
     <div className="mb-4">
@@ -86,12 +86,21 @@ export const MarketHeader = ({
         <div
           className={`${isMobile ? 'w-12 h-12 rounded-lg' : 'w-16 h-16 rounded-xl'} bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden`}
         >
-          {market.imageUrl && !imageFailed ? (
-            <img
+          {market.imageUrl ? (
+            <ImageWithFallback
               src={market.imageUrl}
               alt={market.title}
+              width={isMobile ? 48 : 64}
+              height={isMobile ? 48 : 64}
               className="w-full h-full object-cover"
-              onError={() => setImageFailed(true)}
+              unoptimized={market.imageUrl.startsWith('http')}
+              fallbackElement={
+                <span
+                  className={`text-gray-500 dark:text-gray-400 ${isMobile ? 'text-lg' : 'text-3xl'} font-bold`}
+                >
+                  📊
+                </span>
+              }
             />
           ) : (
             <span

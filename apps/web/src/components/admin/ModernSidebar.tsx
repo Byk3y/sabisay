@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import Image from 'next/image';
 import {
   Home,
   LayoutDashboard,
@@ -103,9 +104,11 @@ export function ModernSidebar({
             collapsed ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
           )}
         >
-          <img
+          <Image
             src="/images/pakomarket/pakomarket-logo.png"
             alt="PakoMarket"
+            width={256}
+            height={256}
             className="h-48 w-auto dark:invert"
             onError={(e) => {
               // Fallback to the original P icon if logo fails to load

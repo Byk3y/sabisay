@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import Image from 'next/image';
 import { useConnect, useSwitchChain } from 'wagmi';
 import { injected, walletConnect, coinbaseWallet, metaMask } from 'wagmi/connectors';
 import { polygonAmoy } from 'wagmi/chains';
@@ -67,100 +68,17 @@ export function SignUpModal({
       // Initialize Magic client with OAuth2 extension
       const magic = createMagicClientWithOAuth();
 
-      // Start Google OAuth flow with popup
-      const result = await (magic.oauth2 as any)?.loginWithPopup({
+      // Start Google OAuth flow with redirect instead of popup
+      await (magic.oauth2 as any)?.loginWithRedirect({
         provider: 'google',
+        redirectURI: `${window.location.origin}/auth/callback`,
       });
 
-      // Process the OAuth result directly
-      const didToken = (result as any)?.magic?.idToken;
-
-      if (didToken) {
-        // Send DID token to our API
-        const response = await fetch('/api/auth/magic/login', {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ didToken }),
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          await login(result.userId, result.email, result.username || '');
-
-          // Close modal immediately
-          onClose();
-
-          // Refresh auth context to ensure sync
-          await refreshAuth();
-        } else {
-          const errorData = await response.json();
-          console.error('Login failed:', errorData);
-          setError('Login failed. Please try again.');
-        }
-      } else {
-        console.error('No ID token received from OAuth popup');
-        setError('No authentication token received');
-      }
+      // The user will be redirected to Google, then back to /auth/callback
+      // No need to handle the response here as the callback page will handle it
     } catch (error) {
       console.error('Google sign up error:', error);
-
-      // Handle "already logged in" case
-      if (
-        error instanceof Error &&
-        error.message?.includes('already logged in')
-      ) {
-        setIsGoogleLoading(true); // Show loading state
-        try {
-          // Create new Magic instance for getting current token
-          const magicInstance = createMagicClientWithOAuth();
-
-          // Get current DID token
-          const didToken = await magicInstance.user.getIdToken();
-          if (didToken) {
-            // Send to API to create session
-            const response = await fetch('/api/auth/magic/login', {
-              method: 'POST',
-              credentials: 'include',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ didToken }),
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              await login(result.userId, result.email, result.username || '');
-              onClose();
-              return;
-            } else {
-              console.error('Failed to create session with existing token');
-              setError('Failed to restore your session. Please try again.');
-            }
-          } else {
-            setError(
-              'Unable to get your authentication token. Please try again.'
-            );
-          }
-        } catch (sessionError) {
-          console.error('Failed to get current session:', sessionError);
-          setError('Failed to restore your session. Please try again.');
-        } finally {
-          setIsGoogleLoading(false);
-        }
-      }
-
-      // Only show error if it's not the "already logged in" case
-      if (
-        !(
-          error instanceof Error && error.message?.includes('already logged in')
-        )
-      ) {
-        setError('Google sign up failed. Please try again.');
-      }
-    } finally {
+      setError('Google sign up failed. Please try again.');
       setIsGoogleLoading(false);
     }
   };
@@ -266,11 +184,14 @@ export function SignUpModal({
             {/* PakoMarket logo */}
             <div className="mx-auto mb-3">
               {!logoFailed ? (
-                <img
+                <Image
                   src="/images/pakomarket/pakomarket-logo.png"
                   alt="PakoMarket"
+                  width={256}
+                  height={256}
                   className="h-56 w-auto dark:invert"
                   onError={() => setLogoFailed(true)}
+                  priority
                 />
               ) : (
                 <span className="text-blue-600 font-bold text-5xl">P</span>

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { RawMarket } from '@/lib/mock';
 import { formatPool } from '@/lib/mock';
 import { buildEventUrl, generateMarketSlug } from '@/lib/slugUtils';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 
 interface MarketCardProps {
   market: RawMarket;
@@ -24,13 +25,18 @@ export function MarketCard({ market, onYesClick, onNoClick }: MarketCardProps) {
           <div className="flex items-center gap-3 mb-2">
             <div className="w-[38px] h-[38px] shrink-0 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden">
               {market.imageUrl && (
-                <img
+                <ImageWithFallback
                   src={market.imageUrl}
                   alt="Market"
+                  width={38}
+                  height={38}
                   className="w-full h-full object-cover"
-                  onError={e => {
-                    e.currentTarget.style.display = 'none';
-                  }}
+                  unoptimized={market.imageUrl.startsWith('http')}
+                  fallbackElement={
+                    <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                      <span className="text-gray-500 dark:text-gray-400 text-xs">📊</span>
+                    </div>
+                  }
                 />
               )}
             </div>

@@ -2,6 +2,7 @@
 
 import { Search, Menu, ChevronDown, Bell, LogOut, User } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { useSignUpModalContext } from '@/contexts/SignUpModalContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -70,20 +71,25 @@ export function TopNav() {
           suppressHydrationWarning
         >
           {!logoFailed ? (
-            <img
+            <Image
               src="/images/pakomarket/pakomarket-logo.png"
               alt="PakoMarket"
+              width={256}
+              height={256}
               className="h-48 w-auto dark:invert -ml-1 md:-ml-5"
               onError={() => setLogoFailed(true)}
+              priority
             />
           ) : (
             <span className="text-blue-600 dark:text-white font-bold text-4xl">
               P
             </span>
           )}
-          <img
+          <Image
             src="/images/nigerian-flag.svg"
             alt="Nigeria"
+            width={24}
+            height={16}
             className="w-6 h-4 -ml-2"
           />
 

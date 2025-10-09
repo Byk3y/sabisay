@@ -4,6 +4,7 @@ import type { MarketItem } from '@/types/market';
 import { CardShell, CardHeader, ActionPill } from './_primitives';
 import { formatPool } from '@/lib/mock';
 import { buildEventUrl, generateMarketSlug } from '@/lib/slugUtils';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 
 // Helper function to determine color based on percentage
 function getChanceColor(percentage: number): string {
@@ -30,13 +31,18 @@ export function BinaryCard({
 
   // Icon placeholder (same as MarketCard)
   const iconSlot = market.imageUrl ? (
-    <img
+    <ImageWithFallback
       src={market.imageUrl}
       alt="Market"
+      width={38}
+      height={38}
       className="w-full h-full object-cover"
-      onError={e => {
-        e.currentTarget.style.display = 'none';
-      }}
+      unoptimized={market.imageUrl.startsWith('http')}
+      fallbackElement={
+        <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+          <span className="text-gray-500 dark:text-gray-400 text-xs">📊</span>
+        </div>
+      }
     />
   ) : null;
 
