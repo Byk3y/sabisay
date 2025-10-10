@@ -122,7 +122,7 @@ export function BulkActionBar({
                   .map(action => (
                     <ModernButton
                       key={action.id}
-                      variant={action.variant || 'secondary'}
+                      variant={action.variant === 'default' ? 'secondary' : action.variant || 'secondary'}
                       size="sm"
                       onClick={() => handleAction(action)}
                       disabled={action.disabled}
@@ -180,7 +180,7 @@ export function BulkActionBar({
                     .map(action => (
                       <ModernButton
                         key={action.id}
-                        variant={action.variant || 'secondary'}
+                        variant={action.variant === 'default' ? 'secondary' : action.variant || 'secondary'}
                         size="sm"
                         leftIcon={action.icon}
                         onClick={() => handleAction(action)}
@@ -257,7 +257,7 @@ export function BulkActionBar({
                 Cancel
               </ModernButton>
               <ModernButton
-                variant={pendingAction.variant || 'danger'}
+                variant={pendingAction.variant === 'default' ? 'secondary' : pendingAction.variant || 'danger'}
                 onClick={confirmAction}
                 className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
               >
