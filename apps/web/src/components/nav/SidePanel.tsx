@@ -29,13 +29,12 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
   const { user, logout } = useAuth();
 
   const navigationItems = [
-    { label: 'Elections', icon: Home },
-    { label: 'Dashboards', icon: Search },
-    { label: 'Leaderboard', icon: TrendingUp },
-    { label: 'Activity', icon: Bell },
     { label: 'Profile', icon: User },
-    { label: 'Resources', icon: HelpCircle, hasDropdown: true },
-    { label: 'Rewards', icon: Shield, hasDropdown: true },
+    { label: 'Elections', icon: Home },
+    { label: 'Sports', icon: TrendingUp },
+    { label: 'Rewards', icon: Shield },
+    { label: 'Documentation', icon: HelpCircle },
+    { label: 'Terms of Use', icon: Shield },
   ];
 
   const socialIcons = [
@@ -79,6 +78,17 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
                   )}
                 </button>
               ))}
+              
+              {/* Admin link for admin users */}
+              {user?.isAdmin && (
+                <a
+                  href="/admin"
+                  className="w-full flex items-center justify-between p-2 text-left text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 rounded-md transition-colors"
+                  onClick={onClose}
+                >
+                  <span className="font-medium text-lg">Admin</span>
+                </a>
+              )}
             </nav>
 
             {/* Social Icons */}
